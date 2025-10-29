@@ -65,7 +65,7 @@ const Navigation = () => {
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             <a
-              href="http://localhost:5175/login"
+              href="https://callwaitingai-frontend-gyn1kc42u-odia-backends-projects.vercel.app/login"
               className="text-gray-700 hover:text-primary-blue font-medium transition-colors"
             >
               Sign In
@@ -106,7 +106,7 @@ const Navigation = () => {
             </button>
             <div className="pt-4 border-t border-gray-200">
               <a
-                href="http://localhost:5175/login"
+                href="https://callwaitingai-frontend-gyn1kc42u-odia-backends-projects.vercel.app/login"
                 className="block w-full text-left text-gray-700 hover:text-brand-purple font-medium"
               >
                 Sign In
