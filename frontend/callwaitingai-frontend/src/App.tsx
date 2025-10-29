@@ -10,6 +10,7 @@ import { Calls } from './pages/Calls';
 import { Leads } from './pages/Leads';
 import { Payments } from './pages/Payments';
 import { Settings } from './pages/Settings';
+import AgentSetup from './pages/AgentSetup';
 import EmailVerification from './pages/EmailVerification';
 import PasswordReset from './pages/PasswordReset';
 
@@ -87,6 +88,16 @@ function AppRoutes() {
             <ProtectedRoute>
               <Layout>
                 <Settings />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/agent-setup"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <AgentSetup />
               </Layout>
             </ProtectedRoute>
           }

@@ -1,15 +1,16 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  LayoutDashboard, 
-  Phone, 
-  Users, 
-  CreditCard, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Phone,
+  Users,
+  CreditCard,
+  Settings,
   LogOut,
   Menu,
-  X
+  X,
+  Bot
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -28,6 +29,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Call Logs', href: '/calls', icon: Phone },
     { name: 'Leads', href: '/leads', icon: Users },
+    { name: 'Agent Setup', href: '/agent-setup', icon: Bot },
     { name: 'Payments', href: '/payments', icon: CreditCard },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
