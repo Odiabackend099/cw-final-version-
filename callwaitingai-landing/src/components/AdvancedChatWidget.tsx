@@ -77,9 +77,10 @@ const AdvancedChatWidget = () => {
 
       // Speech recognition events (user speaking)
       client.on('speech-start', () => {
-        console.log('🎤 User started speaking');
+        console.log('🎤 User started speaking - AI WILL BE INTERRUPTED');
         setIsListening(true);
         setIsSpeaking(false);
+        // Vapi automatically stops AI when user speaks (built-in interruption)
       });
 
       client.on('speech-end', () => {
@@ -248,14 +249,18 @@ const AdvancedChatWidget = () => {
     }
   };
 
-  // Voice handlers
+  // Voice handlers - FIXED for better connection
   const startVoiceCall = async () => {
     if (!vapiClient) {
       setConnectionError('Voice system not ready. Please refresh the page.');
+      console.error('❌ Vapi client not initialized');
       return;
     }
 
-    if (isConnecting || isCallActive) return;
+    if (isConnecting || isCallActive) {
+      console.log('⚠️ Call already in progress');
+      return;
+    }
 
     console.log('📞 Starting voice call...');
     setIsConnecting(true);
@@ -263,17 +268,70 @@ const AdvancedChatWidget = () => {
     setConnectionError('');
 
     try {
-      // Request microphone first
-      await startAudioVisualization();
+      // Step 1: Request microphone permission
+      console.log('🎤 Requesting microphone permission...');
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      console.log('✅ Microphone permission granted');
 
-      // Start Vapi call
-      console.log('🎙️ Calling Vapi start...');
-      await vapiClient.start('fdaaa6f7-a204-4c08-99fd-20451c96fc74');
+      // Step 2: Setup audio visualization
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
+        const source = audioContextRef.current.createMediaStreamSource(stream);
+        analyserRef.current = audioContextRef.current.createAnalyser();
+        analyserRef.current.fftSize = 256;
+        source.connect(analyserRef.current);
+        updateAudioLevel();
+      }
+
+      // Step 3: Start Vapi call with assistant config
+      console.log('🎙️ Starting Vapi call with assistant...');
+      const assistantConfig = {
+        transcriber: {
+          provider: 'deepgram',
+          model: 'nova-2',
+          language: 'en'
+        },
+        voice: {
+          provider: 'playht',
+          voiceId: 'jennifer'
+        },
+        model: {
+          provider: 'openai',
+          model: 'gpt-3.5-turbo',
+          messages: [{
+            role: 'system',
+            content: 'You are Marcy, a professional AI receptionist. Be helpful, concise, and friendly. If user interrupts, stop speaking immediately.'
+          }]
+        },
+        silenceTimeoutSeconds: 30,
+        responseDelaySeconds: 0.4, // Quick response
+        interruptionThreshold: 50 // Allow easy interruption
+      };
+
+      await vapiClient.start('fdaaa6f7-a204-4c08-99fd-20451c96fc74', assistantConfig);
       console.log('✅ Vapi call started successfully');
 
     } catch (error: any) {
-      console.error('Failed to start voice call:', error);
-      setConnectionError(error.message || 'Failed to connect. Please check microphone permissions.');
+      console.error('❌ Failed to start voice call:', error);
+
+      let errorMessage = 'Failed to connect. ';
+      if (error.name === 'NotAllowedError') {
+        errorMessage += 'Please allow microphone access and try again.';
+      } else if (error.name === 'NotFoundError') {
+        errorMessage += 'No microphone found. Please connect a microphone.';
+      } else if (error.message) {
+        errorMessage += error.message;
+      } else {
+        errorMessage += 'Please check your connection and try again.';
+      }
+
+      setConnectionError(errorMessage);
       setIsConnecting(false);
       setIsCallActive(false);
       stopAudioVisualization();
