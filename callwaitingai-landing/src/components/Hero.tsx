@@ -1,27 +1,13 @@
-import { useState } from 'react';
-import { Phone, Sparkles, Clock, Target, Loader2 } from 'lucide-react';
-import { vapiService } from '../lib/vapi';
+import { Link } from 'react-router-dom';
+import { Phone, Sparkles, Clock, Target, MessageSquare, Shield } from 'lucide-react';
 
 const Hero = () => {
-  const [isCallingVapi, setIsCallingVapi] = useState(false);
-  const [callError, setCallError] = useState('');
+  const handleTryTextChat = () => {
+    window.dispatchEvent(new CustomEvent('openChatWidget', { detail: { mode: 'chat' } }));
+  };
 
-  const handleVapiCall = async () => {
-    setIsCallingVapi(true);
-    setCallError('');
-    
-    try {
-      await vapiService.initiateCall();
-    } catch (error: any) {
-      console.error('Vapi call failed:', error);
-      setCallError('Voice call unavailable. Using direct dial...');
-      // Fallback to direct phone call
-      setTimeout(() => {
-        vapiService.dialDirect();
-      }, 1500);
-    } finally {
-      setIsCallingVapi(false);
-    }
+  const handleTryVoiceCall = () => {
+    window.dispatchEvent(new CustomEvent('openChatWidget', { detail: { mode: 'voice' } }));
   };
 
   return (
@@ -33,7 +19,7 @@ const Hero = () => {
             <div className="inline-flex items-center space-x-2 gradient-subtle px-4 py-2 rounded-full">
               <Sparkles className="w-4 h-4 text-primary-blue" />
               <span className="text-sm font-medium text-primary-blue">
-                100% Free to Start - No Credit Card Required
+                50 Free Call Minutes • Cancel Anytime
               </span>
             </div>
 
@@ -48,37 +34,44 @@ const Hero = () => {
             </p>
 
             <p className="text-lg text-gray-600 leading-relaxed">
-              AI voice receptionist that answers, qualifies, and books calls for your business 24/7. 
+              AI voice receptionist that answers, qualifies, and books calls for your business 24/7.
               Built for UK businesses that value every customer.
             </p>
 
-            {/* CTA Button */}
+            {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
               <button
-                onClick={handleVapiCall}
-                disabled={isCallingVapi}
-                className="bg-gradient-primary text-white font-bold px-8 py-4 rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleTryTextChat}
+                className="bg-gradient-primary text-white font-bold px-8 py-4 rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2"
               >
-                {isCallingVapi ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Connecting...</span>
-                  </>
-                ) : (
-                  <>
-                    <Phone className="w-5 h-5" />
-                    <span>Talk to Our AI - Free Demo</span>
-                  </>
-                )}
+                <MessageSquare className="w-5 h-5" />
+                <span>Try the AI (Text)</span>
+              </button>
+
+              <button
+                onClick={handleTryVoiceCall}
+                className="bg-white text-primary-main border-2 border-primary-main font-bold px-8 py-4 rounded-xl hover:bg-primary-light hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2"
+              >
+                <Phone className="w-5 h-5" />
+                <span>Call the AI</span>
               </button>
             </div>
 
-            {/* Call Error Message */}
-            {callError && (
-              <div className="bg-status-info/10 border border-status-info/20 text-status-info px-4 py-3 rounded-xl text-sm">
-                {callError}
+            {/* Trust Badges */}
+            <div className="flex flex-wrap items-center gap-6 pt-4">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Shield className="w-4 h-4 text-green-600" />
+                <span className="font-medium">UK GDPR Compliant</span>
               </div>
-            )}
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Shield className="w-4 h-4 text-green-600" />
+                <span className="font-medium">98% Uptime</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Shield className="w-4 h-4 text-green-600" />
+                <span className="font-medium">Secure & Private</span>
+              </div>
+            </div>
 
             {/* Contact Info */}
             <p className="text-gray-600 flex items-center space-x-2">
@@ -96,9 +89,9 @@ const Hero = () => {
               <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center mb-4">
                 <Phone className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">100</h3>
-              <p className="text-gray-600 font-medium">Free Calls</p>
-              <p className="text-sm text-gray-500 mt-1">No credit card required</p>
+              <h3 className="text-3xl font-bold text-gray-900 mb-2">50</h3>
+              <p className="text-gray-600 font-medium">Free Minutes</p>
+              <p className="text-sm text-gray-500 mt-1">Start your trial</p>
             </div>
 
             <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">

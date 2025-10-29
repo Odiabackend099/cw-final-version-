@@ -47,6 +47,27 @@ const AdvancedChatWidget = () => {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number>();
 
+  // Listen for external widget open events
+  useEffect(() => {
+    const handleOpenWidget = (event: any) => {
+      const { mode: requestedMode } = event.detail;
+      setMode(requestedMode);
+      setIsOpen(true);
+
+      // If voice mode requested, auto-start call after opening
+      if (requestedMode === 'voice') {
+        setTimeout(() => {
+          if (!isCallActive && !isConnecting) {
+            startVoiceCall();
+          }
+        }, 500);
+      }
+    };
+
+    window.addEventListener('openChatWidget', handleOpenWidget);
+    return () => window.removeEventListener('openChatWidget', handleOpenWidget);
+  }, [isCallActive, isConnecting]);
+
   // Initialize Vapi
   useEffect(() => {
     const VAPI_PUBLIC_KEY = 'ddd720c5-6fb8-4174-b7a6-729d7b308cb9';
