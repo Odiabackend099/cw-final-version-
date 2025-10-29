@@ -12,6 +12,10 @@ export interface ChatMessage {
 export const chatService = {
   async sendMessage(messages: ChatMessage[], sessionId?: string) {
     try {
+      // SPEED OPTIMIZATION: Add timeout and reduced tokens
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 25000); // 25s timeout
+
       const response = await fetch(SUPABASE_FUNCTION_URL, {
         method: 'POST',
         headers: {
@@ -20,9 +24,14 @@ export const chatService = {
         },
         body: JSON.stringify({
           messages,
-          sessionId: sessionId || `landing-${Date.now()}`, // Generate session ID for tracking
+          sessionId: sessionId || `landing-${Date.now()}`,
+          max_tokens: 250, // FASTER: Reduced for quicker responses
+          temperature: 0.5, // FASTER: More focused, less creative = faster
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeout);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -31,8 +40,11 @@ export const chatService = {
 
       const data = await response.json();
       return data.data.message;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Chat error:', error);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout. Please try again.');
+      }
       throw new Error('Failed to get response from AI assistant. Please try again.');
     }
   },

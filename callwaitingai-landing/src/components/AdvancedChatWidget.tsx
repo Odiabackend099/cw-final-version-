@@ -316,12 +316,18 @@ const AdvancedChatWidget = () => {
     return (
       <div className="relative w-32 h-32">
         {waves}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-600 via-blue-600 to-green-500 flex items-center justify-center text-white text-3xl font-bold shadow-2xl">
+        <div className="absolute inset-0 rounded-full bg-white flex items-center justify-center shadow-2xl overflow-hidden p-4">
           {isCallActive ? (
-            isListening ? '🎤' :
-            isSpeaking ? '🔊' :
-            '⏸️'
-          ) : '🤖'}
+            <div className="text-4xl animate-pulse">
+              {isListening ? '🎤' : isSpeaking ? '🔊' : '⏸️'}
+            </div>
+          ) : (
+            <img
+              src="/images/callwaiting ai logo.jpeg"
+              alt="CallWaitingAI"
+              className="w-full h-full object-contain"
+            />
+          )}
         </div>
       </div>
     );
