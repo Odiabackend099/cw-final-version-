@@ -5,7 +5,7 @@ import Visualization from './components/Visualization';
 import HowItWorks from './components/HowItWorks';
 import Pricing from './components/Pricing';
 import Footer from './components/Footer';
-import AdvancedVoiceWidget from './components/AdvancedVoiceWidget';
+import AdvancedChatWidget from './components/AdvancedChatWidget';
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
       <HowItWorks />
       <Pricing />
       <Footer />
-      <AdvancedVoiceWidget />
+      <AdvancedChatWidget />
     </div>
   );
 }
