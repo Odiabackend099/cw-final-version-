@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Mic, MicOff, Send, Loader2, Volume2 } from 'lucide-react';
+import { MessageSquare, X, PhoneCall, PhoneOff, Send, Loader2 } from 'lucide-react';
 import { chatService, ChatMessage } from '../lib/chat';
 import Vapi from '@vapi-ai/web';
 
@@ -40,6 +40,7 @@ const AdvancedChatWidget = () => {
   const [audioLevel, setAudioLevel] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [connectionError, setConnectionError] = useState<string>('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -49,11 +50,12 @@ const AdvancedChatWidget = () => {
   // Initialize Vapi
   useEffect(() => {
     const VAPI_PUBLIC_KEY = 'ddd720c5-6fb8-4174-b7a6-729d7b308cb9';
-    const VAPI_ASSISTANT_ID = 'fdaaa6f7-a204-4c08-99fd-20451c96fc74';
 
     try {
+      console.log('🚀 Initializing Vapi client...');
       const client = new Vapi(VAPI_PUBLIC_KEY);
       setVapiClient(client);
+      console.log('✅ Vapi client initialized successfully');
 
       // Voice call events
       client.on('call-start', () => {
@@ -61,6 +63,7 @@ const AdvancedChatWidget = () => {
         setIsCallActive(true);
         setIsConnecting(false);
         setIsListening(true);
+        setConnectionError('');
       });
 
       client.on('call-end', () => {
@@ -130,11 +133,13 @@ const AdvancedChatWidget = () => {
         console.error('❌ Vapi error:', error);
         setIsCallActive(false);
         setIsConnecting(false);
+        setConnectionError(error.message || 'Failed to connect. Please try again.');
         stopAudioVisualization();
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to initialize Vapi:', error);
+      setConnectionError('Failed to initialize voice system');
     }
 
     return () => {
@@ -148,7 +153,16 @@ const AdvancedChatWidget = () => {
   // Audio visualization
   const startAudioVisualization = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('🎵 Starting audio visualization...');
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      console.log('✅ Microphone access granted');
+
       audioContextRef.current = new AudioContext();
       const source = audioContextRef.current.createMediaStreamSource(stream);
       analyserRef.current = audioContextRef.current.createAnalyser();
@@ -156,8 +170,10 @@ const AdvancedChatWidget = () => {
       source.connect(analyserRef.current);
 
       updateAudioLevel();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to get audio stream:', error);
+      setConnectionError('Microphone access denied. Please allow microphone access and try again.');
+      throw error;
     }
   };
 
@@ -234,22 +250,38 @@ const AdvancedChatWidget = () => {
 
   // Voice handlers
   const startVoiceCall = async () => {
-    if (!vapiClient || isConnecting || isCallActive) return;
+    if (!vapiClient) {
+      setConnectionError('Voice system not ready. Please refresh the page.');
+      return;
+    }
 
+    if (isConnecting || isCallActive) return;
+
+    console.log('📞 Starting voice call...');
     setIsConnecting(true);
     setTranscripts([]);
+    setConnectionError('');
 
     try {
+      // Request microphone first
       await startAudioVisualization();
+
+      // Start Vapi call
+      console.log('🎙️ Calling Vapi start...');
       await vapiClient.start('fdaaa6f7-a204-4c08-99fd-20451c96fc74');
-    } catch (error) {
+      console.log('✅ Vapi call started successfully');
+
+    } catch (error: any) {
       console.error('Failed to start voice call:', error);
+      setConnectionError(error.message || 'Failed to connect. Please check microphone permissions.');
       setIsConnecting(false);
+      setIsCallActive(false);
       stopAudioVisualization();
     }
   };
 
   const stopVoiceCall = () => {
+    console.log('🛑 Stopping voice call...');
     if (vapiClient) {
       vapiClient.stop();
     }
@@ -258,8 +290,8 @@ const AdvancedChatWidget = () => {
     stopAudioVisualization();
   };
 
-  // Wave visualization component
-  const WaveVisualization = () => {
+  // Modern avatar orb (replaces microphone icon)
+  const AvatarOrb = () => {
     const waveCount = 5;
     const waves = Array.from({ length: waveCount }, (_, i) => {
       const scale = isListening ? 1 + (audioLevel / 100) * (i + 1) * 0.3 :
@@ -281,7 +313,18 @@ const AdvancedChatWidget = () => {
       );
     });
 
-    return <div className="relative w-40 h-40">{waves}</div>;
+    return (
+      <div className="relative w-32 h-32">
+        {waves}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-600 via-blue-600 to-green-500 flex items-center justify-center text-white text-3xl font-bold shadow-2xl">
+          {isCallActive ? (
+            isListening ? '🎤' :
+            isSpeaking ? '🔊' :
+            '⏸️'
+          ) : '🤖'}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -290,9 +333,13 @@ const AdvancedChatWidget = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-gradient-to-r from-purple-600 via-blue-600 to-green-500 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all duration-300 animate-pulse"
+          className="fixed bottom-6 right-6 z-50 w-20 h-20 bg-gradient-to-r from-purple-600 via-blue-600 to-green-500 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all duration-300 group"
+          aria-label="Open chat"
         >
-          <MessageSquare className="w-8 h-8 text-white" />
+          <MessageSquare className="w-10 h-10 text-white group-hover:scale-110 transition-transform" />
+          <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold animate-pulse">
+            1
+          </div>
         </button>
       )}
 
@@ -413,38 +460,34 @@ const AdvancedChatWidget = () => {
             ) : (
               /* VOICE MODE */
               <div className="h-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-purple-50 via-blue-50 to-green-50">
-                {/* Wave Visualization */}
+                {/* Avatar Orb */}
                 <div className="mb-6 flex items-center justify-center">
-                  <WaveVisualization />
-                  <div className="absolute">
-                    {isCallActive ? (
-                      isListening ? (
-                        <Mic className="w-16 h-16 text-blue-600 animate-pulse" />
-                      ) : isSpeaking ? (
-                        <Volume2 className="w-16 h-16 text-green-600 animate-pulse" />
-                      ) : (
-                        <Mic className="w-16 h-16 text-purple-600" />
-                      )
-                    ) : (
-                      <Mic className="w-16 h-16 text-gray-400" />
-                    )}
-                  </div>
+                  <AvatarOrb />
                 </div>
 
                 {/* Status */}
                 <div className="text-center mb-4">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {isConnecting ? 'Connecting...' :
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    {isConnecting ? '⏳ Connecting...' :
                      isCallActive ? (
                        isListening ? '🎤 Listening...' :
                        isSpeaking ? '🔊 Marcy is speaking...' :
-                       '⏸️ Voice call active'
-                     ) : 'Start Voice Conversation'}
+                       '⏸️ Call Active'
+                     ) : '🎙️ Start Voice Call'}
                   </h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-gray-600 text-base">
                     {isCallActive ? 'Speak naturally with Marcy' : 'Experience AI voice assistant'}
                   </p>
                 </div>
+
+                {/* Error Message */}
+                {connectionError && (
+                  <div className="w-full bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-4">
+                    <p className="text-sm text-red-700 text-center font-medium">
+                      ⚠️ {connectionError}
+                    </p>
+                  </div>
+                )}
 
                 {/* Real-time Transcripts */}
                 {transcripts.length > 0 && (
@@ -470,23 +513,23 @@ const AdvancedChatWidget = () => {
                   disabled={isConnecting}
                   className={`${
                     isCallActive
-                      ? 'bg-red-600 hover:bg-red-700'
-                      : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-105'
-                  } text-white font-bold px-8 py-4 rounded-full shadow-xl transition-all duration-300 disabled:opacity-50 flex items-center space-x-2`}
+                      ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800'
+                      : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'
+                  } text-white font-bold px-10 py-5 rounded-full shadow-2xl transition-all duration-300 disabled:opacity-50 flex items-center space-x-3 text-lg hover:scale-105 disabled:hover:scale-100`}
                 >
                   {isConnecting ? (
                     <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <Loader2 className="w-6 h-6 animate-spin" />
                       <span>Connecting...</span>
                     </>
                   ) : isCallActive ? (
                     <>
-                      <MicOff className="w-5 h-5" />
+                      <PhoneOff className="w-6 h-6" />
                       <span>End Call</span>
                     </>
                   ) : (
                     <>
-                      <Mic className="w-5 h-5" />
+                      <PhoneCall className="w-6 h-6" />
                       <span>Start Voice Call</span>
                     </>
                   )}
@@ -503,6 +546,21 @@ const AdvancedChatWidget = () => {
 
       <style>
         {`
+          @keyframes slide-up {
+            from {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+
+          .animate-slide-up {
+            animation: slide-up 0.3s ease-out;
+          }
+
           @keyframes pulse {
             0%, 100% {
               transform: scale(1);

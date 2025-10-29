@@ -36,7 +36,7 @@ const Navigation = () => {
             <img
               src="/images/callwaiting ai logo.jpeg"
               alt="CallWaitingAI"
-              className="h-10 w-auto"
+              className="h-16 w-auto"
             />
           </div>
 
