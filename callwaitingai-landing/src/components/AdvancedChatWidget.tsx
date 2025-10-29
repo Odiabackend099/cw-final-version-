@@ -289,32 +289,11 @@ const AdvancedChatWidget = () => {
         updateAudioLevel();
       }
 
-      // Step 3: Start Vapi call with assistant config
-      console.log('🎙️ Starting Vapi call with assistant...');
-      const assistantConfig = {
-        transcriber: {
-          provider: 'deepgram',
-          model: 'nova-2',
-          language: 'en'
-        },
-        voice: {
-          provider: 'playht',
-          voiceId: 'jennifer'
-        },
-        model: {
-          provider: 'openai',
-          model: 'gpt-3.5-turbo',
-          messages: [{
-            role: 'system',
-            content: 'You are Marcy, a professional AI receptionist. Be helpful, concise, and friendly. If user interrupts, stop speaking immediately.'
-          }]
-        },
-        silenceTimeoutSeconds: 30,
-        responseDelaySeconds: 0.4, // Quick response
-        interruptionThreshold: 50 // Allow easy interruption
-      };
+      // Step 3: Start Vapi call with assistant ID (uses pre-configured assistant)
+      console.log('🎙️ Starting Vapi call with assistant ID...');
 
-      await vapiClient.start('fdaaa6f7-a204-4c08-99fd-20451c96fc74', assistantConfig);
+      // Use the assistant ID directly - it already has all configuration on Vapi dashboard
+      await vapiClient.start('fdaaa6f7-a204-4c08-99fd-20451c96fc74');
       console.log('✅ Vapi call started successfully');
 
     } catch (error: any) {
