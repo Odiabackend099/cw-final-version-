@@ -2,8 +2,19 @@ import { useState, useEffect, useRef } from 'react';
 import { Phone, PhoneOff, Mic, MicOff, Volume2, Activity, AlertCircle, Loader2 } from 'lucide-react';
 import Vapi from '@vapi-ai/web';
 
+interface Assistant {
+  id: string;
+  business_name: string;
+  business_industry: string;
+  business_hours: string;
+  timezone: string;
+  system_prompt: string;
+  minimax_voice_id: string | null;
+  use_minimax_tts: boolean;
+}
+
 interface VoiceCallTesterProps {
-  assistantId: string;
+  assistant: Assistant;
   onClose: () => void;
 }
 
@@ -17,10 +28,9 @@ interface TranscriptMessage {
 interface VoiceMetrics {
   volume: number;
   isSpeaking: boolean;
-  latency: number;
 }
 
-export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) {
+export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
   // Call state
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -33,53 +43,51 @@ export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) 
   const [metrics, setMetrics] = useState<VoiceMetrics>({
     volume: 0,
     isSpeaking: false,
-    latency: 0,
   });
 
   // Buffering state
   const [isBuffering, setIsBuffering] = useState(false);
-  const [bufferProgress, setBufferProgress] = useState(0);
 
   // Refs
   const vapiRef = useRef<any>(null);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const transcriptEndRef = useRef<HTMLDivElement>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
 
   // Initialize Vapi client
   useEffect(() => {
     const vapiApiKey = import.meta.env.VITE_VAPI_PUBLIC_KEY;
 
     if (!vapiApiKey) {
-      setCallError('Vapi API key not configured. Please add VITE_VAPI_PUBLIC_KEY to your environment variables.');
+      setCallError('Vapi API key not configured. Add VITE_VAPI_PUBLIC_KEY to environment variables.');
       return;
     }
 
-    vapiRef.current = new Vapi(vapiApiKey);
+    try {
+      vapiRef.current = new Vapi(vapiApiKey);
+      console.log('✅ Vapi client initialized');
 
-    // Event listeners
-    vapiRef.current.on('call-start', handleCallStart);
-    vapiRef.current.on('call-end', handleCallEnd);
-    vapiRef.current.on('speech-start', handleSpeechStart);
-    vapiRef.current.on('speech-end', handleSpeechEnd);
-    vapiRef.current.on('message', handleMessage);
-    vapiRef.current.on('error', handleError);
-    vapiRef.current.on('volume-level', handleVolumeLevel);
+      // Event listeners
+      vapiRef.current.on('call-start', handleCallStart);
+      vapiRef.current.on('call-end', handleCallEnd);
+      vapiRef.current.on('speech-start', handleSpeechStart);
+      vapiRef.current.on('speech-end', handleSpeechEnd);
+      vapiRef.current.on('message', handleMessage);
+      vapiRef.current.on('error', handleError);
+    } catch (error: any) {
+      console.error('❌ Vapi init error:', error);
+      setCallError(`Vapi initialization failed: ${error.message}`);
+    }
 
     return () => {
       if (vapiRef.current) {
-        vapiRef.current.stop();
+        try {
+          vapiRef.current.stop();
+        } catch (e) {
+          console.error('Cleanup error:', e);
+        }
       }
       if (durationIntervalRef.current) {
         clearInterval(durationIntervalRef.current);
-      }
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
       }
     };
   }, []);
@@ -91,7 +99,7 @@ export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) 
 
   // Event handlers
   const handleCallStart = () => {
-    console.log('Call started');
+    console.log('✅ Call started');
     setIsConnecting(false);
     setIsConnected(true);
     setCallError(null);
@@ -100,36 +108,35 @@ export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) 
     durationIntervalRef.current = setInterval(() => {
       setCallDuration(prev => prev + 1);
     }, 1000);
-
-    // Initialize audio visualization
-    initAudioVisualization();
   };
 
   const handleCallEnd = () => {
-    console.log('Call ended');
+    console.log('📞 Call ended');
     setIsConnected(false);
+    setIsBuffering(false);
     if (durationIntervalRef.current) {
       clearInterval(durationIntervalRef.current);
     }
   };
 
   const handleSpeechStart = () => {
-    console.log('Speech started');
+    console.log('🎤 Speech started');
     setMetrics(prev => ({ ...prev, isSpeaking: true }));
+    setIsBuffering(false);
   };
 
   const handleSpeechEnd = () => {
-    console.log('Speech ended');
+    console.log('🔇 Speech ended');
     setMetrics(prev => ({ ...prev, isSpeaking: false }));
   };
 
   const handleMessage = (message: any) => {
-    console.log('Message received:', message);
+    console.log('📨 Message:', message);
 
     // Handle transcript messages
-    if (message.type === 'transcript') {
+    if (message.type === 'transcript' && message.transcript) {
       const newMessage: TranscriptMessage = {
-        role: message.role,
+        role: message.role || 'assistant',
         text: message.transcript,
         timestamp: new Date(),
         isFinal: message.transcriptType === 'final',
@@ -147,58 +154,22 @@ export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) 
       });
     }
 
-    // Handle buffering events
+    // Handle speech events for buffering indication
     if (message.type === 'speech-update') {
       if (message.status === 'started') {
         setIsBuffering(true);
-        setBufferProgress(0);
       } else if (message.status === 'stopped') {
         setIsBuffering(false);
-        setBufferProgress(100);
       }
     }
   };
 
   const handleError = (error: any) => {
-    console.error('Vapi error:', error);
+    console.error('❌ Vapi error:', error);
     setCallError(error.message || 'An error occurred during the call');
     setIsConnecting(false);
     setIsConnected(false);
-  };
-
-  const handleVolumeLevel = (volume: number) => {
-    setMetrics(prev => ({ ...prev, volume }));
-  };
-
-  // Audio visualization
-  const initAudioVisualization = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioContextRef.current = new AudioContext();
-      const source = audioContextRef.current.createMediaStreamSource(stream);
-
-      analyserRef.current = audioContextRef.current.createAnalyser();
-      analyserRef.current.fftSize = 256;
-      source.connect(analyserRef.current);
-
-      animateVolumeLevel();
-    } catch (error) {
-      console.error('Failed to initialize audio visualization:', error);
-    }
-  };
-
-  const animateVolumeLevel = () => {
-    if (!analyserRef.current) return;
-
-    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-    analyserRef.current.getByteFrequencyData(dataArray);
-
-    const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-    const normalizedVolume = Math.min(100, (average / 255) * 100);
-
-    setMetrics(prev => ({ ...prev, volume: normalizedVolume }));
-
-    animationFrameRef.current = requestAnimationFrame(animateVolumeLevel);
+    setIsBuffering(false);
   };
 
   // Call actions
@@ -214,28 +185,55 @@ export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) 
       setTranscript([]);
       setCallDuration(0);
 
-      // Start call with assistant configuration
-      await vapiRef.current.start({
-        assistantId: assistantId,
-        // Enable real-time transcription
+      console.log('🚀 Starting call with assistant:', assistant.business_name);
+
+      // Create inline assistant configuration
+      const assistantConfig = {
+        name: assistant.business_name || 'AI Receptionist',
+        model: {
+          provider: 'groq',
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            {
+              role: 'system',
+              content: assistant.system_prompt || 'You are a helpful AI assistant.',
+            },
+          ],
+          temperature: 0.7,
+          maxTokens: 500,
+        },
+        voice: {
+          provider: '11labs',
+          voiceId: 'rachel', // Default ElevenLabs voice
+        },
         transcriber: {
           provider: 'deepgram',
           model: 'nova-2',
           language: 'en-US',
         },
-        // Enable voice activity detection
+        firstMessage: `Hello! I'm the AI assistant for ${assistant.business_name}. How can I help you today?`,
+        // Enable real-time features
         silenceTimeoutSeconds: 30,
         responseDelaySeconds: 0.4,
         interruptionsEnabled: true,
-      });
+        backgroundSound: 'off',
+      };
+
+      console.log('📋 Assistant config:', assistantConfig);
+
+      // Start call with inline assistant
+      await vapiRef.current.start(assistantConfig);
+
+      console.log('✅ Call start request sent');
     } catch (error: any) {
-      console.error('Failed to start call:', error);
-      setCallError(error.message || 'Failed to start call');
+      console.error('❌ Failed to start call:', error);
+      setCallError(`Failed to start call: ${error.message}`);
       setIsConnecting(false);
     }
   };
 
   const endCall = () => {
+    console.log('🛑 Ending call...');
     if (vapiRef.current) {
       vapiRef.current.stop();
     }
@@ -245,6 +243,7 @@ export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) 
     if (vapiRef.current) {
       vapiRef.current.setMuted(!isMuted);
       setIsMuted(!isMuted);
+      console.log(isMuted ? '🔊 Unmuted' : '🔇 Muted');
     }
   };
 
@@ -291,13 +290,15 @@ export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) 
           {/* Voice Metrics */}
           {isConnected && (
             <div className="mt-4 flex items-center gap-6">
-              {/* Volume Level */}
+              {/* Volume Level - Simulated based on speaking state */}
               <div className="flex items-center gap-2">
                 <Volume2 className="w-4 h-4 text-gray-600" />
                 <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-100"
-                    style={{ width: `${metrics.volume}%` }}
+                    className={`h-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-300 ${
+                      metrics.isSpeaking ? 'animate-pulse' : ''
+                    }`}
+                    style={{ width: metrics.isSpeaking ? '80%' : '20%' }}
                   />
                 </div>
               </div>
@@ -316,7 +317,7 @@ export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) 
               {isBuffering && (
                 <div className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
-                  <span className="text-xs text-gray-600">Buffering...</span>
+                  <span className="text-xs text-gray-600">Processing...</span>
                 </div>
               )}
             </div>
@@ -327,7 +328,10 @@ export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) 
         {callError && (
           <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-800">{callError}</p>
+            <div className="flex-1">
+              <p className="text-sm text-red-800 font-medium">Call Error</p>
+              <p className="text-xs text-red-700 mt-1">{callError}</p>
+            </div>
           </div>
         )}
 
@@ -336,7 +340,8 @@ export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) 
           {transcript.length === 0 && !isConnected && (
             <div className="text-center py-12 text-gray-500">
               <Mic className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>Start a call to see live transcription</p>
+              <p className="font-medium">Start a call to see live transcription</p>
+              <p className="text-sm mt-2">Testing: {assistant.business_name}</p>
             </div>
           )}
 
@@ -353,7 +358,7 @@ export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) 
                 } ${!message.isFinal ? 'opacity-60 italic' : ''}`}
               >
                 <div className="text-xs font-medium mb-1 opacity-75">
-                  {message.role === 'user' ? 'You' : 'AI Assistant'}
+                  {message.role === 'user' ? 'You' : assistant.business_name}
                 </div>
                 <p className="text-sm">{message.text}</p>
                 <div className="text-xs mt-1 opacity-60">
@@ -375,7 +380,7 @@ export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) 
             {!isConnected ? (
               <button
                 onClick={startCall}
-                disabled={isConnecting}
+                disabled={isConnecting || !!callError}
                 className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isConnecting ? (
@@ -416,7 +421,7 @@ export function VoiceCallTester({ assistantId, onClose }: VoiceCallTesterProps) 
           </div>
 
           <p className="text-xs text-center text-gray-500 mt-3">
-            This is a test call using your AI assistant configuration
+            Testing with Groq Llama 3.3 70B + ElevenLabs Rachel voice
           </p>
         </div>
       </div>

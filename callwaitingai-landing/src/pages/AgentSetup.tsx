@@ -578,7 +578,7 @@ const AgentSetup = () => {
       {/* Voice Call Tester Modal */}
       {showCallTester && assistant && (
         <VoiceCallTester
-          assistantId={assistant.id}
+          assistant={assistant}
           onClose={() => setShowCallTester(false)}
         />
       )}
