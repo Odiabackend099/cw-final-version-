@@ -1,99 +1,183 @@
-import { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Phone, Send, Loader2 } from 'lucide-react';
-import { chatService, ChatMessage } from '../lib/chat';
-import { vapiService } from '../lib/vapi';
+import React, { useState, useEffect, useRef } from 'react';
+import { MessageCircle, Mic, Send, X, Phone } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import Vapi from '@vapi-ai/web';
 
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-const FloatingChatWidget = () => {
+export function FloatingChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState('');
-  const [isVoiceMode, setIsVoiceMode] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: "Hi! I'm Marcy, your AI receptionist. How can I help you today?",
-    },
-  ]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isCallingVapi, setIsCallingVapi] = useState(false);
-  const [sessionId] = useState(() => `landing-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [sessionId] = useState(() => crypto.randomUUID());
+  const [isVoiceActive, setIsVoiceActive] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [vapiClient, setVapiClient] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  useEffect(() => {
+    // Initialize Vapi client with live public key
+    const vapiPublicKey = 'ddd720c5-6fb8-4174-b7a6-729d7b308cb9';
+    try {
+      const client = new Vapi(vapiPublicKey);
+      setVapiClient(client);
+      
+      // Set up event listeners
+      client.on('call-start', () => {
+        console.log('Voice call started');
+        setIsVoiceActive(true);
+      });
+
+      client.on('call-end', () => {
+        console.log('Voice call ended');
+        setIsVoiceActive(false);
+      });
+
+      client.on('error', (error: any) => {
+        console.error('Vapi error:', error);
+        setIsVoiceActive(false);
+      });
+    } catch (error) {
+      console.error('Error initializing Vapi:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadChatHistory();
+      scrollToBottom();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!message.trim() || isLoading) return;
+  async function loadChatHistory() {
+    try {
+      const { data } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('created_at', { ascending: true });
 
-    const userMessage = message.trim();
-    setMessage('');
+      if (data && data.length > 0) {
+        setMessages(data);
+      } else {
+        // Add welcome message from Marcy
+        const welcomeMessage = {
+          id: crypto.randomUUID(),
+          session_id: sessionId,
+          sender_type: 'assistant',
+          message_text: "Hello! I'm Marcy, your CallWaitingAI assistant. I can help you manage calls, capture leads, and answer questions. How can I assist you today?",
+          message_type: 'text',
+          created_at: new Date().toISOString()
+        };
+        setMessages([welcomeMessage]);
+        
+        // Save welcome message
+        await supabase.from('chat_messages').insert(welcomeMessage);
+      }
+    } catch (error) {
+      console.error('Error loading chat history:', error);
+    }
+  }
+
+  async function sendMessage(e?: React.FormEvent) {
+    if (e) e.preventDefault();
     
-    // Add user message to chat
-    const newMessages: Message[] = [
-      ...messages,
-      { role: 'user', content: userMessage },
-    ];
-    setMessages(newMessages);
-    setIsLoading(true);
+    if (!inputMessage.trim() || isSending) return;
+
+    const userMessage = {
+      id: crypto.randomUUID(),
+      session_id: sessionId,
+      sender_type: 'user',
+      message_text: inputMessage,
+      message_type: 'text',
+      created_at: new Date().toISOString()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputMessage;
+    setInputMessage('');
+    setIsSending(true);
 
     try {
-      // Get AI response
-      const chatMessages: ChatMessage[] = newMessages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      }));
+      // Save user message to database
+      await supabase.from('chat_messages').insert(userMessage);
 
-      const aiResponse = await chatService.sendMessage(chatMessages, sessionId);
+      // Call Groq AI chat function
+      const { data, error } = await supabase.functions.invoke('groq-chat', {
+        body: {
+          messages: [
+            { role: 'user', content: currentInput }
+          ],
+          sessionId: sessionId
+        }
+      });
 
-      // Add AI response to chat
-      setMessages([
-        ...newMessages,
-        { role: 'assistant', content: aiResponse },
-      ]);
+      if (error) {
+        console.error('Chat error:', error);
+        throw error;
+      }
+
+      // Add AI response to messages
+      const aiResponse = {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        sender_type: 'assistant',
+        message_text: data?.data?.message || 'I apologize, but I encountered an error. Please try again.',
+        message_type: 'text',
+        created_at: new Date().toISOString()
+      };
+
+      setMessages(prev => [...prev, aiResponse]);
     } catch (error) {
-      console.error('Chat error:', error);
-      setMessages([
-        ...newMessages,
-        {
-          role: 'assistant',
-          content: "I apologize, but I'm having trouble connecting right now. Please try calling us directly at +1 (276) 582-5329 or email support.",
-        },
-      ]);
+      console.error('Error sending message:', error);
+      
+      // Fallback response
+      const fallbackResponse = {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        sender_type: 'assistant',
+        message_text: "I'm currently unable to process your request. Please try again or contact support if the issue persists.",
+        message_type: 'text',
+        created_at: new Date().toISOString()
+      };
+      
+      setMessages(prev => [...prev, fallbackResponse]);
     } finally {
-      setIsLoading(false);
+      setIsSending(false);
     }
-  };
+  }
 
-  const handleQuickAction = async (action: string) => {
-    setMessage(action);
-    // Simulate a small delay before sending
-    setTimeout(() => {
-      handleSendMessage();
-    }, 100);
-  };
+  async function startVoiceCall() {
+    if (!vapiClient) {
+      alert('Voice assistant is initializing. Please try again in a moment.');
+      return;
+    }
 
-  const handleVoiceCall = async () => {
-    setIsCallingVapi(true);
-    
     try {
-      await vapiService.initiateCall();
+      setIsVoiceActive(true);
+      
+      // Start Vapi call with the configured assistant
+      await vapiClient.start('fdaaa6f7-a204-4c08-99fd-20451c96fc74');
+
     } catch (error) {
-      console.error('Vapi call failed, using fallback:', error);
-      // Fallback to direct phone call
-      vapiService.dialDirect();
-    } finally {
-      setIsCallingVapi(false);
+      console.error('Error starting voice call:', error);
+      setIsVoiceActive(false);
+      alert('Failed to start voice call. Please check your microphone permissions and try again.');
     }
-  };
+  }
+
+  function stopVoiceCall() {
+    if (vapiClient) {
+      vapiClient.stop();
+    }
+    setIsVoiceActive(false);
+  }
+
+  function scrollToBottom() {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }
 
   return (
     <>
@@ -101,180 +185,108 @@ const FloatingChatWidget = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-16 h-16 gradient-bg rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all duration-300 animate-pulse"
+          className="fixed bottom-6 right-6 p-4 bg-gradient-to-r from-blue-600 to-green-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all z-50 flex items-center gap-2"
         >
-          <MessageSquare className="w-8 h-8 text-white" />
+          <MessageCircle className="h-6 w-6" />
+          <span className="pr-2 font-medium">Chat with Marcy</span>
         </button>
       )}
 
-      {/* Chat Widget */}
+      {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-96 h-[32rem] bg-white rounded-2xl shadow-2xl flex flex-col animate-slide-up overflow-hidden border border-gray-200 max-w-[calc(100vw-3rem)]">
+        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-lg shadow-2xl flex flex-col z-50">
           {/* Header */}
-          <div className="gradient-bg text-white p-4 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <MessageSquare className="w-6 h-6" />
-              </div>
+          <div className="bg-gradient-to-r from-blue-600 to-green-500 text-white p-4 rounded-t-lg flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5" />
               <div>
-                <h3 className="font-bold">Chat with Marcy</h3>
-                <p className="text-sm text-white/80">AI Receptionist</p>
+                <h3 className="font-semibold">Marcy - AI Assistant</h3>
+                <p className="text-xs text-white/80">
+                  {isVoiceActive ? 'Voice call active' : 'Always here to help'}
+                </p>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-white hover:bg-white/20 p-2 rounded-full transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={isVoiceActive ? stopVoiceCall : startVoiceCall}
+                className={`p-2 rounded-full transition-colors ${
+                  isVoiceActive 
+                    ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
+                    : 'bg-white/20 hover:bg-white/30'
+                }`}
+                title={isVoiceActive ? 'End voice call' : 'Start voice call'}
+              >
+                <Phone className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-1 hover:bg-white/20 rounded"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
-          {/* Mode Toggle */}
-          <div className="flex border-b border-gray-200">
-            <button
-              onClick={() => setIsVoiceMode(false)}
-              className={`flex-1 py-3 font-semibold transition-colors ${
-                !isVoiceMode
-                  ? 'text-brand-purple border-b-2 border-brand-purple'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Chat
-            </button>
-            <button
-              onClick={() => setIsVoiceMode(true)}
-              className={`flex-1 py-3 font-semibold transition-colors ${
-                isVoiceMode
-                  ? 'text-brand-purple border-b-2 border-brand-purple'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Voice
-            </button>
-          </div>
-
-          {/* Content Area */}
-          <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
-            {!isVoiceMode ? (
-              <div className="space-y-4">
-                {/* Chat Messages */}
-                {messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`${
-                      msg.role === 'user'
-                        ? 'ml-auto bg-gradient-to-r from-brand-purple to-brand-blue text-white'
-                        : 'bg-white text-gray-700'
-                    } rounded-2xl p-4 shadow-sm max-w-[85%] ${
-                      msg.role === 'user' ? 'text-right' : ''
-                    }`}
-                  >
-                    <p className="text-sm leading-relaxed">{msg.content}</p>
-                  </div>
-                ))}
-
-                {/* Loading Indicator */}
-                {isLoading && (
-                  <div className="bg-white rounded-2xl p-4 shadow-sm max-w-[85%]">
-                    <div className="flex items-center space-x-2 text-gray-500">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-sm">Marcy is typing...</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Quick Actions (only show initially) */}
-                {messages.length === 1 && !isLoading && (
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-600 font-medium">Quick actions:</p>
-                    <button
-                      onClick={() => handleQuickAction('I would like to schedule a demo')}
-                      className="w-full text-left bg-white rounded-xl p-3 hover:bg-purple-50 transition-colors text-gray-700 text-sm"
-                    >
-                      Schedule a demo
-                    </button>
-                    <button
-                      onClick={() => handleQuickAction('Can you tell me about your pricing plans?')}
-                      className="w-full text-left bg-white rounded-xl p-3 hover:bg-purple-50 transition-colors text-gray-700 text-sm"
-                    >
-                      Get pricing information
-                    </button>
-                    <button
-                      onClick={() => handleQuickAction('I need help getting started')}
-                      className="w-full text-left bg-white rounded-xl p-3 hover:bg-purple-50 transition-colors text-gray-700 text-sm"
-                    >
-                      Talk to support
-                    </button>
-                  </div>
-                )}
-
-                <div ref={messagesEndRef} />
-              </div>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center space-y-6">
-                <div className={`w-32 h-32 gradient-bg rounded-full flex items-center justify-center ${isCallingVapi ? 'animate-pulse' : ''}`}>
-                  <Phone className="w-16 h-16 text-white" />
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.sender_type === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[80%] p-3 rounded-lg ${
+                    message.sender_type === 'user'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-900'
+                  }`}
+                >
+                  <p className="text-sm whitespace-pre-wrap">{message.message_text}</p>
+                  <p className="text-xs mt-1 opacity-70">
+                    {new Date(message.created_at).toLocaleTimeString([], { 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })}
+                  </p>
                 </div>
-                <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Talk to Marcy
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Experience our AI voice assistant firsthand
-                  </p>
-                  <button
-                    onClick={handleVoiceCall}
-                    disabled={isCallingVapi}
-                    className="gradient-bg text-white font-bold px-8 py-4 rounded-full hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 flex items-center justify-center mx-auto"
-                  >
-                    {isCallingVapi ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Connecting...
-                      </>
-                    ) : (
-                      'Start Voice Call'
-                    )}
-                  </button>
-                  <p className="text-sm text-gray-500 mt-4">
-                    Or call: +1 (276) 582-5329
-                  </p>
+              </div>
+            ))}
+            {isSending && (
+              <div className="flex justify-start">
+                <div className="bg-gray-100 text-gray-900 p-3 rounded-lg">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Area (only in chat mode) */}
-          {!isVoiceMode && (
-            <div className="p-4 border-t border-gray-200 bg-white">
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                  placeholder="Type your message..."
-                  disabled={isLoading}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-purple disabled:opacity-50"
-                />
-                <button
-                  onClick={handleSendMessage}
-                  disabled={isLoading || !message.trim()}
-                  className="gradient-bg text-white p-3 rounded-full hover:scale-110 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Send className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
+          {/* Input */}
+          <form onSubmit={sendMessage} className="p-4 border-t border-gray-200">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                disabled={isSending}
+                placeholder={isSending ? "Marcy is typing..." : "Type your message..."}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100"
+              />
+              <button
+                type="submit"
+                disabled={isSending || !inputMessage.trim()}
+                className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Send className="h-5 w-5" />
+              </button>
             </div>
-          )}
+          </form>
         </div>
       )}
     </>
   );
-};
-
-export default FloatingChatWidget;
+}
