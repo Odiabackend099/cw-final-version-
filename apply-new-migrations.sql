@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS public.minimax_voices (
 -- Add RLS policies for minimax_voices
 ALTER TABLE public.minimax_voices ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Anyone can view active voices"
+DROP POLICY IF EXISTS "Anyone can view active voices" ON public.minimax_voices;
+CREATE POLICY "Anyone can view active voices"
   ON public.minimax_voices FOR SELECT
   USING (is_active = true);
 
@@ -64,7 +65,8 @@ CREATE TABLE IF NOT EXISTS public.knowledge_base_files (
 -- Add RLS policies for knowledge_base_files
 ALTER TABLE public.knowledge_base_files ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Users can manage their own knowledge base files"
+DROP POLICY IF EXISTS "Users can manage their own knowledge base files" ON public.knowledge_base_files;
+CREATE POLICY "Users can manage their own knowledge base files"
   ON public.knowledge_base_files FOR ALL
   USING (
     EXISTS (
@@ -106,6 +108,9 @@ CREATE INDEX IF NOT EXISTS idx_assistants_user_id ON public.assistants(user_id);
 DROP POLICY IF EXISTS "Anyone can view active assistants" ON public.assistants;
 DROP POLICY IF EXISTS "Allow insert assistants" ON public.assistants;
 DROP POLICY IF EXISTS "Allow update assistants" ON public.assistants;
+DROP POLICY IF EXISTS "Users can view their own assistants" ON public.assistants;
+DROP POLICY IF EXISTS "Users can create their own assistants" ON public.assistants;
+DROP POLICY IF EXISTS "Users can update their own assistants" ON public.assistants;
 
 CREATE POLICY "Users can view their own assistants"
   ON public.assistants FOR SELECT
