@@ -1,0 +1,16 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5173",
+  "executionArgs": {
+    "projectName": "callwaitingai-landing",
+    "projectPath": "/Users/odiadev/Downloads/cwlunch/callwaitingai-landing",
+    "testIds": [],
+    "additionalInstruction": "",
+    "envs": {
+      "API_KEY": "sk-user-zs_TB3AKshhlBZta5ESO6RvfY8pcJbJXhO4s_w2hQ__bcI9xPRf1jjWaCiklTHAeO7GxcsUu2F8xaFXqKwqORGgd2c3NbkxGxJlagIjDXcTRagTp2WjGGpQkXskk_Kp9ols"
+    }
+  },
+  "proxy": "http://39b4994e-a50b-41d1-8ab4-b480e09b864b:EDnFxcZNhIzclB24UhDzGowoCAZxk7Bu@tun.testsprite.com:8080"
+}

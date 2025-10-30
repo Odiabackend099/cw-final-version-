@@ -1,0 +1,218 @@
+{
+  "meta": {
+    "project": "CallWaitingAI MVP Implementation",
+    "date": "2025-10-29",
+    "prepared_by": "Software Development Manager"
+  },
+  "product_overview": "CallWaitingAI is an AI-driven voice and chat agent platform designed for businesses to manage customer interactions seamlessly. It enables users to configure custom AI receptionists, handle voice calls, chat via AI widgets, and manage leads and payments via a unified dashboard.",
+  "core_goals": [
+    "Provide a fully functional MVP supporting 100 users on the free tier with zero infrastructure cost",
+    "Ensure reliable and scalable authentication and agent configuration",
+    "Implement robust voice call handling with tier-based voice features",
+    "Enable seamless file uploads for knowledge base integration with user-friendly UX",
+    "Deliver real-time call logging and analytics through webhook integration",
+    "Prevent abuse via basic rate limiting mechanisms",
+    "Ensure high uptime with health check endpoints and monitoring",
+    "Validate user input to prevent errors and improve user experience",
+    "Deploy an end-to-end tested and production-ready system for seamless onboarding"
+  ],
+  "key_features": [
+    "User authentication with email verification, password reset, signup, and login leveraging Supabase Auth",
+    "AI Agent configuration interface allowing users to set business details, system prompts, voice selections, and upload knowledge bases",
+    "Tier-based voice call testing using Vapi.ai for free tier and Minimax TTS for paid tiers",
+    "Dashboard featuring analytics, call history, lead management, and subscription payments overview",
+    "Vapi webhook integration for logging call events into Supabase database",
+    "File upload system with auto-save and validation for secure knowledge base management",
+    "Subscription tier detection to control access to premium features",
+    "Rate limiting on API endpoints to prevent abuse, especially on the free tier",
+    "Health check endpoint integrated with uptime monitoring services",
+    "Mobile responsive design and accessible navigation components"
+  ],
+  "user_flow_summary": [
+    "User signs up and verifies email via Supabase Auth",
+    "User configures AI agent with business name, custom system prompt, and selects voice options",
+    "User uploads knowledge base documents which are auto-saved and stored securely",
+    "User initiates or receives voice call testing from dashboard depending on subscription tier",
+    "Voice call events are logged through webhook integration and shown on calls dashboard",
+    "Users manage leads captured from calls and chats, and can view analytics",
+    "Subscription tier is verified to enable/disable advanced voice features and chat widgets",
+    "User accesses settings to manage profile and payment subscriptions",
+    "Health endpoints monitor system status with alerts from uptime services"
+  ],
+  "validation_criteria": [
+    "Agent configuration saves without errors including system prompt persistence",
+    "Knowledge base uploads succeed immediately after auto-save without errors",
+    "Input validations reject empty business names, overly long system prompts (over 10,000 chars), and large files (>50 MB) with friendly error messages",
+    "Vapi webhook creates call logs in the Supabase database upon call completion",
+    "Rate limiting enforces maximum 100 calls/hour per assistant returning HTTP 429 on excess requests",
+    "Health check endpoint returns 200 HTTP status when healthy and 503 when database is unreachable",
+    "End-to-end user flow from signup to call logging completes with no console errors or failures",
+    "System handles 100 simultaneous users safely within free tier resource limits",
+    "UptimeRobot monitoring shows 99%+ uptime for 48 hours post-launch"
+  ],
+  "code_summary": {
+    "tech_stack": [
+      "TypeScript",
+      "React 18",
+      "Vite 6",
+      "React Router v6",
+      "Supabase (PostgreSQL + Auth + Storage)",
+      "TailwindCSS",
+      "Radix UI",
+      "Vapi.ai Voice SDK",
+      "Minimax TTS",
+      "Lucide React Icons",
+      "React Hook Form + Zod"
+    ],
+    "features": [
+      {
+        "name": "Authentication System",
+        "description": "User authentication with email verification, password reset, signup, login, and session management using Supabase Auth",
+        "files": [
+          "src/contexts/AuthContext.tsx",
+          "src/pages/Login.tsx",
+          "src/pages/SignUp.tsx",
+          "src/pages/EmailVerification.tsx",
+          "src/pages/PasswordReset.tsx",
+          "src/components/AuthModal.tsx",
+          "src/lib/auth.ts"
+        ]
+      },
+      {
+        "name": "AI Agent Configuration",
+        "description": "Setup and configure AI voice agents with business details, system prompts, voice selection, and knowledge base upload",
+        "files": [
+          "src/pages/AgentSetup.tsx",
+          "src/components/VoiceCallTester.tsx"
+        ]
+      },
+      {
+        "name": "Voice Call System",
+        "description": "Tier-based voice call testing with Vapi default voice for free tier and Minimax TTS for paid tiers",
+        "files": [
+          "src/components/VoiceCallTester.tsx",
+          "src/components/AdvancedVoiceWidget.tsx",
+          "src/lib/vapi.ts",
+          "src/lib/advancedVapi.ts"
+        ]
+      },
+      {
+        "name": "User Tier Management",
+        "description": "Subscription tier detection based on payment history (free/professional/pro) to enable/disable premium features",
+        "files": [
+          "src/lib/userTier.ts"
+        ]
+      },
+      {
+        "name": "Chat Widget System",
+        "description": "AI chat widgets for customer interaction with floating and advanced chat interfaces",
+        "files": [
+          "src/components/FloatingChatWidget.tsx",
+          "src/components/AdvancedChatWidget.tsx",
+          "src/lib/chat.ts"
+        ]
+      },
+      {
+        "name": "Dashboard",
+        "description": "Main dashboard with analytics, stats overview, and navigation to all features",
+        "files": [
+          "src/pages/Dashboard.tsx",
+          "src/components/Layout.tsx"
+        ]
+      },
+      {
+        "name": "Calls Management",
+        "description": "View and manage incoming/outgoing calls, call history, and call analytics",
+        "files": [
+          "src/pages/Calls.tsx"
+        ]
+      },
+      {
+        "name": "Leads Management",
+        "description": "Track and manage leads captured through voice and chat interactions",
+        "files": [
+          "src/pages/Leads.tsx"
+        ]
+      },
+      {
+        "name": "Payment System",
+        "description": "Payment processing, subscription management, and payment history for Starter/Professional/Pro plans",
+        "files": [
+          "src/pages/Payments.tsx"
+        ]
+      },
+      {
+        "name": "User Settings",
+        "description": "User profile settings, preferences, and account configuration",
+        "files": [
+          "src/pages/Settings.tsx"
+        ]
+      },
+      {
+        "name": "Landing Page",
+        "description": "Public-facing marketing pages with hero, features, pricing, how it works sections",
+        "files": [
+          "src/pages/Home.tsx",
+          "src/components/Hero.tsx",
+          "src/components/Features.tsx",
+          "src/components/Pricing.tsx",
+          "src/components/HowItWorks.tsx",
+          "src/components/Visualization.tsx"
+        ]
+      },
+      {
+        "name": "Navigation & Layout",
+        "description": "Site navigation, footer, layout components with responsive design",
+        "files": [
+          "src/components/Navigation.tsx",
+          "src/components/Footer.tsx",
+          "src/components/Layout.tsx"
+        ]
+      },
+      {
+        "name": "Legal Pages",
+        "description": "Privacy policy and terms of service pages with white-labeled ODIADEV branding",
+        "files": [
+          "src/pages/Privacy.tsx",
+          "src/pages/Terms.tsx"
+        ]
+      },
+      {
+        "name": "Protected Routes",
+        "description": "Route protection for authenticated users with loading states and redirects",
+        "files": [
+          "src/App.tsx"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "description": "Global error boundary for catching and displaying React errors",
+        "files": [
+          "src/components/ErrorBoundary.tsx"
+        ]
+      },
+      {
+        "name": "Supabase Integration",
+        "description": "Database client configuration for authentication, storage, and data queries",
+        "files": [
+          "src/lib/supabase.ts"
+        ]
+      },
+      {
+        "name": "Design System",
+        "description": "Design tokens, theming, and UI component styling utilities",
+        "files": [
+          "src/lib/designSystem.ts",
+          "src/lib/utils.ts"
+        ]
+      },
+      {
+        "name": "Mobile Responsiveness",
+        "description": "Custom hook for detecting mobile devices and responsive design",
+        "files": [
+          "src/hooks/use-mobile.tsx"
+        ]
+      }
+    ]
+  }
+}
