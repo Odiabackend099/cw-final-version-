@@ -34,7 +34,7 @@ const Pricing = () => {
         'Priority support (24h response)',
         'Advanced analytics & reporting',
         'CRM integration',
-        'Custom voice personalities (Minimax)',
+        'Custom voice personalities (ODIADEV TTS)',
         'Telegram notifications',
         'API access',
         'Advanced voice assistant',

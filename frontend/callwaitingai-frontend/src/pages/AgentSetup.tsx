@@ -382,7 +382,7 @@ const AgentSetup = () => {
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                 />
                 <label className="text-sm text-gray-700">
-                  Use custom Minimax voices (Professional/Pro plans only)
+                  Use custom ODIADEV TTS voices (Professional/Pro plans only)
                 </label>
               </div>
 
@@ -415,7 +415,7 @@ const AgentSetup = () => {
 
               {!useMinimaxTts && (
                 <p className="text-sm text-gray-600">
-                  Using default Vapi voices. Enable Minimax for custom voice options.
+                  Using default ODIADEV voices. Enable ODIADEV TTS for custom voice options.
                 </p>
               )}
             </div>
