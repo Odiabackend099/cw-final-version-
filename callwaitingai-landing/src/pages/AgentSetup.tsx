@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Save, Upload, Play, Loader2, AlertCircle, CheckCircle, Volume2, FileText, Globe } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { VoiceCallTester } from '../components/VoiceCallTester';
 
 interface MinimaxVoice {
   id: string;
@@ -75,6 +76,9 @@ const AgentSetup = () => {
   const [assistant, setAssistant] = useState<Assistant | null>(null);
   const [knowledgeBaseFiles, setKnowledgeBaseFiles] = useState<File[]>([]);
   const [uploadingKb, setUploadingKb] = useState(false);
+
+  // Voice call tester state
+  const [showCallTester, setShowCallTester] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -276,21 +280,8 @@ const AgentSetup = () => {
       return;
     }
 
-    try {
-      setTestingCall(true);
-      setMessage(null);
-
-      // TODO: Trigger test call via Vapi API
-      // For now, simulate success
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      setMessage({ type: 'success', text: 'Test call initiated! Check your phone.' });
-    } catch (error: any) {
-      console.error('Error testing call:', error);
-      setMessage({ type: 'error', text: error.message });
-    } finally {
-      setTestingCall(false);
-    }
+    // Open voice call tester
+    setShowCallTester(true);
   };
 
   const selectedVoice = voices.find(v => v.voice_id === selectedVoiceId);
@@ -583,6 +574,14 @@ const AgentSetup = () => {
           )}
         </button>
       </div>
+
+      {/* Voice Call Tester Modal */}
+      {showCallTester && assistant && (
+        <VoiceCallTester
+          assistantId={assistant.id}
+          onClose={() => setShowCallTester(false)}
+        />
+      )}
     </div>
   );
 };
