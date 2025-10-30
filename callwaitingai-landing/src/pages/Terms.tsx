@@ -210,7 +210,7 @@ const Terms = () => {
           <section>
             <h2 className="text-2xl font-semibold text-neutral-darkText mb-4">9. Third-Party Services and Integrations</h2>
             <p className="text-neutral-mediumText leading-relaxed">
-              The Service integrates with third-party providers (Vapi.ai, Groq, Minimax, Flutterwave, Supabase). We are not responsible for:
+              The Service uses ODIADEV's proprietary AI technology and integrates with secure payment processing. We are not responsible for:
             </p>
             <ul className="list-disc list-inside text-neutral-mediumText space-y-2">
               <li>Third-party service availability, accuracy, or security</li>

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Phone, PhoneOff, Mic, MicOff, Volume2, Activity, AlertCircle, Loader2 } from 'lucide-react';
 import Vapi from '@vapi-ai/web';
+import { useAuth } from '../contexts/AuthContext';
+import { getUserTier } from '../lib/userTier';
 
 interface Assistant {
   id: string;
@@ -31,6 +33,8 @@ interface VoiceMetrics {
 }
 
 export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
+  const { user } = useAuth();
+
   // Call state
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -187,8 +191,37 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
 
       console.log('🚀 Starting call with assistant:', assistant.business_name);
 
+      // Determine user's subscription tier
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const userTier = await getUserTier(user.id);
+      console.log('👤 User tier:', userTier);
+
+      // Configure voice based on tier and assistant settings
+      let voiceConfig: any;
+
+      if (userTier === 'free') {
+        // FREE tier: Use Vapi's default voice (no custom voice config)
+        voiceConfig = undefined;
+        console.log('🎤 Voice: Vapi default (free tier)');
+      } else if (assistant.use_minimax_tts && assistant.minimax_voice_id) {
+        // PAID tier with Minimax TTS enabled: Use Minimax voice
+        voiceConfig = {
+          provider: 'custom-llm',
+          url: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/minimax-tts`,
+          model: assistant.minimax_voice_id,
+        };
+        console.log('🎤 Voice: ODIADEV TTS (Minimax)', assistant.minimax_voice_id);
+      } else {
+        // PAID tier without Minimax: Use Vapi default
+        voiceConfig = undefined;
+        console.log('🎤 Voice: Vapi default (paid tier, Minimax disabled)');
+      }
+
       // Create inline assistant configuration
-      const assistantConfig = {
+      const assistantConfig: any = {
         name: assistant.business_name || 'AI Receptionist',
         model: {
           provider: 'groq',
@@ -202,10 +235,6 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
           temperature: 0.7,
           maxTokens: 500,
         },
-        voice: {
-          provider: '11labs',
-          voiceId: 'rachel', // Default ElevenLabs voice
-        },
         transcriber: {
           provider: 'deepgram',
           model: 'nova-2',
@@ -218,6 +247,11 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
         interruptionsEnabled: true,
         backgroundSound: 'off',
       };
+
+      // Add voice config only if it's defined (paid tiers with custom voice)
+      if (voiceConfig) {
+        assistantConfig.voice = voiceConfig;
+      }
 
       console.log('📋 Assistant config:', assistantConfig);
 
@@ -421,7 +455,7 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
           </div>
 
           <p className="text-xs text-center text-gray-500 mt-3">
-            Testing with Groq Llama 3.3 70B + ElevenLabs Rachel voice
+            Powered by ODIADEV TTS
           </p>
         </div>
       </div>

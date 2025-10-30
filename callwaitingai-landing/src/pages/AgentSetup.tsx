@@ -284,6 +284,56 @@ const AgentSetup = () => {
     setShowCallTester(true);
   };
 
+  const testAgentConfiguration = async () => {
+    if (!assistant) {
+      setMessage({ type: 'error', text: 'Please save your agent configuration first' });
+      return false;
+    }
+
+    try {
+      setMessage({ type: 'info', text: 'Testing agent configuration...' });
+
+      // Validate agent has all required fields
+      const isValid = Boolean(
+        assistant.business_name &&
+        assistant.system_prompt &&
+        assistant.business_hours &&
+        assistant.timezone
+      );
+
+      if (isValid) {
+        console.log('✅ AGENT TEST: TRUE/OK');
+        console.log('═══════════════════════════');
+        console.log('Agent ID:', assistant.id);
+        console.log('Business:', assistant.business_name);
+        console.log('Industry:', assistant.business_industry);
+        console.log('Hours:', assistant.business_hours);
+        console.log('Timezone:', assistant.timezone);
+        console.log('System Prompt Length:', assistant.system_prompt.length, 'chars');
+        console.log('Voice Config:', {
+          use_minimax_tts: assistant.use_minimax_tts,
+          minimax_voice_id: assistant.minimax_voice_id,
+        });
+        console.log('═══════════════════════════');
+        console.log('RESULT: TRUE');
+        console.log('STATUS: OK');
+        console.log('═══════════════════════════');
+
+        setMessage({ type: 'success', text: '✅ Agent configuration validated successfully! Check console for details.' });
+        return true;
+      } else {
+        console.log('❌ AGENT TEST: FALSE/ERROR');
+        console.log('Missing required fields');
+        setMessage({ type: 'error', text: 'Agent configuration incomplete. Missing required fields.' });
+        return false;
+      }
+    } catch (error: any) {
+      console.error('❌ AGENT TEST ERROR:', error);
+      setMessage({ type: 'error', text: `Test failed: ${error.message}` });
+      return false;
+    }
+  };
+
   const selectedVoice = voices.find(v => v.voice_id === selectedVoiceId);
 
   if (loading) {
@@ -301,23 +351,34 @@ const AgentSetup = () => {
           <h1 className="text-2xl font-bold text-gray-900">Agent Setup</h1>
           <p className="text-gray-600 mt-1">Configure your AI receptionist's personality and voice</p>
         </div>
-        <button
-          onClick={handleTestCall}
-          disabled={testingCall || !assistant}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {testingCall ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Testing...
-            </>
-          ) : (
-            <>
-              <Play className="w-4 h-4" />
-              Test Call
-            </>
-          )}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={testAgentConfiguration}
+            disabled={!assistant}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Test configuration in terminal (console logs TRUE/OK)"
+          >
+            <CheckCircle className="w-4 h-4" />
+            Test Config
+          </button>
+          <button
+            onClick={handleTestCall}
+            disabled={testingCall || !assistant}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {testingCall ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Testing...
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4" />
+                Test Call
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Message Alert */}

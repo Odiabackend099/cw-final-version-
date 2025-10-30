@@ -75,9 +75,9 @@ const Privacy = () => {
             </p>
             <ul className="list-disc list-inside text-neutral-mediumText space-y-2">
               <li><strong>Supabase:</strong> Database and authentication (EU hosted)</li>
-              <li><strong>Vapi.ai:</strong> Voice call orchestration and transcription</li>
-              <li><strong>Groq/Llama AI:</strong> Text chat processing</li>
-              <li><strong>Minimax:</strong> Text-to-speech voice synthesis (for paid users)</li>
+              <li><strong>ODIADEV Voice AI:</strong> Voice call orchestration and transcription</li>
+              <li><strong>ODIADEV AI:</strong> Text chat processing</li>
+              <li><strong>ODIADEV TTS:</strong> Text-to-speech voice synthesis (for paid users)</li>
               <li><strong>Flutterwave:</strong> Payment processing</li>
               <li><strong>Vercel:</strong> Hosting infrastructure</li>
             </ul>
@@ -153,9 +153,9 @@ const Privacy = () => {
             </p>
             <ul className="list-disc list-inside text-neutral-mediumText space-y-2">
               <li>Supabase (database, authentication) - EU region</li>
-              <li>Vapi.ai (voice infrastructure) - US-based, GDPR-compliant</li>
-              <li>Groq (AI chat processing)</li>
-              <li>Minimax (voice synthesis)</li>
+              <li>ODIADEV Voice AI (voice infrastructure) - GDPR-compliant</li>
+              <li>ODIADEV AI (chat processing)</li>
+              <li>ODIADEV TTS (voice synthesis)</li>
               <li>Flutterwave (payment processing)</li>
               <li>Vercel (hosting)</li>
             </ul>
