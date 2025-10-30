@@ -59,7 +59,7 @@ const AgentSetup = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testingCall, setTestingCall] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info', text: string } | null>(null);
 
   // Form state
   const [businessName, setBusinessName] = useState('');
@@ -182,8 +182,13 @@ const AgentSetup = () => {
   };
 
   const handleKnowledgeBaseUpload = async () => {
-    if (knowledgeBaseFiles.length === 0 || !assistant) {
-      setMessage({ type: 'error', text: 'Please select files to upload and save your agent first' });
+    if (knowledgeBaseFiles.length === 0) {
+      setMessage({ type: 'error', text: 'Please select files to upload' });
+      return;
+    }
+
+    if (!user) {
+      setMessage({ type: 'error', text: 'Please log in to upload files' });
       return;
     }
 
@@ -191,9 +196,48 @@ const AgentSetup = () => {
       setUploadingKb(true);
       setMessage(null);
 
+      // SUBTASK 2 FIX: Auto-save agent before upload if not already saved
+      let currentAssistant = assistant;
+
+      if (!currentAssistant) {
+        setMessage({ type: 'info', text: 'Saving agent configuration...' });
+
+        // Replace placeholders in system prompt
+        const processedPrompt = systemPrompt
+          .replace(/{business_name}/g, businessName)
+          .replace(/{business_industry}/g, businessIndustry)
+          .replace(/{business_hours}/g, businessHours)
+          .replace(/{timezone}/g, timezone);
+
+        const assistantData = {
+          user_id: user.id,
+          business_name: businessName,
+          business_industry: businessIndustry,
+          business_hours: businessHours,
+          timezone: timezone,
+          system_prompt: processedPrompt,
+          minimax_voice_id: selectedVoiceId || null,
+          use_minimax_tts: useMinimaxTts,
+          updated_at: new Date().toISOString(),
+        };
+
+        // Create new assistant
+        const { data, error } = await supabase
+          .from('assistants')
+          .insert([assistantData])
+          .select()
+          .single();
+
+        if (error) throw error;
+        currentAssistant = data;
+        setAssistant(data);
+        setMessage({ type: 'info', text: 'Agent saved. Uploading files...' });
+      }
+
+      // Now upload files
       for (const file of knowledgeBaseFiles) {
         const fileExt = file.name.split('.').pop();
-        const fileName = `${assistant.id}/${Date.now()}_${file.name}`;
+        const fileName = `${currentAssistant.id}/${Date.now()}_${file.name}`;
 
         // Upload to Supabase Storage
         const { error: uploadError } = await supabase.storage
@@ -206,7 +250,7 @@ const AgentSetup = () => {
         const { error: dbError } = await supabase
           .from('knowledge_base_files')
           .insert([{
-            assistant_id: assistant.id,
+            assistant_id: currentAssistant.id,
             file_name: file.name,
             file_path: fileName,
             file_type: fileExt,
@@ -288,14 +332,26 @@ const AgentSetup = () => {
       {/* Message Alert */}
       {message && (
         <div className={`flex items-start gap-3 p-4 rounded-lg ${
-          message.type === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+          message.type === 'success'
+            ? 'bg-green-50 border border-green-200'
+            : message.type === 'info'
+            ? 'bg-blue-50 border border-blue-200'
+            : 'bg-red-50 border border-red-200'
         }`}>
           {message.type === 'success' ? (
             <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+          ) : message.type === 'info' ? (
+            <Loader2 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5 animate-spin" />
           ) : (
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           )}
-          <p className={`text-sm ${message.type === 'success' ? 'text-green-800' : 'text-red-800'}`}>
+          <p className={`text-sm ${
+            message.type === 'success'
+              ? 'text-green-800'
+              : message.type === 'info'
+              ? 'text-blue-800'
+              : 'text-red-800'
+          }`}>
             {message.text}
           </p>
         </div>
