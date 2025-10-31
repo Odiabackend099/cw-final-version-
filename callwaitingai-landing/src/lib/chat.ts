@@ -1,7 +1,8 @@
 // Secure Groq AI Chat Integration via Supabase Edge Function
 // API key is stored securely in Supabase and never exposed to the frontend
 
-const SUPABASE_FUNCTION_URL = 'https://bcufohulqrceytkrqpgd.supabase.co/functions/v1/groq-chat';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://bcufohulqrceytkrqpgd.supabase.co';
+const SUPABASE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/groq-chat`;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export interface ChatMessage {

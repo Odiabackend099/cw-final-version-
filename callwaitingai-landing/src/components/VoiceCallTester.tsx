@@ -41,6 +41,7 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
   const [isConnected, setIsConnected] = useState(false);
   const [callError, setCallError] = useState<string | null>(null);
   const [callDuration, setCallDuration] = useState(0);
+  const [isVapiReady, setIsVapiReady] = useState(false);
 
   // Voice state
   const [isMuted, setIsMuted] = useState(false);
@@ -79,9 +80,13 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
       vapiRef.current.on('speech-end', handleSpeechEnd);
       vapiRef.current.on('message', handleMessage);
       vapiRef.current.on('error', handleError);
+
+      // Mark as ready after successful initialization
+      setIsVapiReady(true);
     } catch (error: any) {
       console.error('❌ Vapi init error:', error);
       setCallError(`Vapi initialization failed: ${error.message}`);
+      setIsVapiReady(false);
     }
 
     return () => {
@@ -180,8 +185,8 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
 
   // Call actions
   const startCall = async () => {
-    if (!vapiRef.current) {
-      setCallError('Vapi client not initialized');
+    if (!vapiRef.current || !isVapiReady) {
+      setCallError('Voice system is not ready. Please wait a moment and try again.');
       return;
     }
 
@@ -262,13 +267,13 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
 
   const endCall = () => {
     console.log('🛑 Ending call...');
-    if (vapiRef.current) {
+    if (vapiRef.current && isVapiReady) {
       vapiRef.current.stop();
     }
   };
 
   const toggleMute = () => {
-    if (vapiRef.current) {
+    if (vapiRef.current && isVapiReady) {
       vapiRef.current.setMuted(!isMuted);
       setIsMuted(!isMuted);
       console.log(isMuted ? '🔊 Unmuted' : '🔇 Muted');
@@ -408,13 +413,18 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
             {!isConnected ? (
               <button
                 onClick={startCall}
-                disabled={isConnecting || !!callError}
+                disabled={isConnecting || !!callError || !isVapiReady}
                 className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isConnecting ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
                     <span>Connecting...</span>
+                  </>
+                ) : !isVapiReady ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Initializing...</span>
                   </>
                 ) : (
                   <>

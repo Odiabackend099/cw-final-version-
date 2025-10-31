@@ -35,6 +35,7 @@ const AdvancedChatWidget = () => {
 
   // Voice state
   const [vapiClient, setVapiClient] = useState<any>(null);
+  const [isVapiReady, setIsVapiReady] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [transcripts, setTranscripts] = useState<TranscriptEntry[]>([]);
@@ -71,7 +72,14 @@ const AdvancedChatWidget = () => {
 
   // Initialize Vapi
   useEffect(() => {
-    const VAPI_PUBLIC_KEY = 'ddd720c5-6fb8-4174-b7a6-729d7b308cb9';
+    // Use env variable instead of hardcoded key
+    const VAPI_PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY;
+
+    if (!VAPI_PUBLIC_KEY) {
+      console.error('❌ Vapi public key not configured');
+      setConnectionError('Voice system not configured');
+      return;
+    }
 
     try {
       console.log('🚀 Initializing Vapi client...');
@@ -160,9 +168,13 @@ const AdvancedChatWidget = () => {
         stopAudioVisualization();
       });
 
+      // Mark as ready after successful initialization
+      setIsVapiReady(true);
+
     } catch (error: any) {
       console.error('Failed to initialize Vapi:', error);
       setConnectionError('Failed to initialize voice system');
+      setIsVapiReady(false);
     }
 
     return () => {
@@ -273,9 +285,9 @@ const AdvancedChatWidget = () => {
 
   // Voice handlers - FIXED for better connection
   const startVoiceCall = async () => {
-    if (!vapiClient) {
-      setConnectionError('Voice system not ready. Please refresh the page.');
-      console.error('❌ Vapi client not initialized');
+    if (!vapiClient || !isVapiReady) {
+      setConnectionError('Voice system is not ready. Please wait a moment and try again.');
+      console.error('❌ Vapi client not initialized or not ready');
       return;
     }
 
