@@ -93,11 +93,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         emailRedirectTo: `${window.location.origin}/auth/confirm`,
         data: {
           full_name: fullName,
-        }
+        },
+        // Add captcha to help with rate limiting (if enabled in Supabase)
+        captchaToken: undefined, // Can be populated if using captcha
       }
     });
 
-    if (authError) throw authError;
+    // Handle rate limit errors with better messaging
+    if (authError) {
+      const errorMessage = authError.message?.toLowerCase() || '';
+      const isRateLimitError = 
+        errorMessage.includes('rate limit') ||
+        errorMessage.includes('too many') ||
+        errorMessage.includes('429') ||
+        errorMessage.includes('email rate') ||
+        authError.status === 429;
+
+      if (isRateLimitError) {
+        // Re-throw with more user-friendly message
+        throw new Error('Email rate limit reached. Please wait a few minutes before trying again. If you need immediate access, please contact support.');
+      }
+      
+      // Throw original error for other cases
+      throw authError;
+    }
 
     // Create user profile after successful signup
     if (authData.user) {
