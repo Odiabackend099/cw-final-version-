@@ -232,6 +232,12 @@ const AdvancedChatWidget = () => {
       });
 
       // Mark as ready after successful initialization
+      
+    } catch (error: any) {
+      console.error('❌ Failed to initialize Vapi client:', error);
+      setConnectionError('Failed to initialize voice system. Please refresh the page and try again.');
+      setIsVapiReady(false);
+    }
       setIsVapiReady(true);
 
     } catch (error: any) {
