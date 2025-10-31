@@ -8,15 +8,33 @@ import FinalCTA from '../components/FinalCTA';
 
 const Home = () => {
   return (
-    <>
-      <Hero />
-      <Features />
-      <Visualization />
-      <HowItWorks />
-      <Pricing />
-      <FAQ />
-      <FinalCTA />
-    </>
+    <div className="relative">
+      {/* Fixed Background Image - Only thing that stays fixed */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/images/hhhh.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+        }}
+      >
+        {/* Subtle overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/40"></div>
+      </div>
+      
+      {/* All content scrolls over the fixed background */}
+      <div className="relative z-10">
+        <Hero />
+        <Features />
+        <Visualization />
+        <HowItWorks />
+        <Pricing />
+        <FAQ />
+        <FinalCTA />
+      </div>
+    </div>
   );
 };
 

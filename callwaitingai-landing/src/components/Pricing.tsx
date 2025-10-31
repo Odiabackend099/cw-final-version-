@@ -75,7 +75,7 @@ const Pricing = () => {
   };
 
   return (
-    <section id="pricing" className="py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
+    <section id="pricing" className="py-20 bg-transparent">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16 animate-fade-in">
@@ -92,7 +92,7 @@ const Pricing = () => {
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative bg-white rounded-2xl p-8 transition-all duration-300 animate-fade-in shadow-lg ${
+              className={`relative bg-white/85 backdrop-blur-sm rounded-2xl p-8 transition-all duration-300 animate-fade-in shadow-lg border border-white/30 ${
                 plan.highlighted
                   ? 'border-2 border-primary-blue shadow-2xl scale-105 hover:scale-105'
                   : 'border border-neutral-lightGray hover:border-primary-blue hover:shadow-xl hover:-translate-y-2'
@@ -111,12 +111,12 @@ const Pricing = () => {
 
               {/* Plan Header */}
               <div className="text-center mb-8 pt-4">
-                <h3 className="text-2xl font-bold text-neutral-darker mb-2">{plan.name}</h3>
-                <p className="text-neutral-darkGray mb-6">{plan.description}</p>
+                <h3 className="text-2xl font-bold text-neutral-darker mb-2 drop-shadow-sm">{plan.name}</h3>
+                <p className="text-neutral-darkGray mb-6 drop-shadow-sm">{plan.description}</p>
                 <div className="flex items-baseline justify-center">
-                  <span className="text-5xl font-black text-neutral-darker">{plan.price}</span>
+                  <span className="text-5xl font-black text-neutral-darker drop-shadow-sm">{plan.price}</span>
                   {plan.period && (
-                    <span className="text-xl text-neutral-gray ml-2">{plan.period}</span>
+                    <span className="text-xl text-neutral-gray ml-2 drop-shadow-sm">{plan.period}</span>
                   )}
                 </div>
               </div>
@@ -128,7 +128,7 @@ const Pricing = () => {
                     <div className="flex-shrink-0 w-6 h-6 bg-gradient-primary rounded-full flex items-center justify-center mr-3 mt-0.5">
                       <Check className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-neutral-darkGray">{feature}</span>
+                    <span className="text-neutral-darkGray drop-shadow-sm">{feature}</span>
                   </div>
                 ))}
               </div>

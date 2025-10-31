@@ -11,28 +11,8 @@ const Hero = () => {
   };
 
   return (
-    <section id="hero" className="min-h-screen flex items-center relative overflow-hidden pt-16">
-      {/* Background Image with Mature Overlay */}
-      <div 
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: 'url(/images/hhhh.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      >
-        {/* Dark overlay for maturity and text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/50"></div>
-        
-        {/* Subtle blur overlay */}
-        <div className="absolute inset-0 backdrop-blur-[2px]"></div>
-        
-        {/* Blue-green tint overlay to match brand colors subtly */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/10 via-transparent to-primary-green/10"></div>
-      </div>
-      
-      {/* Content Container */}
+    <section id="hero" className="min-h-screen flex items-center relative pt-16">
+      {/* Hero content - no background, uses parent fixed background */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-20 w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
