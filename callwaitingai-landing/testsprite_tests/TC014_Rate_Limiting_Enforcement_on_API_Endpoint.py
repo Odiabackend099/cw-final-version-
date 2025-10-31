@@ -46,27 +46,26 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Simulate over 100 API requests for voice calls within one hour from the same assistant to test rate limiting
-        await page.goto('http://localhost:5173/api/voice-call', timeout=10000)
-        await asyncio.sleep(3)
+        # -> Simulate over 100 API requests for voice calls within one hour from the same assistant to test rate limiting.
+        frame = context.pages[-1]
+        # Click 'Call the AI' button to initiate voice call API interaction or open relevant interface for testing API calls
+        elem = frame.locator('xpath=html/body/div/div/section/div/div/div/div[2]/button[2]').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
-        # -> Simulate sending 100 API requests to the voice call endpoint from the same assistant to test rate limiting
-        await page.goto('http://localhost:5173/api/voice-call', timeout=10000)
-        await asyncio.sleep(3)
-        
-
-        # -> Simulate sending 100 API requests to the voice call endpoint from the same assistant to test rate limiting
-        await page.goto('http://localhost:5173/api/voice-call', timeout=10000)
-        await asyncio.sleep(3)
+        # -> Simulate over 100 API requests for voice calls within one hour from the same assistant to test rate limiting.
+        frame = context.pages[-1]
+        # Click 'Start Voice Call' button to attempt initiating a voice call and trigger an API request
+        elem = frame.locator('xpath=html/body/div/div/div/div[3]/div/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Rate limit exceeded: 100 calls per assistant per hour').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Rate limit exceeded: 429 Too Many Requests').first).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test failed: API did not enforce rate limiting at 100 calls per assistant per hour, or did not return HTTP 429 Too Many Requests as expected.')
+            raise AssertionError("Test case failed: API did not enforce rate limiting at 100 calls per assistant per hour, expected HTTP 429 Too Many Requests response after exceeding limit.")
         await asyncio.sleep(5)
     
     finally:

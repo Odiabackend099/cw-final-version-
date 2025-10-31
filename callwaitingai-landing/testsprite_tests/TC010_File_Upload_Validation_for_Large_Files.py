@@ -46,19 +46,70 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Locate and navigate to the knowledge base upload or file upload section to test uploading a file larger than 50MB.
+        # -> Locate and navigate to the knowledge base upload page or section
         frame = context.pages[-1]
-        # Click on 'Sign In' link to access user dashboard or account area where upload might be available
+        # Click on 'Sign In' link to access user dashboard or upload area
         elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Input email and password, then click Sign In button
+        frame = context.pages[-1]
+        # Input email for login
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('testuser@example.com')
+        
+
+        frame = context.pages[-1]
+        # Input password for login
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('TestPassword123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign In button to submit login form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Check for sign up or password reset options or alternative navigation to upload section
+        frame = context.pages[-1]
+        # Click on 'Sign up' link to create a new account or find alternative access
+        elem = frame.locator('xpath=html/body/div/div/div/div/p/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Fill in Full Name, Email, and Password fields and click Sign Up button
+        frame = context.pages[-1]
+        # Input Full Name for sign-up
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('John Doe')
+        
+
+        frame = context.pages[-1]
+        # Input Email for sign-up
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('johndoe@example.com')
+        
+
+        frame = context.pages[-1]
+        # Input Password for sign-up
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[3]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('TestPassword123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign Up button to submit the form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=File upload successful').first).to_be_visible(timeout=30000)
+            await expect(frame.locator('text=File size exceeds the 50MB limit').first).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test failed: Large file upload was not rejected with a friendly error message as expected.')
+            raise AssertionError("Test failed: The system did not reject the file larger than 50MB with the expected friendly error message during knowledge base upload.")
         await asyncio.sleep(5)
     
     finally:

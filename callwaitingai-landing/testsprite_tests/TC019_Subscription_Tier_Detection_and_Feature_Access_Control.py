@@ -46,19 +46,59 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Click on Sign In to start login as free tier user
+        # -> Scroll down or try to find login or navigation elements to start login as free tier user.
+        await page.mouse.wheel(0, await page.evaluate('() => window.innerHeight'))
+        
+
+        # -> Try to open a new tab or navigate to a known login URL or check for any hidden elements or menus.
+        await page.goto('http://localhost:5173/login', timeout=10000)
+        await asyncio.sleep(3)
+        
+
+        # -> Input free tier user credentials and sign in.
         frame = context.pages[-1]
-        # Click on Sign In to start login as free tier user
-        elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
+        # Input free tier user email
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('freeuser@example.com')
+        
+
+        frame = context.pages[-1]
+        # Input free tier user password
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('freepassword')
+        
+
+        frame = context.pages[-1]
+        # Click Sign In button to log in as free tier user
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Request or verify correct login credentials for free tier user or try alternative approach to test subscription tiers.
+        frame = context.pages[-1]
+        # Input professional tier user email
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('professional@example.com')
+        
+
+        frame = context.pages[-1]
+        # Input professional tier user password
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('propassword')
+        
+
+        frame = context.pages[-1]
+        # Click Sign In button to log in as professional tier user
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Premium Subscription Activated')).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Premium Subscription Activated').first).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test case failed: User subscription tiers detection failed. Premium features are not enabled or disabled as expected based on the subscription tier.')
+            raise AssertionError("Test failed: User subscription tiers detection failed. Premium features are not enabled as expected for professional tier user.")
         await asyncio.sleep(5)
     
     finally:

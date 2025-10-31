@@ -46,19 +46,64 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Click on Sign In to start signup or login process.
+        # -> Click on 'Sign In' link to proceed to signup or login page.
         frame = context.pages[-1]
-        # Click on Sign In link to start signup or login process
+        # Click on 'Sign In' link to go to login/signup page
         elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Click on 'Sign up' link to go to signup page.
+        frame = context.pages[-1]
+        # Click on 'Sign up' link to navigate to signup page
+        elem = frame.locator('xpath=html/body/div/div/div/div/p/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Fill in the signup form with valid data and submit.
+        frame = context.pages[-1]
+        # Input full name in signup form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('John Doe')
+        
+
+        frame = context.pages[-1]
+        # Input email in signup form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('john.doe@example.com')
+        
+
+        frame = context.pages[-1]
+        # Input password in signup form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[3]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('Password123!')
+        
+
+        frame = context.pages[-1]
+        # Click Sign Up button to submit signup form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Try signing up with a different email to check if the error is data-specific or persistent.
+        frame = context.pages[-1]
+        # Input a different email to retry signup
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('john.doe+test1@example.com')
+        
+
+        frame = context.pages[-1]
+        # Click Sign Up button to submit signup form with new email
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=User Journey Completed Successfully')).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Call Successfully Completed and Logged').first).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test case failed: The complete user journey including signup, verification, AI agent setup, call initiation, and call event logging did not complete successfully as expected.')
+            raise AssertionError("Test case failed: The complete user journey including signup, verification, AI agent setup, call initiation, and call event logging did not complete successfully. The call event was not logged in the dashboard as expected.")
         await asyncio.sleep(5)
     
     finally:

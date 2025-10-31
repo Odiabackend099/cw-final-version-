@@ -48,17 +48,49 @@ async def run_test():
         # Interact with the page elements to simulate user flow
         # -> Navigate to signup page
         frame = context.pages[-1]
-        # Click on 'Sign In' link to navigate to sign in or signup page
+        # Click on 'Sign In' link to find signup option or navigate to signup page
         elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Click on 'Sign up' link to navigate to signup page
+        frame = context.pages[-1]
+        # Click on 'Sign up' link to navigate to signup page
+        elem = frame.locator('xpath=html/body/div/div/div/div/p/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Enter valid full name, email, and password, then submit the signup form
+        frame = context.pages[-1]
+        # Enter full name
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('John Doe')
+        
+
+        frame = context.pages[-1]
+        # Enter valid email
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('john.doe@example.com')
+        
+
+        frame = context.pages[-1]
+        # Enter valid password
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[3]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('Password123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign Up button to submit the signup form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Account Activation Successful').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Account successfully activated').first).to_be_visible(timeout=10000)
         except AssertionError:
-            raise AssertionError('Test case failed: User sign up process did not complete successfully. Verification email was not received or email confirmation did not activate the account as expected.')
+            raise AssertionError("Test case failed: The user was unable to successfully sign up, receive a verification email, and confirm their email address to activate their account as expected in the test plan.")
         await asyncio.sleep(5)
     
     finally:

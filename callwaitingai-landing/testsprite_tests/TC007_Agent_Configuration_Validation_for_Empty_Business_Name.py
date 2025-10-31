@@ -46,40 +46,24 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Open AI agent configuration page
-        frame = context.pages[-1]
-        # Click 'Try the AI (Text)' button to open AI agent configuration page
-        elem = frame.locator('xpath=html/body/div/div/section/div/div/div/div[2]/button').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        # -> Find and open the AI agent configuration page from the current or another accessible page.
+        await page.mouse.wheel(0, await page.evaluate('() => window.innerHeight'))
         
 
-        # -> Find and clear the business name field in the AI agent configuration or chat interface
-        await page.mouse.wheel(0, 500)
+        # -> Try alternative ways to access the AI agent configuration page, such as navigating directly to a known URL or opening a new tab.
+        await page.goto('http://localhost:5173/configuration', timeout=10000)
+        await asyncio.sleep(3)
         
 
-        # -> Locate the business name input field in the AI agent configuration or chat interface
-        await page.mouse.wheel(0, 1000)
-        
-
-        # -> Send a message to Marcy AI to clear the business name and attempt to save configuration to trigger validation error
-        frame = context.pages[-1]
-        # Input command to clear business name in chat
-        elem = frame.locator('xpath=html/body/div/div/div/div[3]/div/div[2]/div/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('Clear business name')
-        
-
-        frame = context.pages[-1]
-        # Send the chat message to Marcy AI
-        elem = frame.locator('xpath=html/body/div/div/div/div[3]/div/div[2]/div/button').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        # -> Try to find any hidden or alternative ways to reveal the business name input field and save button, or report issue if none found.
+        await page.mouse.wheel(0, await page.evaluate('() => window.innerHeight'))
         
 
         # --> Assertions to verify final state
-        frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Business name cannot be empty').first).to_be_visible(timeout=30000)
+            await expect(page.locator('text=Business name cannot be empty').first).to_be_visible(timeout=3000)
         except AssertionError:
-            raise AssertionError('Test case failed: Validation error for empty business name was not displayed as expected.')
+            raise AssertionError("Test failed: Expected validation error message for empty business name was not displayed after attempting to save configuration with empty business name field.")
         await asyncio.sleep(5)
     
     finally:

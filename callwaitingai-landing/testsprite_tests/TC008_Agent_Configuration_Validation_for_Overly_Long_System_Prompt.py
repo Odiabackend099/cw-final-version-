@@ -48,17 +48,68 @@ async def run_test():
         # Interact with the page elements to simulate user flow
         # -> Find and open the agent configuration page
         frame = context.pages[-1]
-        # Click Sign In to access user account or configuration
+        # Click on 'Sign In' link to access user account for configuration
         elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Input email and password, then click Sign In button
+        frame = context.pages[-1]
+        # Enter email for login
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('testuser@example.com')
+        
+
+        frame = context.pages[-1]
+        # Enter password for login
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('TestPassword123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign In button to submit login form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Check for alternative navigation or sign up to create a new account to access agent configuration
+        frame = context.pages[-1]
+        # Click on 'Sign up' link to create a new account for access
+        elem = frame.locator('xpath=html/body/div/div/div/div/p/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Fill in Full Name, Email, and Password fields with valid data and submit the form to create a new account.
+        frame = context.pages[-1]
+        # Enter Full Name for new account
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('Test User')
+        
+
+        frame = context.pages[-1]
+        # Enter Email for new account
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('testuser+001@example.com')
+        
+
+        frame = context.pages[-1]
+        # Enter Password for new account
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[3]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('TestPass123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign Up button to submit the registration form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=System prompt saved successfully').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=System prompt accepted successfully').first).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test failed: System prompt exceeding 10,000 characters was not rejected with an appropriate error message as expected.')
+            raise AssertionError("Test failed: The system did not reject the prompt exceeding 10,000 characters with an appropriate error message as required by the test plan.")
         await asyncio.sleep(5)
     
     finally:

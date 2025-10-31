@@ -46,20 +46,73 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Find or reveal navigation or link to password reset page
+        # -> Try to find a way to navigate to the password reset page, possibly by scrolling or checking for hidden elements or links.
         await page.mouse.wheel(0, await page.evaluate('() => window.innerHeight'))
         
 
-        # -> Try to navigate to password reset page by URL as no navigation elements found
+        # -> Navigate directly to the password reset page URL if known or try common password reset URL paths.
         await page.goto('http://localhost:5173/password-reset', timeout=10000)
         await asyncio.sleep(3)
         
 
+        # -> Click 'Go to Login' button to return to login page and find the password reset request form.
+        frame = context.pages[-1]
+        # Click 'Go to Login' button to return to login page
+        elem = frame.locator('xpath=html/body/div/div/div/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Try to navigate to common password reset URLs such as /forgot-password or /reset-password to find the password reset request form.
+        await page.goto('http://localhost:5173/forgot-password', timeout=10000)
+        await asyncio.sleep(3)
+        
+
+        # -> Try navigating to /reset-password-request or /password-reset-request to find the password reset request form.
+        await page.goto('http://localhost:5173/reset-password-request', timeout=10000)
+        await asyncio.sleep(3)
+        
+
+        # -> Try to navigate to the sign-up page or other related pages to check for password reset options or links.
+        await page.goto('http://localhost:5173/signup', timeout=10000)
+        await asyncio.sleep(3)
+        
+
+        # -> Click the 'Sign in' link to return to the login page and re-check for any password reset options or links.
+        frame = context.pages[-1]
+        # Click 'Sign in' link to return to login page
+        elem = frame.locator('xpath=html/body/div/div/div/div/p/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Try to simulate entering a registered email and submit the sign in form to see if any password reset option appears on error or next step.
+        frame = context.pages[-1]
+        # Enter registered email address
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('testuser@example.com')
+        
+
+        frame = context.pages[-1]
+        # Enter a wrong password to trigger error
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('wrongpassword')
+        
+
+        frame = context.pages[-1]
+        # Click Sign In button to submit login form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Try to find any hidden or alternative UI elements or links that might trigger password reset request or try to navigate to any API or backend endpoint if accessible.
+        await page.mouse.wheel(0, await page.evaluate('() => window.innerHeight'))
+        
+
         # --> Assertions to verify final state
+        frame = context.pages[-1]
         try:
-            await expect(page.locator('text=Password Reset Successful! Your password has been updated.')).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Password Reset Successful').first).to_be_visible(timeout=3000)
         except AssertionError:
-            raise AssertionError('Test case failed: Password reset process did not complete successfully as per the test plan. The expected success message after password reset was not found on the page.')
+            raise AssertionError("Test case failed: Password reset process did not complete successfully as per the test plan. Expected to receive a password reset email and confirm password update, but this was not observed.")
         await asyncio.sleep(5)
     
     finally:

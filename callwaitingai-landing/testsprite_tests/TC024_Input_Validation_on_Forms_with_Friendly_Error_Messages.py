@@ -46,19 +46,187 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Navigate to the Sign In page to test login form validation.
+        # -> Click on 'Sign In' link to access login form
         frame = context.pages[-1]
-        # Click on 'Sign In' link to go to login form
+        # Click on 'Sign In' link to open login form
         elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Submit login form with empty email and password fields to check validation errors
+        frame = context.pages[-1]
+        # Click Sign In button with empty email and password fields to trigger validation
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Enter invalid email and password formats in login form and submit to check validation error messages
+        frame = context.pages[-1]
+        # Enter invalid email format in login form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('invalid-email-format')
+        
+
+        frame = context.pages[-1]
+        # Enter invalid password format (too short) in login form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign In button to trigger validation for invalid inputs
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Click on 'Sign up' link to open signup form
+        frame = context.pages[-1]
+        # Click on 'Sign up' link to open signup form
+        elem = frame.locator('xpath=html/body/div/div/div/div/p/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Submit signup form with empty required fields to check validation errors
+        frame = context.pages[-1]
+        # Clear Full Name field to test empty required validation
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('')
+        
+
+        frame = context.pages[-1]
+        # Clear Email field to test empty required validation
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('')
+        
+
+        frame = context.pages[-1]
+        # Clear Password field to test empty required validation
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[3]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('')
+        
+
+        frame = context.pages[-1]
+        # Click Sign Up button with empty fields to trigger validation
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Enter invalid email and short password in signup form and submit to check validation error messages
+        frame = context.pages[-1]
+        # Enter valid full name in signup form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('John Doe')
+        
+
+        frame = context.pages[-1]
+        # Enter invalid email format in signup form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('invalid-email-format')
+        
+
+        frame = context.pages[-1]
+        # Enter invalid password (too short) in signup form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[3]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign Up button to trigger validation for invalid inputs
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Navigate to agent setup form
+        frame = context.pages[-1]
+        # Click 'Sign in' link to navigate back to login page to find navigation to agent setup form
+        elem = frame.locator('xpath=html/body/div/div/div/div/p/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Navigate to agent setup form from current page or main navigation
+        await page.mouse.wheel(0, await page.evaluate('() => window.innerHeight'))
+        
+
+        frame = context.pages[-1]
+        # Click on 'Sign up' link to navigate to signup page to check if agent setup form is accessible from there
+        elem = frame.locator('xpath=html/body/div/div/div/div/p/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Find and navigate to agent setup form from current page or main navigation
+        await page.mouse.wheel(0, await page.evaluate('() => window.innerHeight'))
+        
+
+        frame = context.pages[-1]
+        # Click 'Sign in' link to navigate back to login page to find navigation to agent setup form
+        elem = frame.locator('xpath=html/body/div/div/div/div/p/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Explore navigation or page elements to find link or button to agent setup form
+        await page.mouse.wheel(0, await page.evaluate('() => window.innerHeight'))
+        
+
+        frame = context.pages[-1]
+        # Click 'Sign up' link to check if agent setup form is accessible from signup page
+        elem = frame.locator('xpath=html/body/div/div/div/div/p/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Find navigation or link to agent setup form from signup or main navigation
+        await page.mouse.wheel(0, await page.evaluate('() => window.innerHeight'))
+        
+
+        frame = context.pages[-1]
+        # Click 'Sign in' link to navigate back to login page to find agent setup form navigation
+        elem = frame.locator('xpath=html/body/div/div/div/div/p/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Log in with valid credentials to access authenticated area and find agent setup form
+        frame = context.pages[-1]
+        # Enter valid email for login
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('testuser@example.com')
+        
+
+        frame = context.pages[-1]
+        # Enter valid password for login
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('ValidPassword123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign In button to log in and access authenticated area
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Verify login credentials or try alternative valid credentials to log in and access agent setup form
+        frame = context.pages[-1]
+        # Re-enter valid email for login
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('testuser@example.com')
+        
+
+        frame = context.pages[-1]
+        # Re-enter valid password for login
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('ValidPassword123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign In button to retry login with valid credentials
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Successful Login').first).to_be_visible(timeout=3000)
+            await expect(frame.locator('text=All inputs are valid and no errors found').first).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test case failed: The test plan requires validation of user input forms to display clear error messages for invalid data, but the test plan execution has failed.')
+            raise AssertionError("Test plan execution failed: Validation errors for user input forms (signup, login, agent setup, payment, profile) were not correctly displayed or input validation did not prevent submission as expected.")
         await asyncio.sleep(5)
     
     finally:

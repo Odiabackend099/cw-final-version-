@@ -48,17 +48,75 @@ async def run_test():
         # Interact with the page elements to simulate user flow
         # -> Navigate to AI Agent configuration page
         frame = context.pages[-1]
-        # Click Sign In to access user dashboard or configuration
+        # Click on 'Features' button to find AI Agent configuration page
+        elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[2]/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Try alternative navigation to AI Agent configuration page or report issue if not found
+        frame = context.pages[-1]
+        # Click 'Sign In' link to access user dashboard or settings where AI Agent configuration might be located
         elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Input valid email and password, then click Sign In button
+        frame = context.pages[-1]
+        # Input valid email in email field
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('testuser@example.com')
+        
+
+        frame = context.pages[-1]
+        # Input valid password in password field
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('TestPassword123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign In button to submit login form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Try to navigate to 'Sign up' page to check if new account creation is possible or to find password recovery options.
+        frame = context.pages[-1]
+        # Click 'Sign up' link to explore account creation or password recovery options
+        elem = frame.locator('xpath=html/body/div/div/div/div/p/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Fill in the sign-up form with valid details and submit to create a new account
+        frame = context.pages[-1]
+        # Input Full Name in sign-up form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('Test User')
+        
+
+        frame = context.pages[-1]
+        # Input Email in sign-up form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('testuser+aiagent@example.com')
+        
+
+        frame = context.pages[-1]
+        # Input Password in sign-up form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[3]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('TestPassword123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign Up button to submit the form and create account
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Configuration Saved Successfully').first).to_be_visible(timeout=3000)
+            await expect(frame.locator('text=Configuration Saved Successfully').first).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test case failed: AI agent configuration form did not save successfully with system prompt persistence and no errors as expected.')
+            raise AssertionError("Test failed: AI agent configuration form did not save successfully with system prompt persistence and no errors as required by the test plan.")
         await asyncio.sleep(5)
     
     finally:

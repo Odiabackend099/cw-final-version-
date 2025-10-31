@@ -46,26 +46,25 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Find or navigate to a page or interface where database connectivity can be simulated or health check endpoint can be tested.
-        await page.mouse.wheel(0, 500)
+        # -> Simulate database downtime/unreachable state
+        await page.goto('http://localhost:5173/api/health', timeout=10000)
+        await asyncio.sleep(3)
         
 
-        # -> Look for any navigation or links related to health check, admin, or database simulation to proceed with the task.
-        await page.mouse.wheel(0, 1000)
+        # -> Simulate database downtime/unreachable state
+        await page.goto('http://localhost:5173/admin/simulate-db-down', timeout=10000)
+        await asyncio.sleep(3)
         
 
-        # -> Try to find a way to simulate database downtime or access the health check endpoint, possibly by opening developer tools or using a new tab to send HTTP requests.
-        frame = context.pages[-1]
-        # Click on Sign In to check if admin or dashboard access is available for database simulation or health check testing
-        elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        # -> Send request to health check endpoint
+        await page.goto('http://localhost:5173/api/health', timeout=10000)
+        await asyncio.sleep(3)
         
 
         # --> Assertions to verify final state
-        try:
-            await expect(page.locator('text=Database is fully operational').first).to_be_visible(timeout=1000)
-        except AssertionError:
-            raise AssertionError('Test failed: Health check endpoint did not return HTTP 503 status as expected when the Supabase database is unreachable.')
+        frame = context.pages[-1]
+        await expect(frame.locator('text=503 Service Unavailable').first).to_be_visible(timeout=30000)
+        await expect(frame.locator('text=Database unreachable').first).to_be_visible(timeout=30000)
         await asyncio.sleep(5)
     
     finally:

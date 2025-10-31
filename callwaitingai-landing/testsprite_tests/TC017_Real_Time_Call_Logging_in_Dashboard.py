@@ -46,10 +46,53 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Initiate a voice call session by clicking 'Call the AI' button to start the call.
+        # -> Click the 'Call the AI' button to start a voice call session
         frame = context.pages[-1]
-        # Click 'Call the AI' button to initiate a voice call session
+        # Click the 'Call the AI' button to start a voice call session
         elem = frame.locator('xpath=html/body/div/div/section/div/div/div/div[2]/button[2]').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Wait a moment and then try to start the voice call again by clicking 'Start Voice Call' button
+        frame = context.pages[-1]
+        # Click 'Start Voice Call' button to initiate voice call session
+        elem = frame.locator('xpath=html/body/div/div/div/div[3]/div/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Navigate to calls dashboard or call history to verify if any calls are recorded
+        await page.mouse.wheel(0, await page.evaluate('() => window.innerHeight'))
+        
+
+        frame = context.pages[-1]
+        # Click 'Pricing' or other navigation to find calls dashboard or call history
+        elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[2]/button[3]').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Navigate to calls dashboard or call history page to verify if any calls are recorded
+        frame = context.pages[-1]
+        # Click 'Sign In' to access user dashboard or calls history
+        elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Input email and password, then click 'Sign In' to access user dashboard
+        frame = context.pages[-1]
+        # Input email for login
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('testuser@example.com')
+        
+
+        frame = context.pages[-1]
+        # Input password for login
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('TestPassword123')
+        
+
+        frame = context.pages[-1]
+        # Click 'Sign In' button to submit login form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 

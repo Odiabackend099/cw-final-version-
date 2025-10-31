@@ -267,36 +267,12 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
         backgroundSound: 'off',
       };
 
-      // Configure voice - Use Minimax TTS for test calls when configured
-      // IMPORTANT: Uses the exact voice ID saved in agent setup (assistant.minimax_voice_id)
-      // Vapi supports custom TTS providers via custom-provider with URL and voiceId
-      if ((userTier === 'pro' || userTier === 'promax') && assistant.use_minimax_tts && assistant.minimax_voice_id) {
-        // Use Minimax TTS via custom provider for paid tiers
-        // voiceId must match exactly what was selected in Agent Setup
+      // Configure voice - Use Minimax voices for test calls as requested
+      if (assistant.use_minimax_tts && assistant.minimax_voice_id) {
         assistantConfig.voice = {
-          provider: 'custom-provider',
-          url: `${supabaseUrl}/functions/v1/minimax-tts`,
-          voiceId: assistant.minimax_voice_id, // This is the voice ID selected in Agent Setup
+          voiceId: assistant.minimax_voice_id,
         };
-        if (import.meta.env.DEV) {
-          console.log('🎤 Voice Configuration from Agent Setup:');
-          console.log('   Provider: Minimax TTS (Custom Provider)');
-          console.log('   Voice ID:', assistant.minimax_voice_id);
-          console.log('   Endpoint:', `${supabaseUrl}/functions/v1/minimax-tts`);
-          console.log('   Tier:', userTier);
-        }
-      } else {
-        // Fallback to Vapi default voice for free/professional tiers or when Minimax not configured
-        if (import.meta.env.DEV) {
-          console.log('🎤 Voice: Vapi default');
-          if (userTier !== 'pro' && userTier !== 'promax') {
-            console.log('   Reason: User tier does not support Minimax TTS');
-          } else if (!assistant.use_minimax_tts) {
-            console.log('   Reason: Minimax TTS not enabled in agent setup');
-          } else if (!assistant.minimax_voice_id) {
-            console.log('   Reason: No Minimax voice ID configured in agent setup');
-          }
-        }
+        console.log('🎤 Using Minimax Voice:', assistant.minimax_voice_id);
       }
 
       if (import.meta.env.DEV) {

@@ -46,19 +46,29 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Look for any navigation or login elements by scrolling or waiting for page content to load.
-        await page.mouse.wheel(0, 300)
-        
-
-        # -> Try to reload the page or open a new tab to find login or navigation elements.
-        await page.goto('http://localhost:5173', timeout=10000)
-        await asyncio.sleep(3)
-        
-
-        # -> Click on the 'Sign In' link to log in as a user with professional or pro subscription tier.
+        # -> Click on the 'Sign In' link to proceed with login.
         frame = context.pages[-1]
-        # Click on the 'Sign In' link to proceed to login
+        # Click on the 'Sign In' link to start login process
         elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Input email and password, then click Sign In button.
+        frame = context.pages[-1]
+        # Input email for professional or pro subscription user
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('pro_user@example.com')
+        
+
+        frame = context.pages[-1]
+        # Input password for professional or pro subscription user
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('ProUserPassword123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign In button to log in
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 

@@ -46,19 +46,36 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Click on the 'Sign In' link to navigate to the login page
+        # -> Click on the 'Sign In' link to go to the login page
         frame = context.pages[-1]
-        # Click on the 'Sign In' link to go to login page
+        # Click on 'Sign In' link to navigate to login page
         elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Input valid registered email and incorrect password into the login form
+        frame = context.pages[-1]
+        # Enter valid registered email
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('testuser@example.com')
+        
+
+        frame = context.pages[-1]
+        # Enter incorrect password
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('wrongpassword123')
+        
+
+        # -> Click the Sign In button to submit the login form
+        frame = context.pages[-1]
+        # Click the Sign In button to submit login form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
-        try:
-            await expect(frame.locator('text=Login Successful')).to_be_visible(timeout=1000)
-        except AssertionError:
-            raise AssertionError('Test case failed: Login did not succeed as expected because the password was incorrect, but the success message was not found.')
+        await expect(frame.locator('text=Invalid login credentials').first).to_be_visible(timeout=30000)
         await asyncio.sleep(5)
     
     finally:

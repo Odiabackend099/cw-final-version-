@@ -46,19 +46,72 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Click the 'Call the AI' button to initiate a voice call for testing webhook and call log creation.
+        # -> Scroll down or try to find any interactive elements or navigation to start the voice call test.
+        await page.mouse.wheel(0, await page.evaluate('() => window.innerHeight'))
+        
+
+        # -> Try to open a new tab and navigate to a known URL or dashboard related to calls or Supabase to verify call logs.
+        await page.goto('http://localhost:5173/dashboard', timeout=10000)
+        await asyncio.sleep(3)
+        
+
+        # -> Input email and password, then click Sign In to log into the app.
         frame = context.pages[-1]
-        # Click the 'Call the AI' button to initiate a voice call for testing webhook and call log creation
-        elem = frame.locator('xpath=html/body/div/div/section/div/div/div/div[2]/button[2]').nth(0)
+        # Input email for login
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('testuser@example.com')
+        
+
+        frame = context.pages[-1]
+        # Input password for login
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('TestPassword123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign In button to submit login form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Try to use the 'Sign up' link to create a new account or find alternative credentials to log in.
+        frame = context.pages[-1]
+        # Click 'Sign up' link to create a new account or find registration options
+        elem = frame.locator('xpath=html/body/div/div/div/div/p/a').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Fill in Full Name, Email, and Password fields and click Sign Up to create a new account.
+        frame = context.pages[-1]
+        # Input Full Name for signup
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('Test User')
+        
+
+        frame = context.pages[-1]
+        # Input Email for signup
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('testuser@example.com')
+        
+
+        frame = context.pages[-1]
+        # Input Password for signup
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[3]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('TestPassword123')
+        
+
+        frame = context.pages[-1]
+        # Click Sign Up button to submit signup form
+        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Webhook Failure Detected').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Webhook Event Received Successfully').first).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test case failed: Voice call completion webhook did not trigger or call log entry was not created in Supabase as expected.')
+            raise AssertionError("Test failed: Voice call completion webhook did not trigger or call log entry was not created in Supabase as expected.")
         await asyncio.sleep(5)
     
     finally:
