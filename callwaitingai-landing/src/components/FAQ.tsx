@@ -44,7 +44,7 @@ const FAQ = () => {
   };
 
   return (
-    <section id="faq" className="py-20 bg-transparent">
+    <section id="faq" className="py-20 bg-gradient-to-b from-blue-50 to-white">
       <div className="max-w-4xl mx-auto px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16 animate-fade-in">
@@ -61,12 +61,12 @@ const FAQ = () => {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/40 overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 animate-fade-in"
+              className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 animate-fade-in"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <button
                 onClick={() => toggleFAQ(index)}
-                className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-white/10 transition-colors"
+                className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
               >
                 <h3 className="text-xl font-bold text-gray-900 pr-4">
                   {faq.question}

@@ -37,7 +37,7 @@ const HowItWorks = () => {
   ];
 
   return (
-    <section id="how-it-works" className="py-20 bg-transparent">
+    <section id="how-it-works" className="py-20 bg-gradient-to-b from-white to-blue-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16 animate-fade-in">
@@ -62,7 +62,7 @@ const HowItWorks = () => {
                   className="animate-fade-in"
                   style={{ animationDelay: `${index * 150}ms` }}
                 >
-                  <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden border border-white/30">
+                  <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
                     {/* Number Badge */}
                     <div
                       className={`w-16 h-16 bg-gradient-to-r ${step.gradient} rounded-full flex items-center justify-center mb-6 mx-auto`}
@@ -87,13 +87,13 @@ const HowItWorks = () => {
                       </div>
                     </div>
 
-                        {/* Content */}
-                        <h3 className="text-xl font-bold mb-3 text-gray-900 text-center drop-shadow-sm">
-                          {step.title}
-                        </h3>
-                        <p className="text-gray-700 text-center leading-relaxed drop-shadow-sm">
-                          {step.description}
-                        </p>
+                    {/* Content */}
+                    <h3 className="text-xl font-bold mb-3 text-gray-900 text-center">
+                      {step.title}
+                    </h3>
+                    <p className="text-gray-600 text-center leading-relaxed">
+                      {step.description}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -109,7 +109,7 @@ const HowItWorks = () => {
               className="relative animate-fade-in"
               style={{ animationDelay: `${index * 150}ms` }}
             >
-                  <div className="bg-transparent backdrop-blur-md rounded-3xl p-8 shadow-lg overflow-hidden border border-white/30">
+                  <div className="bg-white rounded-3xl p-8 shadow-lg overflow-hidden">
                 {/* Number Badge */}
                 <div
                   className={`w-16 h-16 bg-gradient-to-r ${step.gradient} rounded-full flex items-center justify-center mx-auto mb-6`}
@@ -128,15 +128,15 @@ const HowItWorks = () => {
 
                 {/* Content */}
                 <div className="text-center">
-                      <div className="flex items-center justify-center mb-3">
-                        <step.icon className="w-6 h-6 text-primary-blue mr-3 drop-shadow-sm" />
-                        <h3 className="text-xl font-bold text-gray-900 drop-shadow-sm">
-                          {step.title}
-                        </h3>
-                      </div>
-                      <p className="text-gray-700 leading-relaxed drop-shadow-sm">
-                        {step.description}
-                      </p>
+                  <div className="flex items-center justify-center mb-3">
+                    <step.icon className="w-6 h-6 text-primary-blue mr-3" />
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {step.title}
+                    </h3>
+                  </div>
+                  <p className="text-gray-600 leading-relaxed">
+                    {step.description}
+                  </p>
                 </div>
               </div>
 

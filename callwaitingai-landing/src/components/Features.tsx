@@ -41,7 +41,7 @@ const Features = () => {
   ];
 
   return (
-    <section id="features" className="py-20 bg-transparent">
+    <section id="features" className="py-20 bg-gradient-to-b from-white to-blue-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16 animate-fade-in">
@@ -59,7 +59,7 @@ const Features = () => {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group bg-transparent backdrop-blur-md border border-white/30 rounded-2xl p-8 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 animate-fade-in"
+              className="group bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 animate-fade-in"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div
@@ -67,10 +67,10 @@ const Features = () => {
               >
                 <feature.icon className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900 drop-shadow-sm">
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">
                 {feature.title}
               </h3>
-              <p className="text-gray-700 leading-relaxed drop-shadow-sm">
+              <p className="text-gray-600 leading-relaxed">
                 {feature.description}
               </p>
             </div>

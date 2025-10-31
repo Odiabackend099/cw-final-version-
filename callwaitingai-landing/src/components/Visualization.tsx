@@ -29,7 +29,7 @@ const Visualization = () => {
   ];
 
   return (
-    <section className="py-20 bg-transparent">
+    <section className="py-20 bg-gradient-to-b from-blue-50 to-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16 animate-fade-in">
@@ -46,7 +46,7 @@ const Visualization = () => {
           {visualizations.map((viz, index) => (
             <div
               key={index}
-              className="relative overflow-hidden bg-transparent backdrop-blur-md border-2 border-white/40 rounded-3xl p-10 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 animate-fade-in"
+              className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-green-50 border-2 border-primary-blue/20 rounded-3xl p-10 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 animate-fade-in"
               style={{ animationDelay: `${index * 150}ms` }}
             >
               {/* Icon with Animation */}
@@ -57,10 +57,10 @@ const Visualization = () => {
               </div>
 
               {/* Content */}
-              <h3 className="text-2xl font-bold text-gray-900 mb-3 drop-shadow-sm">
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
                 {viz.title}
               </h3>
-              <p className="text-lg text-gray-700 leading-relaxed drop-shadow-sm">
+              <p className="text-lg text-gray-600 leading-relaxed">
                 {viz.description}
               </p>
 

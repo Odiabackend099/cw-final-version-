@@ -3,7 +3,14 @@ import { UserPlus, Sparkles, Shield, Clock } from 'lucide-react';
 
 const FinalCTA = () => {
   return (
-    <section className="py-20 bg-transparent relative">
+    <section className="py-20 bg-gradient-to-br from-primary-blue via-primary-blue/90 to-primary-green relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+          backgroundSize: '40px 40px'
+        }}></div>
+      </div>
 
       <div className="max-w-4xl mx-auto px-6 lg:px-8 relative z-10">
         <div className="text-center animate-fade-in">
