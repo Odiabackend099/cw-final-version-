@@ -32,9 +32,11 @@ const REQUEST_LIMITS = {
 } as const;
 
 /**
- * Voice ID pattern validation (UUID-like format)
+ * Voice ID pattern validation
+ * Minimax voice IDs format: moss_audio_[uuid] (e.g., moss_audio_4e6eb029-ab89-11f0-a74c-2a7a0b4baedc)
+ * Also supports plain UUID format for backward compatibility
  */
-const VOICE_ID_PATTERN = /^[a-f0-9-]{36}$/i;
+const VOICE_ID_PATTERN = /^(moss_audio_[a-f0-9-]{36}|[a-f0-9-]{36})$/i;
 
 const MINIMAX_API_KEY = Deno.env.get('MINIMAX_API_KEY');
 const MINIMAX_GROUP_ID = Deno.env.get('MINIMAX_GROUP_ID');
