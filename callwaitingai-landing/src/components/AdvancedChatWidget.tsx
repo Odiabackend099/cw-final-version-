@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, PhoneCall, PhoneOff, Send, Loader2, Volume2, VolumeX, Play, Pause, Activity } from 'lucide-react';
+import { MessageSquare, X, PhoneCall, PhoneOff, Send, Loader2, Volume2, VolumeX, Play, Pause, Activity, Mic } from 'lucide-react';
 import { chatService, ChatMessage } from '../lib/chat';
 import Vapi from '@vapi-ai/web';
 import CallWaitingLogo from './CallWaitingLogo';
@@ -36,10 +36,15 @@ const AdvancedChatWidget = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => `landing-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
 
-  // TTS state
-  const [ttsEnabled, setTtsEnabled] = useState(false);
+  // TTS state - DISABLED (auto-play removed)
+  const [ttsEnabled, setTtsEnabled] = useState(false); // Always false, TTS disabled
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
   const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
+  
+  // Browser-native STT (Speech-to-Text) state
+  const [isSttActive, setIsSttActive] = useState(false);
+  const [sttTranscript, setSttTranscript] = useState('');
+  const recognitionRef = useRef<any>(null);
 
   // Voice state
   const [vapiClient, setVapiClient] = useState<any>(null);
@@ -430,17 +435,109 @@ const AdvancedChatWidget = () => {
     }
   };
 
-  // Cleanup TTS on unmount or mode change
+  // Initialize Browser-native Speech Recognition (STT)
   useEffect(() => {
+    // Check for browser Speech Recognition support
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+      
+      recognition.onresult = (event: any) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        
+        if (finalTranscript) {
+          // User finished speaking - set as message
+          setMessage(finalTranscript.trim());
+          setSttTranscript('');
+          // Auto-submit if user wants
+          // handleSendMessage(new Event('submit') as any);
+        } else {
+          // Show interim results
+          setSttTranscript(interimTranscript);
+        }
+      };
+      
+      recognition.onerror = (event: any) => {
+        console.error('STT error:', event.error);
+        setIsSttActive(false);
+        setSttTranscript('');
+        
+        if (event.error === 'not-allowed') {
+          setConnectionError('Microphone permission denied. Please allow microphone access.');
+        } else if (event.error === 'no-speech') {
+          setIsSttActive(false);
+        }
+      };
+      
+      recognition.onend = () => {
+        setIsSttActive(false);
+      };
+      
+      recognitionRef.current = recognition;
+    } else {
+      console.warn('⚠️ Browser Speech Recognition not supported');
+    }
+    
     return () => {
-      stopSpeech();
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      stopSpeech(); // Cleanup TTS
     };
-  }, []);
+  }, [isOpen]);
+
+  const startSTT = () => {
+    if (!recognitionRef.current) {
+      setConnectionError('Speech recognition not supported in this browser');
+      return;
+    }
+    
+    try {
+      recognitionRef.current.start();
+      setIsSttActive(true);
+      setSttTranscript('');
+      console.log('🎤 Browser STT started');
+    } catch (error: any) {
+      if (error.name === 'InvalidStateError') {
+        // Already started, ignore
+      } else {
+        console.error('Failed to start STT:', error);
+        setConnectionError('Failed to start speech recognition');
+      }
+    }
+  };
+
+  const stopSTT = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsSttActive(false);
+      setSttTranscript('');
+      console.log('🛑 Browser STT stopped');
+    }
+  };
 
   useEffect(() => {
-    // Stop TTS when switching modes
+    // Stop TTS when switching modes (TTS is disabled anyway)
     if (mode === 'voice') {
       stopSpeech();
+    }
+    // Stop STT when switching to voice mode (voice mode uses Vapi)
+    if (mode === 'voice') {
+      stopSTT();
     }
   }, [mode]);
 
@@ -476,12 +573,7 @@ const AdvancedChatWidget = () => {
 
       setMessages([...newMessages, assistantMessage]);
 
-      // Auto-play TTS if enabled
-      if (ttsEnabled) {
-        setTimeout(() => {
-          speakText(aiResponse, assistantMessageId);
-        }, 300); // Small delay to ensure message is rendered
-      }
+      // TTS auto-play DISABLED - removed per user request
     } catch (error) {
       console.error('Chat error:', error);
       const errorMessageId = `error-${Date.now()}`;
@@ -767,27 +859,42 @@ const AdvancedChatWidget = () => {
             {mode === 'chat' ? (
               /* CHAT MODE */
               <div className="h-full flex flex-col">
-                {/* TTS Toggle */}
-                <div className="px-4 pt-3 pb-2 bg-white border-b border-gray-200">
-                  <button
-                    onClick={() => {
-                      setTtsEnabled(!ttsEnabled);
-                      if (!ttsEnabled) {
-                        console.log('✅ TTS Auto-play enabled');
-                      } else {
-                        console.log('🔇 TTS Auto-play disabled');
-                        stopSpeech();
-                      }
-                    }}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                      ttsEnabled
-                        ? 'bg-purple-100 text-purple-700 border-2 border-purple-300'
-                        : 'bg-gray-100 text-gray-600 border-2 border-gray-300'
-                    }`}
-                  >
-                    {ttsEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-                    <span>{ttsEnabled ? 'Auto-play ON' : 'Auto-play OFF'}</span>
-                  </button>
+                {/* Browser STT Toggle - TTS Auto-play DISABLED */}
+                <div className="px-4 pt-3 pb-2 bg-white border-b border-gray-200 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        if (isSttActive) {
+                          stopSTT();
+                        } else {
+                          startSTT();
+                        }
+                      }}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                        isSttActive
+                          ? 'bg-green-100 text-green-700 border-2 border-green-300'
+                          : 'bg-gray-100 text-gray-600 border-2 border-gray-300'
+                      }`}
+                    >
+                      {isSttActive ? (
+                        <>
+                          <Mic className="w-3.5 h-3.5 animate-pulse" />
+                          <span>Listening...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Mic className="w-3.5 h-3.5" />
+                          <span>Start Voice Input</span>
+                        </>
+                      )}
+                    </button>
+                    {sttTranscript && (
+                      <span className="text-xs text-gray-500 italic">{sttTranscript}</span>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    TTS Auto-play: Disabled
+                  </div>
                 </div>
 
                 <div className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3">
@@ -810,30 +917,7 @@ const AdvancedChatWidget = () => {
                           </p>
                         </div>
 
-                        {/* TTS Play Button for Assistant Messages */}
-                        {msg.role === 'assistant' && (
-                          <button
-                            onClick={() => toggleTTS(msg.id, msg.content)}
-                            className={`self-start flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
-                              currentlyPlayingId === msg.id
-                                ? 'bg-purple-600 text-white shadow-md'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                            title={currentlyPlayingId === msg.id ? 'Stop audio' : 'Play audio'}
-                          >
-                            {currentlyPlayingId === msg.id ? (
-                              <>
-                                <Pause className="w-3 h-3" />
-                                <span>Playing...</span>
-                              </>
-                            ) : (
-                              <>
-                                <Play className="w-3 h-3" />
-                                <span>Listen</span>
-                              </>
-                            )}
-                          </button>
-                        )}
+                        {/* TTS DISABLED - Play button removed per user request */}
                       </div>
                     </div>
                   ))}
@@ -857,10 +941,13 @@ const AdvancedChatWidget = () => {
                   <div className="flex space-x-2">
                     <input
                       type="text"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
+                      value={message || sttTranscript}
+                      onChange={(e) => {
+                        setMessage(e.target.value);
+                        setSttTranscript(''); // Clear STT when user types manually
+                      }}
                       onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                      placeholder="Type your message..."
+                      placeholder={isSttActive ? "Listening... speak now" : "Type a message or use voice input..."}
                       disabled={isLoading}
                       className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 bg-gray-50"
                     />
