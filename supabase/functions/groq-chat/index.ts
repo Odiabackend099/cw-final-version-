@@ -1,9 +1,26 @@
+// Helper function to validate origin
+const getAllowedOrigin = (origin: string | null): string => {
+  const allowedOrigins = [
+    'https://callwaitingai.dev',
+    'https://callwaitingai-landing.vercel.app',
+    'https://callwaitingai-landing-ii7l4wdcq-odia-backends-projects.vercel.app',
+    'https://cwlunch-qx2w79vk8-odia-backends-projects.vercel.app',
+    'http://localhost:5173', // Development only
+    'http://localhost:5174',
+    'http://localhost:5175',
+  ];
+
+  return origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+};
+
 Deno.serve(async (req) => {
+  const origin = req.headers.get('origin');
   const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': getAllowedOrigin(origin),
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Max-Age': '86400',
+    'Access-Control-Allow-Credentials': 'true',
   };
 
   if (req.method === 'OPTIONS') {
@@ -11,7 +28,22 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { messages, sessionId } = await req.json();
+    const MAX_PAYLOAD_SIZE = 50000; // 50KB max payload
+    const bodyText = await req.text();
+
+    if (bodyText.length > MAX_PAYLOAD_SIZE) {
+      return new Response(JSON.stringify({
+        error: {
+          code: 'PAYLOAD_TOO_LARGE',
+          message: 'Request payload too large'
+        }
+      }), {
+        status: 413,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const { messages, sessionId } = JSON.parse(bodyText);
 
     if (!messages || messages.length === 0) {
       throw new Error('Messages are required');
@@ -78,9 +110,19 @@ Deno.serve(async (req) => {
       });
 
       // Attempt to extract lead information from conversation
+      const MAX_MESSAGE_LENGTH = 5000;
       const lastUserMessage = messages[messages.length - 1]?.content || '';
-      const emailMatch = lastUserMessage.match(/[\w.-]+@[\w.-]+\.\w+/);
-      const phoneMatch = lastUserMessage.match(/\d{3}[-.]?\d{3}[-.]?\d{4}/);
+
+      // Validate message length before regex to prevent ReDoS
+      if (lastUserMessage.length > MAX_MESSAGE_LENGTH) {
+        console.warn('Message too long for lead extraction, skipping');
+      } else {
+        // Use safer regex with bounded length substring
+        const safeMessageForEmail = lastUserMessage.substring(0, 500);
+        const safeMessageForPhone = lastUserMessage.substring(0, 100);
+
+        const emailMatch = safeMessageForEmail.match(/[\w.-]+@[\w.-]+\.\w+/);
+        const phoneMatch = safeMessageForPhone.match(/\d{3}[-.]?\d{3}[-.]?\d{4}/);
       
       // If email or phone detected, check if we should create a lead
       if (emailMatch || phoneMatch) {
@@ -138,6 +180,7 @@ Deno.serve(async (req) => {
           }
         }
       }
+      } // Close else block for message length check
     }
 
     return new Response(JSON.stringify({

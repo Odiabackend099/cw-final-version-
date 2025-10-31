@@ -70,118 +70,139 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
     }
 
     try {
-      vapiRef.current = new Vapi(vapiApiKey);
-      console.log('✅ Vapi client initialized with key:', vapiApiKey.substring(0, 10) + '...');
+      const client = new Vapi(vapiApiKey);
+      vapiRef.current = client;
 
-      // Event listeners
-      vapiRef.current.on('call-start', handleCallStart);
-      vapiRef.current.on('call-end', handleCallEnd);
-      vapiRef.current.on('speech-start', handleSpeechStart);
-      vapiRef.current.on('speech-end', handleSpeechEnd);
-      vapiRef.current.on('message', handleMessage);
-      vapiRef.current.on('error', handleError);
+      if (import.meta.env.DEV) {
+        console.log('✅ Vapi client initialized');
+      }
+
+      // Define event handlers inline to avoid stale closures
+      const onCallStart = () => {
+        if (import.meta.env.DEV) console.log('✅ Call started');
+        setIsConnecting(false);
+        setIsConnected(true);
+        setCallError(null);
+
+        // Start duration timer
+        durationIntervalRef.current = setInterval(() => {
+          setCallDuration(prev => prev + 1);
+        }, 1000);
+      };
+
+      const onCallEnd = () => {
+        if (import.meta.env.DEV) console.log('📞 Call ended');
+        setIsConnected(false);
+        setIsBuffering(false);
+        if (durationIntervalRef.current) {
+          clearInterval(durationIntervalRef.current);
+        }
+      };
+
+      const onSpeechStart = () => {
+        if (import.meta.env.DEV) console.log('🎤 Speech started');
+        setMetrics(prev => ({ ...prev, isSpeaking: true }));
+        setIsBuffering(false);
+      };
+
+      const onSpeechEnd = () => {
+        if (import.meta.env.DEV) console.log('🔇 Speech ended');
+        setMetrics(prev => ({ ...prev, isSpeaking: false }));
+      };
+
+      const onMessage = (message: any) => {
+        if (import.meta.env.DEV) console.log('📨 Message:', message);
+
+        // Handle transcript messages
+        if (message.type === 'transcript' && message.transcript) {
+          const newMessage: TranscriptMessage = {
+            role: message.role || 'assistant',
+            text: message.transcript,
+            timestamp: new Date(),
+            isFinal: message.transcriptType === 'final',
+          };
+
+          setTranscript(prev => {
+            // If it's an interim message, replace the last interim message of the same role
+            if (!newMessage.isFinal) {
+              const filtered = prev.filter(m => m.isFinal || m.role !== newMessage.role);
+              return [...filtered, newMessage];
+            }
+            // If it's a final message, replace all interim messages of the same role
+            const filtered = prev.filter(m => m.isFinal);
+            const updated = [...filtered, newMessage];
+
+            // Limit transcript to last 100 messages to prevent memory issues
+            const MAX_MESSAGES = 100;
+            if (updated.length > MAX_MESSAGES) {
+              return updated.slice(-MAX_MESSAGES);
+            }
+            return updated;
+          });
+        }
+
+        // Handle speech events for buffering indication
+        if (message.type === 'speech-update') {
+          if (message.status === 'started') {
+            setIsBuffering(true);
+          } else if (message.status === 'stopped') {
+            setIsBuffering(false);
+          }
+        }
+      };
+
+      const onError = (error: any) => {
+        console.error('❌ Vapi error:', error);
+        setCallError(error.message || 'An error occurred during the call');
+        setIsConnecting(false);
+        setIsConnected(false);
+        setIsBuffering(false);
+      };
+
+      // Register event listeners
+      client.on('call-start', onCallStart);
+      client.on('call-end', onCallEnd);
+      client.on('speech-start', onSpeechStart);
+      client.on('speech-end', onSpeechEnd);
+      client.on('message', onMessage);
+      client.on('error', onError);
 
       // Mark as ready after successful initialization
       setIsVapiReady(true);
+
+      // Cleanup function
+      return () => {
+        if (vapiRef.current) {
+          // Remove all event listeners
+          vapiRef.current.off('call-start', onCallStart);
+          vapiRef.current.off('call-end', onCallEnd);
+          vapiRef.current.off('speech-start', onSpeechStart);
+          vapiRef.current.off('speech-end', onSpeechEnd);
+          vapiRef.current.off('message', onMessage);
+          vapiRef.current.off('error', onError);
+
+          try {
+            vapiRef.current.stop();
+          } catch (e) {
+            if (import.meta.env.DEV) console.error('Cleanup error:', e);
+          }
+        }
+        if (durationIntervalRef.current) {
+          clearInterval(durationIntervalRef.current);
+          durationIntervalRef.current = null;
+        }
+      };
     } catch (error: any) {
       console.error('❌ Vapi init error:', error);
       setCallError(`Vapi initialization failed: ${error.message}`);
       setIsVapiReady(false);
     }
-
-    return () => {
-      if (vapiRef.current) {
-        try {
-          vapiRef.current.stop();
-        } catch (e) {
-          console.error('Cleanup error:', e);
-        }
-      }
-      if (durationIntervalRef.current) {
-        clearInterval(durationIntervalRef.current);
-      }
-    };
   }, []);
 
   // Auto-scroll transcript
   useEffect(() => {
     transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [transcript]);
-
-  // Event handlers
-  const handleCallStart = () => {
-    console.log('✅ Call started');
-    setIsConnecting(false);
-    setIsConnected(true);
-    setCallError(null);
-
-    // Start duration timer
-    durationIntervalRef.current = setInterval(() => {
-      setCallDuration(prev => prev + 1);
-    }, 1000);
-  };
-
-  const handleCallEnd = () => {
-    console.log('📞 Call ended');
-    setIsConnected(false);
-    setIsBuffering(false);
-    if (durationIntervalRef.current) {
-      clearInterval(durationIntervalRef.current);
-    }
-  };
-
-  const handleSpeechStart = () => {
-    console.log('🎤 Speech started');
-    setMetrics(prev => ({ ...prev, isSpeaking: true }));
-    setIsBuffering(false);
-  };
-
-  const handleSpeechEnd = () => {
-    console.log('🔇 Speech ended');
-    setMetrics(prev => ({ ...prev, isSpeaking: false }));
-  };
-
-  const handleMessage = (message: any) => {
-    console.log('📨 Message:', message);
-
-    // Handle transcript messages
-    if (message.type === 'transcript' && message.transcript) {
-      const newMessage: TranscriptMessage = {
-        role: message.role || 'assistant',
-        text: message.transcript,
-        timestamp: new Date(),
-        isFinal: message.transcriptType === 'final',
-      };
-
-      setTranscript(prev => {
-        // If it's an interim message, replace the last interim message of the same role
-        if (!newMessage.isFinal) {
-          const filtered = prev.filter(m => m.isFinal || m.role !== newMessage.role);
-          return [...filtered, newMessage];
-        }
-        // If it's a final message, replace all interim messages of the same role
-        const filtered = prev.filter(m => m.isFinal);
-        return [...filtered, newMessage];
-      });
-    }
-
-    // Handle speech events for buffering indication
-    if (message.type === 'speech-update') {
-      if (message.status === 'started') {
-        setIsBuffering(true);
-      } else if (message.status === 'stopped') {
-        setIsBuffering(false);
-      }
-    }
-  };
-
-  const handleError = (error: any) => {
-    console.error('❌ Vapi error:', error);
-    setCallError(error.message || 'An error occurred during the call');
-    setIsConnecting(false);
-    setIsConnected(false);
-    setIsBuffering(false);
-  };
 
   // Call actions
   const startCall = async () => {
@@ -196,7 +217,9 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
       setTranscript([]);
       setCallDuration(0);
 
-      console.log('🚀 Starting call with assistant:', assistant.business_name);
+      if (import.meta.env.DEV) {
+        console.log('🚀 Starting call with assistant:', assistant.business_name);
+      }
 
       // Determine user's subscription tier
       if (!user) {
@@ -204,11 +227,17 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
       }
 
       const userTier = await getUserTier(user.id);
-      console.log('👤 User tier:', userTier);
+      if (import.meta.env.DEV) {
+        console.log('👤 User tier:', userTier);
+      }
 
       // Get Supabase URL for Minimax TTS endpoint
       const { data: { session } } = await supabase.auth.getSession();
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://bcufohulqrceytkrqpgd.supabase.co';
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+
+      if (!supabaseUrl) {
+        throw new Error('VITE_SUPABASE_URL environment variable is required');
+      }
 
       // Create inline assistant configuration
       const assistantConfig: any = {
@@ -246,18 +275,26 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
           url: `${supabaseUrl}/functions/v1/minimax-tts`,
           voiceId: assistant.minimax_voice_id,
         };
-        console.log('🎤 Voice: Minimax TTS (Custom)', assistant.minimax_voice_id);
+        if (import.meta.env.DEV) {
+          console.log('🎤 Voice: Minimax TTS (Custom)', assistant.minimax_voice_id);
+        }
       } else {
         // Free/Professional tiers or Minimax disabled: Use Vapi default
-        console.log('🎤 Voice: Vapi default');
+        if (import.meta.env.DEV) {
+          console.log('🎤 Voice: Vapi default');
+        }
       }
 
-      console.log('📋 Assistant config:', assistantConfig);
+      if (import.meta.env.DEV) {
+        console.log('📋 Assistant config:', assistantConfig);
+      }
 
       // Start call with inline assistant
       await vapiRef.current.start(assistantConfig);
 
-      console.log('✅ Call start request sent');
+      if (import.meta.env.DEV) {
+        console.log('✅ Call start request sent');
+      }
     } catch (error: any) {
       console.error('❌ Failed to start call:', error);
       setCallError(`Failed to start call: ${error.message}`);
@@ -266,7 +303,9 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
   };
 
   const endCall = () => {
-    console.log('🛑 Ending call...');
+    if (import.meta.env.DEV) {
+      console.log('🛑 Ending call...');
+    }
     if (vapiRef.current && isVapiReady) {
       vapiRef.current.stop();
     }
@@ -276,7 +315,9 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
     if (vapiRef.current && isVapiReady) {
       vapiRef.current.setMuted(!isMuted);
       setIsMuted(!isMuted);
-      console.log(isMuted ? '🔊 Unmuted' : '🔇 Muted');
+      if (import.meta.env.DEV) {
+        console.log(isMuted ? '🔊 Unmuted' : '🔇 Muted');
+      }
     }
   };
 
