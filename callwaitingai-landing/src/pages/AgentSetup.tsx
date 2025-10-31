@@ -160,12 +160,16 @@ const AgentSetup = () => {
 
       if (assistant) {
         // Update existing assistant
-        const { error } = await supabase
+        const { data: updatedAssistant, error } = await supabase
           .from('assistants')
           .update(assistantData)
-          .eq('id', assistant.id);
+          .eq('id', assistant.id)
+          .select()
+          .single();
 
         if (error) throw error;
+        // Update assistant state with fresh data so VoiceCallTester uses latest config
+        setAssistant(updatedAssistant);
       } else {
         // Create new assistant
         const { data, error } = await supabase
@@ -176,6 +180,11 @@ const AgentSetup = () => {
 
         if (error) throw error;
         setAssistant(data);
+      }
+
+      // Ensure selected voice ID matches what was saved
+      if (selectedVoiceId) {
+        setSelectedVoiceId(selectedVoiceId);
       }
 
       setMessage({ type: 'success', text: 'Agent configuration saved successfully!' });
@@ -277,6 +286,33 @@ const AgentSetup = () => {
   };
 
   const handleTestCall = async () => {
+    // If assistant doesn't exist or voice was changed, save first
+    if (!assistant || (selectedVoiceId && assistant.minimax_voice_id !== selectedVoiceId)) {
+      setMessage({ type: 'info', text: 'Saving configuration before test call...' });
+      
+      try {
+        await handleSave();
+        // Wait a moment for state to update
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } catch (error) {
+        setMessage({ type: 'error', text: 'Failed to save configuration. Please try again.' });
+        return;
+      }
+    }
+
+    // Reload assistant data to ensure VoiceCallTester gets latest voice config
+    if (assistant) {
+      const { data: freshAssistant, error } = await supabase
+        .from('assistants')
+        .select('*')
+        .eq('id', assistant.id)
+        .single();
+
+      if (!error && freshAssistant) {
+        setAssistant(freshAssistant);
+      }
+    }
+
     if (!assistant) {
       setMessage({ type: 'error', text: 'Please save your agent configuration first' });
       return;
