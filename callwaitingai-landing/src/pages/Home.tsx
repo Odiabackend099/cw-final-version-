@@ -9,7 +9,7 @@ import FinalCTA from '../components/FinalCTA';
 const Home = () => {
   return (
     <div className="relative">
-      {/* Fixed Background Image - Only thing that stays fixed at 20% opacity */}
+      {/* Fixed Background Image - Only thing that stays fixed at 10% opacity */}
       <div 
         className="fixed inset-0 z-0"
         style={{
@@ -18,7 +18,7 @@ const Home = () => {
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundAttachment: 'fixed',
-          opacity: 0.2,
+          opacity: 0.1,
         }}
       >
       </div>

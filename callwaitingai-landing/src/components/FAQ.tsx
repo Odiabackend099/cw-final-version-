@@ -61,7 +61,7 @@ const FAQ = () => {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="bg-transparent backdrop-blur-md rounded-2xl border border-white/40 overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 animate-fade-in"
+              className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/40 overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 animate-fade-in"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <button
