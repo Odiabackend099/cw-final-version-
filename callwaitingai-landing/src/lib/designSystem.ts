@@ -1,14 +1,24 @@
-// New Design System - Blue-Green Gradient Theme
+// Premium Design System - Deep Navy & Gold Theme
 export const designSystem = {
   colors: {
-    // Primary gradient colors
+    // Premium color palette
     primary: {
-      blue: '#4299E1',
-      blueLight: '#63B3ED',
-      blueDark: '#3182CE',
-      green: '#38A169',
-      greenLight: '#48BB78',
-      greenDark: '#2F855A',
+      navy: '#1E3A5F',
+      navyLight: '#2D4A73',
+      navyDark: '#0F2438',
+      blue: '#1E3A5F', // Alias for gradual migration
+      blueLight: '#2D4A73',
+      blueDark: '#0F2438',
+    },
+    accent: {
+      gold: '#D4AF37',
+      goldLight: '#E5C158',
+      goldDark: '#B8941F',
+    },
+    secondary: {
+      green: '#10B981',
+      greenLight: '#34D399',
+      greenDark: '#059669',
     },
     // Neutral colors
     neutral: {
@@ -30,13 +40,16 @@ export const designSystem = {
   },
   
   gradients: {
-    primary: 'linear-gradient(135deg, #4299E1 0%, #38A169 100%)',
-    primaryHover: 'linear-gradient(135deg, #3182CE 0%, #2F855A 100%)',
-    light: 'linear-gradient(135deg, #63B3ED 0%, #48BB78 100%)',
-    subtle: 'linear-gradient(135deg, rgba(66, 153, 225, 0.1) 0%, rgba(56, 161, 105, 0.1) 100%)',
+    primary: 'linear-gradient(135deg, #1E3A5F 0%, #10B981 100%)',
+    primaryHover: 'linear-gradient(135deg, #0F2438 0%, #059669 100%)',
+    gold: 'linear-gradient(135deg, #D4AF37 0%, #F5A623 100%)',
+    light: 'linear-gradient(135deg, #2D4A73 0%, #34D399 100%)',
+    subtle: 'linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%)',
   },
   
   typography: {
+    headingFont: "'Playfair Display', 'Georgia', serif",
+    bodyFont: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     fontSize: {
       xs: '0.75rem',

@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,13 +7,20 @@
 
 @layer base {
   :root {
-    /* New Blue-Green Design System */
-    --primary-blue: #4299E1;
-    --primary-blue-light: #63B3ED;
-    --primary-blue-dark: #3182CE;
-    --primary-green: #38A169;
-    --primary-green-light: #48BB78;
-    --primary-green-dark: #2F855A;
+    /* Premium Design System - Deep Navy & Gold */
+    --primary-navy: #1E3A5F;
+    --primary-navy-light: #2D4A73;
+    --primary-navy-dark: #0F2438;
+    --accent-gold: #D4AF37;
+    --accent-gold-light: #E5C158;
+    --accent-gold-dark: #B8941F;
+    --primary-green: #10B981;
+    --primary-green-light: #34D399;
+    --primary-green-dark: #059669;
+    /* Legacy blue colors kept for gradual migration */
+    --primary-blue: #1E3A5F;
+    --primary-blue-light: #2D4A73;
+    --primary-blue-dark: #0F2438;
     
     --neutral-white: #FFFFFF;
     --neutral-light-bg: #F0F8FF;
@@ -49,44 +57,71 @@
   }
   
   body {
-    @apply bg-[#F0F8FF] text-[#4A5568];
+    @apply bg-white text-[#1F2937];
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+  }
+
+  /* Premium Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
   }
 }
 
 @layer utilities {
   /* New gradient utilities */
+  /* Premium Gradients */
   .gradient-primary {
-    background: linear-gradient(135deg, #4299E1 0%, #38A169 100%);
+    background: linear-gradient(135deg, #1E3A5F 0%, #10B981 100%);
   }
   
   .gradient-primary-hover {
-    background: linear-gradient(135deg, #3182CE 0%, #2F855A 100%);
+    background: linear-gradient(135deg, #0F2438 0%, #059669 100%);
+  }
+  
+  .gradient-gold {
+    background: linear-gradient(135deg, #D4AF37 0%, #F5A623 100%);
   }
   
   .gradient-light {
-    background: linear-gradient(135deg, #63B3ED 0%, #48BB78 100%);
+    background: linear-gradient(135deg, #2D4A73 0%, #34D399 100%);
   }
   
   .gradient-subtle {
-    background: linear-gradient(135deg, rgba(66, 153, 225, 0.1) 0%, rgba(56, 161, 105, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
   }
   
   .gradient-text-new {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #4299E1 0%, #38A169 100%);
+    background-image: linear-gradient(135deg, #1E3A5F 0%, #10B981 100%);
   }
   
-  /* Legacy gradient support */
   .gradient-text {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #4299E1 0%, #38A169 100%);
+    background-image: linear-gradient(135deg, #1E3A5F 0%, #10B981 100%);
+  }
+  
+  .gradient-text-gold {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #D4AF37 0%, #F5A623 100%);
   }
   
   .gradient-bg {
-    background: linear-gradient(135deg, #4299E1 0%, #38A169 100%);
+    background: linear-gradient(135deg, #1E3A5F 0%, #10B981 100%);
+  }
+  
+  /* Premium Shadows */
+  .shadow-premium {
+    box-shadow: 0 20px 60px -15px rgba(30, 58, 95, 0.15), 0 0 0 1px rgba(30, 58, 95, 0.05);
+  }
+  
+  .shadow-premium-lg {
+    box-shadow: 0 30px 80px -20px rgba(30, 58, 95, 0.2), 0 0 0 1px rgba(30, 58, 95, 0.05);
   }
   
   /* Modern card styles */
