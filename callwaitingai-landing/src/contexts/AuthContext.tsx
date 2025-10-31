@@ -21,18 +21,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadUser() {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError) {
+          console.error('Error loading user:', userError);
+        }
+        
+        setUser(user || null);
         
         if (user) {
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from('users')
             .select('*')
             .eq('id', user.id)
             .maybeSingle();
           
+          if (profileError) {
+            console.error('Error loading user profile:', profileError);
+          }
+          
           setUserProfile(profile);
         }
+      } catch (error) {
+        console.error('Unexpected error in loadUser:', error);
+        setUser(null);
+        setUserProfile(null);
       } finally {
         setLoading(false);
       }

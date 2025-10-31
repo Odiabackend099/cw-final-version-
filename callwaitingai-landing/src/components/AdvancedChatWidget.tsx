@@ -99,8 +99,13 @@ const AdvancedChatWidget = () => {
     try {
       console.log('🚀 Initializing Vapi client...');
       const client = new Vapi(VAPI_PUBLIC_KEY);
-      setVapiClient(client);
-      console.log('✅ Vapi client initialized successfully');
+      
+      // Wait a moment for Vapi to fully initialize
+      setTimeout(() => {
+        setVapiClient(client);
+        setIsVapiReady(true);
+        console.log('✅ Vapi client initialized and ready');
+      }, 500);
 
       // Voice call events
       client.on('call-start', () => {
@@ -569,28 +574,70 @@ const AdvancedChatWidget = () => {
         backgroundSound: 'off',
       };
 
-      await vapiClient.start(assistantConfig);
-      console.log('✅ Vapi call started successfully with inline assistant');
+      // Add retry logic for connection issues
+      let callStarted = false;
+      let lastError: any = null;
+      const maxRetries = 3;
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          if (attempt > 0) {
+            console.log(`🔄 Retry attempt ${attempt + 1}/${maxRetries}...`);
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+          }
+
+          await vapiClient.start(assistantConfig);
+          callStarted = true;
+          console.log('✅ Vapi call started successfully with inline assistant');
+          break;
+        } catch (startError: any) {
+          lastError = startError;
+          console.error(`❌ Start attempt ${attempt + 1} failed:`, startError);
+
+          // If it's a connection error, retry
+          const isConnectionError = 
+            startError.message?.toLowerCase().includes('connection') ||
+            startError.message?.toLowerCase().includes('network') ||
+            startError.message?.toLowerCase().includes('timeout') ||
+            startError.message?.toLowerCase().includes('meeting has ended') ||
+            startError.type === 'daily-call-join-error';
+
+          if (!isConnectionError || attempt === maxRetries - 1) {
+            // Non-retryable error or final attempt
+            throw startError;
+          }
+          // Otherwise continue to retry
+        }
+      }
+
+      if (!callStarted && lastError) {
+        throw lastError;
+      }
 
     } catch (error: any) {
-      console.error('❌ Failed to start voice call:', error);
+      console.error('❌ Failed to start voice call after retries:', error);
 
       let errorMessage = 'Failed to connect. ';
+      
+      // Specific error handling
       if (error.name === 'NotAllowedError' || error.message?.includes('permission') || error.message?.includes('microphone')) {
-        errorMessage += 'Please allow microphone access and try again.';
+        errorMessage = 'Microphone permission denied. Please allow microphone access in your browser settings and try again.';
       } else if (error.name === 'NotFoundError') {
-        errorMessage += 'No microphone found. Please connect a microphone.';
+        errorMessage = 'No microphone found. Please connect a microphone and try again.';
+      } else if (error.type === 'start-method-error') {
+        errorMessage = 'Voice configuration error. Please try again or contact support.';
       } else if (
         error.message?.includes('Meeting has ended') ||
         error.message?.includes('connection') ||
         error.message?.includes('network') ||
+        error.message?.includes('timeout') ||
         error.type === 'daily-call-join-error'
       ) {
-        errorMessage += 'Connection issue. Please check your internet connection and try again.';
+        errorMessage = 'Connection issue. Please check your internet connection, microphone permissions, and try again.';
       } else if (error.message) {
-        errorMessage += error.message;
+        errorMessage = `Connection error: ${error.message}`;
       } else {
-        errorMessage += 'Please check your connection and try again.';
+        errorMessage = 'Unable to connect. Please check your internet connection and microphone permissions.';
       }
 
       setConnectionError(errorMessage);
