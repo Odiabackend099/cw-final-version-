@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, PhoneCall, PhoneOff, Send, Loader2 } from 'lucide-react';
+import { MessageSquare, X, PhoneCall, PhoneOff, Send, Loader2, Volume2, VolumeX, Play, Pause } from 'lucide-react';
 import { chatService, ChatMessage } from '../lib/chat';
 import Vapi from '@vapi-ai/web';
 import CallWaitingLogo from './CallWaitingLogo';
@@ -9,6 +9,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  id: string;
 }
 
 interface TranscriptEntry {
@@ -29,10 +30,16 @@ const AdvancedChatWidget = () => {
       role: 'assistant',
       content: "Hi! I'm Marcy, your AI receptionist. How can I help you today?",
       timestamp: new Date(),
+      id: 'welcome-msg',
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => `landing-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+
+  // TTS state
+  const [ttsEnabled, setTtsEnabled] = useState(false);
+  const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
+  const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   // Voice state
   const [vapiClient, setVapiClient] = useState<any>(null);
@@ -258,6 +265,94 @@ const AdvancedChatWidget = () => {
     scrollToBottom();
   }, [messages, transcripts]);
 
+  // TTS Functions
+  const speakText = (text: string, messageId: string) => {
+    // Stop any currently playing speech
+    stopSpeech();
+
+    // Check if browser supports speech synthesis
+    if (!window.speechSynthesis) {
+      console.warn('⚠️ Speech synthesis not supported in this browser');
+      return;
+    }
+
+    try {
+      const utterance = new SpeechSynthesisUtterance(text);
+
+      // Configure voice settings for natural, clear speech
+      utterance.rate = 1.0; // Normal speed
+      utterance.pitch = 1.0; // Normal pitch
+      utterance.volume = 1.0; // Full volume
+
+      // Try to use a female voice for Marcy
+      const voices = window.speechSynthesis.getVoices();
+      const femaleVoice = voices.find(voice =>
+        voice.name.toLowerCase().includes('female') ||
+        voice.name.toLowerCase().includes('samantha') ||
+        voice.name.toLowerCase().includes('victoria') ||
+        voice.name.toLowerCase().includes('karen')
+      );
+      if (femaleVoice) {
+        utterance.voice = femaleVoice;
+      }
+
+      utterance.onstart = () => {
+        setCurrentlyPlayingId(messageId);
+        console.log('🔊 TTS started for message:', messageId);
+      };
+
+      utterance.onend = () => {
+        setCurrentlyPlayingId(null);
+        speechSynthesisRef.current = null;
+        console.log('✅ TTS finished for message:', messageId);
+      };
+
+      utterance.onerror = (event) => {
+        console.error('❌ TTS error:', event);
+        setCurrentlyPlayingId(null);
+        speechSynthesisRef.current = null;
+      };
+
+      speechSynthesisRef.current = utterance;
+      window.speechSynthesis.speak(utterance);
+    } catch (error) {
+      console.error('❌ Failed to start TTS:', error);
+      setCurrentlyPlayingId(null);
+    }
+  };
+
+  const stopSpeech = () => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      setCurrentlyPlayingId(null);
+      speechSynthesisRef.current = null;
+    }
+  };
+
+  const toggleTTS = (messageId: string, text: string) => {
+    if (currentlyPlayingId === messageId) {
+      // If this message is playing, stop it
+      stopSpeech();
+    } else {
+      // Otherwise, play this message
+      speakText(text, messageId);
+    }
+  };
+
+  // Cleanup TTS on unmount or mode change
+  useEffect(() => {
+    return () => {
+      stopSpeech();
+    };
+  }, []);
+
+  useEffect(() => {
+    // Stop TTS when switching modes
+    if (mode === 'voice') {
+      stopSpeech();
+    }
+  }, [mode]);
+
   // Chat handlers
   const handleSendMessage = async () => {
     if (!message.trim() || isLoading) return;
@@ -267,7 +362,7 @@ const AdvancedChatWidget = () => {
 
     const newMessages: Message[] = [
       ...messages,
-      { role: 'user', content: userMessage, timestamp: new Date() },
+      { role: 'user', content: userMessage, timestamp: new Date(), id: `user-${Date.now()}` },
     ];
     setMessages(newMessages);
     setIsLoading(true);
@@ -280,18 +375,32 @@ const AdvancedChatWidget = () => {
 
       const aiResponse = await chatService.sendMessage(chatMessages, sessionId);
 
-      setMessages([
-        ...newMessages,
-        { role: 'assistant', content: aiResponse, timestamp: new Date() },
-      ]);
+      const assistantMessageId = `assistant-${Date.now()}`;
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: aiResponse,
+        timestamp: new Date(),
+        id: assistantMessageId,
+      };
+
+      setMessages([...newMessages, assistantMessage]);
+
+      // Auto-play TTS if enabled
+      if (ttsEnabled) {
+        setTimeout(() => {
+          speakText(aiResponse, assistantMessageId);
+        }, 300); // Small delay to ensure message is rendered
+      }
     } catch (error) {
       console.error('Chat error:', error);
+      const errorMessageId = `error-${Date.now()}`;
       setMessages([
         ...newMessages,
         {
           role: 'assistant',
           content: "I apologize, but I'm having trouble connecting. Please try again or call +1 (276) 582-5329.",
           timestamp: new Date(),
+          id: errorMessageId,
         },
       ]);
     } finally {
@@ -495,23 +604,73 @@ const AdvancedChatWidget = () => {
             {mode === 'chat' ? (
               /* CHAT MODE */
               <div className="h-full flex flex-col">
+                {/* TTS Toggle */}
+                <div className="px-4 pt-3 pb-2 bg-white border-b border-gray-200">
+                  <button
+                    onClick={() => {
+                      setTtsEnabled(!ttsEnabled);
+                      if (!ttsEnabled) {
+                        console.log('✅ TTS Auto-play enabled');
+                      } else {
+                        console.log('🔇 TTS Auto-play disabled');
+                        stopSpeech();
+                      }
+                    }}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                      ttsEnabled
+                        ? 'bg-purple-100 text-purple-700 border-2 border-purple-300'
+                        : 'bg-gray-100 text-gray-600 border-2 border-gray-300'
+                    }`}
+                  >
+                    {ttsEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                    <span>{ttsEnabled ? 'Auto-play ON' : 'Auto-play OFF'}</span>
+                  </button>
+                </div>
+
                 <div className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3">
                   {messages.map((msg, index) => (
                     <div
                       key={index}
                       className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div
-                        className={`${
-                          msg.role === 'user'
-                            ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
-                            : 'bg-white text-gray-800 border border-gray-200'
-                        } rounded-2xl px-4 py-3 shadow-sm max-w-[85%]`}
-                      >
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                        <p className="text-xs mt-1 opacity-60">
-                          {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
+                      <div className="flex flex-col gap-1 max-w-[85%]">
+                        <div
+                          className={`${
+                            msg.role === 'user'
+                              ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                              : 'bg-white text-gray-800 border border-gray-200'
+                          } rounded-2xl px-4 py-3 shadow-sm`}
+                        >
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                          <p className="text-xs mt-1 opacity-60">
+                            {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+
+                        {/* TTS Play Button for Assistant Messages */}
+                        {msg.role === 'assistant' && (
+                          <button
+                            onClick={() => toggleTTS(msg.id, msg.content)}
+                            className={`self-start flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+                              currentlyPlayingId === msg.id
+                                ? 'bg-purple-600 text-white shadow-md'
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                            title={currentlyPlayingId === msg.id ? 'Stop audio' : 'Play audio'}
+                          >
+                            {currentlyPlayingId === msg.id ? (
+                              <>
+                                <Pause className="w-3 h-3" />
+                                <span>Playing...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Play className="w-3 h-3" />
+                                <span>Listen</span>
+                              </>
+                            )}
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
