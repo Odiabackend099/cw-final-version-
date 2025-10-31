@@ -535,12 +535,42 @@ const AdvancedChatWidget = () => {
         updateAudioLevel();
       }
 
-      // Step 3: Start Vapi call with assistant ID (uses pre-configured assistant)
-      console.log('🎙️ Starting Vapi call with assistant ID...');
+      // Step 3: Start Vapi call with inline assistant configuration
+      console.log('🎙️ Starting Vapi call with inline assistant...');
 
-      // Use the assistant ID from VAPI_CONFIG - it already has all configuration on Vapi dashboard
-      await vapiClient.start(VAPI_CONFIG.assistantId);
-      console.log('✅ Vapi call started successfully');
+      // Create inline assistant with proper Vapi voice configuration
+      const assistantConfig: any = {
+        name: 'Marcy AI',
+        model: {
+          provider: 'groq',
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            {
+              role: 'system',
+              content: "You are Marcy, a professional AI receptionist for CallWaitingAI. Answer questions warmly and professionally. Keep responses concise and helpful.",
+            },
+          ],
+          temperature: 0.7,
+          maxTokens: 500,
+        },
+        transcriber: {
+          provider: 'deepgram',
+          model: 'nova-2',
+          language: 'en-US',
+        },
+        voice: {
+          provider: 'vapi',
+          voiceId: 'harry', // Use Vapi's Harry voice (default)
+        },
+        firstMessage: "Hi! I'm Marcy, your AI assistant. How can I help you today?",
+        silenceTimeoutSeconds: 30,
+        responseDelaySeconds: 0.4,
+        interruptionsEnabled: true,
+        backgroundSound: 'off',
+      };
+
+      await vapiClient.start(assistantConfig);
+      console.log('✅ Vapi call started successfully with inline assistant');
 
     } catch (error: any) {
       console.error('❌ Failed to start voice call:', error);
