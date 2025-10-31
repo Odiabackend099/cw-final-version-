@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, Loader2 } from 'lucide-react';
 
 interface Voice {
-  id: string;
-  name: string;
+  id?: string;
+  name?: string;
+  voice_name?: string; // Database field name
   gender: string;
   accent: string;
   description: string;
@@ -73,7 +74,28 @@ export const VoiceDemoPlayer: React.FC<VoiceDemoPlayerProps> = ({
   const displayVoices = voices.length > 0 
     ? voices.map(v => {
         const config = VOICE_CONFIG.find(c => c.voice_id === v.voice_id);
-        return config ? { ...v, ...config } : v;
+        if (config) {
+          // Merge database voice with config, ensuring all required fields
+          return {
+            id: v.id || config.id,
+            name: v.voice_name || v.name || config.name,
+            voice_name: v.voice_name || config.name,
+            gender: v.gender || config.gender,
+            accent: v.accent || config.accent,
+            description: v.description || config.description,
+            voice_id: v.voice_id,
+          };
+        }
+        // If no config match, create from database fields
+        return {
+          id: v.id || '',
+          name: v.voice_name || v.name || 'Unknown',
+          voice_name: v.voice_name || '',
+          gender: v.gender,
+          accent: v.accent,
+          description: v.description,
+          voice_id: v.voice_id,
+        };
       })
     : VOICE_CONFIG;
 
@@ -226,7 +248,7 @@ export const VoiceDemoPlayer: React.FC<VoiceDemoPlayerProps> = ({
 
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900">{voice.name}</h4>
+                  <h4 className="font-semibold text-gray-900">{voice.name || voice.voice_name || 'Unknown Voice'}</h4>
                   <p className="text-sm text-gray-600">
                     {voice.gender} • {voice.accent}
                   </p>
