@@ -437,6 +437,7 @@ const AdvancedChatWidget = () => {
             <button
               onClick={() => setIsOpen(false)}
               className="text-white hover:bg-white/20 p-2 rounded-full transition-colors"
+              aria-label="Close chat widget"
             >
               <X className="w-5 h-5" />
             </button>
