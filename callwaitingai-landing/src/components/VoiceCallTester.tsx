@@ -267,22 +267,24 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
         backgroundSound: 'off',
       };
 
-      // Configure voice based on tier and settings
-      if ((userTier === 'pro' || userTier === 'promax') && assistant.use_minimax_tts && assistant.minimax_voice_id) {
-        // Pro/ProMax tiers with Minimax TTS enabled: Use custom Minimax voice
-        assistantConfig.voice = {
-          provider: 'custom-provider',
-          url: `${supabaseUrl}/functions/v1/minimax-tts`,
-          voiceId: assistant.minimax_voice_id,
-        };
-        if (import.meta.env.DEV) {
-          console.log('🎤 Voice: Minimax TTS (Custom)', assistant.minimax_voice_id);
-        }
-      } else {
-        // Free/Professional tiers or Minimax disabled: Use Vapi default
-        if (import.meta.env.DEV) {
-          console.log('🎤 Voice: Vapi default');
-        }
+      // Configure voice - Always use Vapi's default for real-time calls
+      // NOTE: Minimax TTS voices are NOT compatible with real-time streaming.
+      // Minimax generates MP3 files (async), while Vapi requires PCM streaming (real-time).
+      // Minimax voices will be used for:
+      // - Webhook-triggered calls
+      // - Recorded messages
+      // - Asynchronous voice generation
+      // But for test calls, we use Vapi's default streaming voice.
+
+      if (assistant.use_minimax_tts && assistant.minimax_voice_id) {
+        console.log('ℹ️ Minimax TTS is configured but not used for test calls');
+        console.log('ℹ️ Test calls use Vapi default voice (real-time streaming)');
+        console.log('ℹ️ Minimax voices will be used in production for webhook calls');
+      }
+
+      // Use Vapi's default voice for test calls (supports real-time streaming)
+      if (import.meta.env.DEV) {
+        console.log('🎤 Voice: Vapi default (real-time streaming)');
       }
 
       if (import.meta.env.DEV) {
@@ -397,6 +399,20 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
             </div>
           )}
         </div>
+
+        {/* Minimax Voice Info */}
+        {assistant.use_minimax_tts && assistant.minimax_voice_id && (
+          <div className="mx-6 mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2">
+            <Volume2 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm text-blue-800 font-medium">Custom Voice Configured</p>
+              <p className="text-xs text-blue-700 mt-1">
+                Your Minimax voice is configured and will be used for production calls via webhooks.
+                Test calls use Vapi's default voice for real-time streaming compatibility.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Error Alert */}
         {callError && (
