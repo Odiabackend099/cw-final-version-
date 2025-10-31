@@ -3,6 +3,7 @@ import { Save, Upload, Play, Loader2, AlertCircle, CheckCircle, Volume2, FileTex
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { VoiceCallTester } from '../components/VoiceCallTester';
+import VoiceDemoPlayer from '../components/VoiceDemoPlayer';
 
 interface MinimaxVoice {
   id: string;
@@ -295,17 +296,22 @@ const AgentSetup = () => {
       setTestingVoice(true);
       setMessage({ type: 'info', text: `Testing ${voiceName}...` });
 
-      // Call Minimax TTS Edge Function
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL || 'https://bcufohulqrceytkrqpgd.supabase.co'}/functions/v1/minimax-tts`, {
+      // Call Minimax TTS Edge Function - Use correct endpoint and voiceId format
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://bcufohulqrceytkrqpgd.supabase.co';
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjdWZvaHVscXJjZXl0a3JxcGdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MTA2NTUsImV4cCI6MjA3NTA4NjY1NX0.rc9-fFpLsTyESK-222zYVKGVx-R5mwb9Xi005p_bwoI';
+      
+      const response = await fetch(`${supabaseUrl}/functions/v1/minimax-tts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjdWZvaHVscXJjZXl0a3JxcGdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MTA2NTUsImV4cCI6MjA3NTA4NjY1NX0.rc9-fFpLsTyESK-222zYVKGVx-R5mwb9Xi005p_bwoI'}`,
+          'Authorization': `Bearer ${supabaseAnonKey}`,
         },
         body: JSON.stringify({
           text: 'Hello, this is a test of the voice system.',
-          voice_id: voiceId,
-          model: 'speech-02-hd',
+          voiceId: voiceId, // Use camelCase voiceId for Minimax endpoint
+          speed: 1.0,
+          volume: 5,
+          pitch: 0,
         }),
       });
 
@@ -512,13 +518,15 @@ const AgentSetup = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="timezone-select" className="block text-sm font-medium text-gray-700 mb-2">
                   Timezone *
                 </label>
                 <select
+                  id="timezone-select"
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-label="Select timezone"
                 >
                   <option value="America/New_York">Eastern (ET)</option>
                   <option value="America/Chicago">Central (CT)</option>
@@ -531,34 +539,44 @@ const AgentSetup = () => {
           </div>
 
           {/* Voice Selection */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Volume2 className="w-5 h-5" />
-              Voice Selection
-            </h2>
+          <div className="space-y-6">
+            {/* Voice Demo Player */}
+            <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <input
+                type="checkbox"
+                id="use-minimax-tts"
+                checked={useMinimaxTts}
+                onChange={(e) => setUseMinimaxTts(e.target.checked)}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <label htmlFor="use-minimax-tts" className="text-sm font-medium text-gray-700">
+                Use custom ODIADEV TTS voices (Pro/ProMax plans only)
+              </label>
+            </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <input
-                  type="checkbox"
-                  checked={useMinimaxTts}
-                  onChange={(e) => setUseMinimaxTts(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+            {useMinimaxTts && (
+              <>
+                {/* Voice Demo Player - Beautiful UI */}
+                <VoiceDemoPlayer
+                  voices={voices}
+                  onVoiceSelect={(voiceId) => setSelectedVoiceId(voiceId)}
+                  selectedVoiceId={selectedVoiceId}
                 />
-                <label className="text-sm text-gray-700">
-                  Use custom ODIADEV TTS voices (Professional/Pro plans only)
-                </label>
-              </div>
 
-              {useMinimaxTts && (
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Select Voice
+                {/* Voice Selection Dropdown (Fallback) */}
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h3 className="text-md font-semibold text-gray-900 mb-4">
+                    Or Select from List
+                  </h3>
+                  <label htmlFor="voice-select-dropdown" className="sr-only">
+                    Select voice from dropdown
                   </label>
                   <select
+                    id="voice-select-dropdown"
                     value={selectedVoiceId}
                     onChange={(e) => setSelectedVoiceId(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    aria-label="Select voice from dropdown"
                   >
                     <option value="">-- Select a voice --</option>
                     {voices.map((voice) => (
@@ -570,8 +588,11 @@ const AgentSetup = () => {
                   </select>
 
                   {selectedVoice && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-600">
+                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                      <p className="text-sm font-medium text-gray-900 mb-1">
+                        Selected: {selectedVoice.voice_name}
+                      </p>
+                      <p className="text-sm text-gray-600 mb-3">
                         {selectedVoice.description}
                       </p>
                       <button
@@ -582,26 +603,28 @@ const AgentSetup = () => {
                         {testingVoice ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            Testing...
+                            Testing Voice...
                           </>
                         ) : (
                           <>
                             <Volume2 className="w-4 h-4" />
-                            Test Voice
+                            Test Voice Quality
                           </>
                         )}
                       </button>
                     </div>
                   )}
                 </div>
-              )}
+              </>
+            )}
 
-              {!useMinimaxTts && (
+            {!useMinimaxTts && (
+              <div className="bg-white rounded-lg shadow p-6">
                 <p className="text-sm text-gray-600">
-                  Using default ODIADEV voices. Enable ODIADEV TTS for custom voice options.
+                  Using default Vapi voices. Enable custom ODIADEV TTS above for Pro/ProMax voice options.
                 </p>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Knowledge Base Upload */}
@@ -617,12 +640,17 @@ const AgentSetup = () => {
               </p>
 
               <div>
+                <label htmlFor="knowledge-base-upload" className="block text-sm font-medium text-gray-700 mb-2">
+                  Upload Knowledge Base Files
+                </label>
                 <input
+                  id="knowledge-base-upload"
                   type="file"
                   multiple
                   accept=".pdf,.txt,.doc,.docx"
                   onChange={(e) => setKnowledgeBaseFiles(Array.from(e.target.files || []))}
                   className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  aria-label="Upload knowledge base files"
                 />
               </div>
 
