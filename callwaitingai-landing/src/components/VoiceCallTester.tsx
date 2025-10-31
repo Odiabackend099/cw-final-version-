@@ -267,14 +267,14 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
         backgroundSound: 'off',
       };
 
-      // Configure voice - Use Minimax voices for test calls
-      // NOTE: Vapi requires a provider, using playht format which accepts custom IDs
+      // Configure voice - For test calls, use default Vapi voice
+      // NOTE: Minimax TTS is only available in production via custom-voice provider
+      // Test calls will use Vapi's default voice for simplicity and reliability
       if (assistant.use_minimax_tts && assistant.minimax_voice_id) {
-        assistantConfig.voice = {
-          provider: 'playht',
-          voiceId: assistant.minimax_voice_id,
-        };
-        console.log('🎤 Using Minimax Voice (via PlayHT provider):', assistant.minimax_voice_id);
+        // Log that Minimax is configured but will use default for test
+        console.log('ℹ️ Minimax Voice configured:', assistant.minimax_voice_id);
+        console.log('ℹ️ Test call will use default Vapi voice (Minimax only available in production)');
+        // Do not set voice config - let Vapi use default voice for test calls
       }
 
       if (import.meta.env.DEV) {
@@ -482,7 +482,7 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
             <div className="flex-1">
               <p className="text-sm text-blue-800 font-medium">Minimax Voice Configured</p>
               <p className="text-xs text-blue-700 mt-1">
-                Your Minimax TTS voice ({assistant.minimax_voice_id}) will be used for this test call and production calls.
+                Test calls use default Vapi voice for reliability. Your Minimax TTS voice ({assistant.minimax_voice_id}) will be used in production calls only.
               </p>
             </div>
           </div>
