@@ -7,10 +7,9 @@
     "projectName": "callwaitingai-landing",
     "projectPath": "/Users/odiadev/Downloads/cwlunch/callwaitingai-landing",
     "testIds": [],
-    "additionalInstruction": "",
+    "additionalInstruction": "Re-running tests after critical fixes: deployment URL updates, Vapi client initialization, Supabase configuration, and route fixes. Expected significant improvement in pass rate from 4.17% to 80%+.",
     "envs": {
       "API_KEY": "sk-user-zs_TB3AKshhlBZta5ESO6RvfY8pcJbJXhO4s_w2hQ__bcI9xPRf1jjWaCiklTHAeO7GxcsUu2F8xaFXqKwqORGgd2c3NbkxGxJlagIjDXcTRagTp2WjGGpQkXskk_Kp9ols"
     }
-  },
-  "proxy": "http://39b4994e-a50b-41d1-8ab4-b480e09b864b:EDnFxcZNhIzclB24UhDzGowoCAZxk7Bu@tun.testsprite.com:8080"
+  }
 }

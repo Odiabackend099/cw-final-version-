@@ -46,19 +46,27 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Navigate to signup page
-        frame = context.pages[-1]
-        # Click on 'Sign In' link to navigate to sign in or signup page
-        elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        # -> Simulate over 100 API requests for voice calls within one hour from the same assistant to test rate limiting
+        await page.goto('http://localhost:5173/api/voice-call', timeout=10000)
+        await asyncio.sleep(3)
+        
+
+        # -> Simulate sending 100 API requests to the voice call endpoint from the same assistant to test rate limiting
+        await page.goto('http://localhost:5173/api/voice-call', timeout=10000)
+        await asyncio.sleep(3)
+        
+
+        # -> Simulate sending 100 API requests to the voice call endpoint from the same assistant to test rate limiting
+        await page.goto('http://localhost:5173/api/voice-call', timeout=10000)
+        await asyncio.sleep(3)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Account Activation Successful').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Rate limit exceeded: 100 calls per assistant per hour').first).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test case failed: User sign up process did not complete successfully. Verification email was not received or email confirmation did not activate the account as expected.')
+            raise AssertionError('Test failed: API did not enforce rate limiting at 100 calls per assistant per hour, or did not return HTTP 429 Too Many Requests as expected.')
         await asyncio.sleep(5)
     
     finally:

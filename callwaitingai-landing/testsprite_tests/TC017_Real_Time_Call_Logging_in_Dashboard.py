@@ -46,19 +46,19 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Navigate to signup page
+        # -> Initiate a voice call session by clicking 'Call the AI' button to start the call.
         frame = context.pages[-1]
-        # Click on 'Sign In' link to navigate to sign in or signup page
-        elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
+        # Click 'Call the AI' button to initiate a voice call session
+        elem = frame.locator('xpath=html/body/div/div/section/div/div/div/div[2]/button[2]').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Account Activation Successful').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Call Completed Successfully').first).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test case failed: User sign up process did not complete successfully. Verification email was not received or email confirmation did not activate the account as expected.')
+            raise AssertionError("Test case failed: Calls completed are not immediately reflected in calls dashboard analytics and call history as expected.")
         await asyncio.sleep(5)
     
     finally:

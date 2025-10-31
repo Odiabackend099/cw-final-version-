@@ -46,35 +46,19 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Try to find or navigate to the login page by scrolling or other means.
-        await page.mouse.wheel(0, await page.evaluate('() => window.innerHeight'))
-        
-
-        # -> Input verified user's email and password, then click the sign in button.
+        # -> Navigate to login page by clicking Sign In link
         frame = context.pages[-1]
-        # Input verified user's email
-        elem = frame.locator('xpath=html/body/div/div/div/div/form/div/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('verifieduser@example.com')
-        
-
-        frame = context.pages[-1]
-        # Input verified user's password
-        elem = frame.locator('xpath=html/body/div/div/div/div/form/div[2]/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('correctpassword')
-        
-
-        frame = context.pages[-1]
-        # Click the sign in button
-        elem = frame.locator('xpath=html/body/div/div/div/div/form/button').nth(0)
+        # Click Sign In link to navigate to login page
+        elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Login Failed: Invalid Credentials').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Login Successful - Welcome to Your Dashboard').first).to_be_visible(timeout=30000)
         except AssertionError:
-            raise AssertionError('Test case failed: User login was not successful with valid credentials post email verification as expected.')
+            raise AssertionError('Test case failed: User with verified email could not log in successfully and was not redirected to the dashboard as expected.')
         await asyncio.sleep(5)
     
     finally:

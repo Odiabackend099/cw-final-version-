@@ -46,9 +46,36 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Navigate to signup page
+        # -> Click on 'Call the AI' button to initiate a call session for lead capture.
         frame = context.pages[-1]
-        # Click on 'Sign In' link to navigate to sign in or signup page
+        # Click 'Call the AI' button to start a call session for lead capture
+        elem = frame.locator('xpath=html/body/div/div/section/div/div/div/div[2]/button[2]').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Click on 'Try the AI (Text)' button to initiate a chat session for lead capture.
+        frame = context.pages[-1]
+        # Click 'Try the AI (Text)' button to start a chat session for lead capture
+        elem = frame.locator('xpath=html/body/div/div/section/div/div/div/div[2]/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Send a message in the chat input to simulate a lead interaction for lead capture.
+        frame = context.pages[-1]
+        # Input message in chat to simulate lead interaction for lead capture
+        elem = frame.locator('xpath=html/body/div/div/div/div[3]/div/div[2]/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('Hello, I am interested in your services. Please capture my lead details.')
+        
+
+        frame = context.pages[-1]
+        # Click send button to send the chat message
+        elem = frame.locator('xpath=html/body/div/div/div/div[3]/div/div[2]/div/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Navigate to leads dashboard to check if leads from voice or chat interactions are captured.
+        frame = context.pages[-1]
+        # Click 'Sign In' to access leads dashboard or user account area
         elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
@@ -56,9 +83,9 @@ async def run_test():
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Account Activation Successful').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Lead Capture Successful').first).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test case failed: User sign up process did not complete successfully. Verification email was not received or email confirmation did not activate the account as expected.')
+            raise AssertionError("Test case failed: Leads generated from voice and chat interactions are not captured or manageable in the leads dashboard as expected.")
         await asyncio.sleep(5)
     
     finally:

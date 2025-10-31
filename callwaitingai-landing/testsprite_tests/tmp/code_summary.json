@@ -1,25 +1,21 @@
 {
   "tech_stack": [
     "TypeScript",
-    "React 18",
-    "Vite 6",
-    "Supabase (PostgreSQL + Auth)",
-    "Vapi.ai (Voice AI)",
-    "Groq (Chat AI)",
-    "Minimax TTS",
-    "TailwindCSS",
-    "React Router DOM",
-    "Radix UI",
-    "React Hook Form",
-    "Zod"
+    "React",
+    "Vite",
+    "Supabase",
+    "Tailwind CSS",
+    "React Router",
+    "Vapi.ai",
+    "Minimax TTS"
   ],
   "features": [
     {
       "name": "Authentication System",
-      "description": "User authentication with email/password, email verification, password reset, and session management using Supabase Auth",
+      "description": "User authentication with signup, login, email verification, password reset, and session management",
       "files": [
-        "src/lib/auth.ts",
         "src/contexts/AuthContext.tsx",
+        "src/lib/auth.ts",
         "src/pages/Login.tsx",
         "src/pages/SignUp.tsx",
         "src/pages/EmailVerification.tsx",
@@ -28,107 +24,154 @@
       ]
     },
     {
-      "name": "AI Agent Configuration",
-      "description": "Setup and configure AI voice agents with business details, system prompts, voice selection (Vapi default for free tier, Minimax TTS for paid tiers), and knowledge base upload",
+      "name": "Agent Setup Configuration",
+      "description": "Configure AI agent settings including business info, voice selection, system prompt, and knowledge base",
       "files": [
         "src/pages/AgentSetup.tsx",
+        "src/components/VoiceDemoPlayer.tsx",
+        "src/components/VoiceCallTester.tsx"
+      ]
+    },
+    {
+      "name": "Voice Demo Player",
+      "description": "Interactive voice demo player allowing users to listen to and select Minimax TTS voices",
+      "files": [
+        "src/components/VoiceDemoPlayer.tsx"
+      ]
+    },
+    {
+      "name": "Voice Call Testing",
+      "description": "Test voice calls with Vapi integration and Minimax TTS support for paid tiers",
+      "files": [
+        "src/components/VoiceCallTester.tsx",
         "src/lib/vapi.ts",
-        "src/lib/advancedVapi.ts",
+        "src/lib/advancedVapi.ts"
+      ]
+    },
+    {
+      "name": "User Tier Management",
+      "description": "Determine user subscription tier (free, professional, pro, promax) based on payment history",
+      "files": [
         "src/lib/userTier.ts"
       ]
     },
     {
-      "name": "Voice Call System",
-      "description": "Tier-based voice call testing with Vapi integration, voice call tester component, and webhook integration for call logging",
-      "files": [
-        "src/lib/vapi.ts",
-        "src/lib/advancedVapi.ts",
-        "src/components/VoiceCallTester.tsx",
-        "src/components/AdvancedVoiceWidget.tsx"
-      ]
-    },
-    {
-      "name": "Chat Widget",
-      "description": "AI-powered chat widget using Groq AI for customer interactions on landing pages, with session management and message history",
-      "files": [
-        "src/components/AdvancedChatWidget.tsx",
-        "src/components/FloatingChatWidget.tsx",
-        "src/lib/chat.ts"
-      ]
-    },
-    {
-      "name": "Dashboard & Analytics",
-      "description": "User dashboard displaying call analytics, statistics, performance metrics, and real-time data visualization",
+      "name": "Dashboard",
+      "description": "Main dashboard showing analytics, stats, and navigation to other features",
       "files": [
         "src/pages/Dashboard.tsx",
-        "src/pages/Calls.tsx",
-        "src/components/Visualization.tsx"
+        "src/components/Layout.tsx"
+      ]
+    },
+    {
+      "name": "Calls Management",
+      "description": "View and manage call logs and call history",
+      "files": [
+        "src/pages/Calls.tsx"
       ]
     },
     {
       "name": "Leads Management",
-      "description": "Track and manage leads generated from calls and chats, with lead status tracking, assignment, and analytics",
+      "description": "View and manage leads captured from calls",
       "files": [
         "src/pages/Leads.tsx"
       ]
     },
     {
-      "name": "Payment Integration",
-      "description": "Subscription management with Flutterwave integration, tier-based pricing (Free, Pro, Professional, Promax), payment link generation, and subscription status tracking",
+      "name": "Payments Management",
+      "description": "View payment history and manage subscriptions",
       "files": [
-        "src/pages/Payments.tsx",
-        "src/lib/userTier.ts"
+        "src/pages/Payments.tsx"
       ]
     },
     {
-      "name": "User Management & Settings",
-      "description": "User profile management, settings updates, subscription management, and user tier detection",
+      "name": "Settings",
+      "description": "User settings and account configuration",
       "files": [
-        "src/pages/Settings.tsx",
-        "src/lib/userTier.ts",
-        "src/lib/auth.ts"
+        "src/pages/Settings.tsx"
       ]
     },
     {
-      "name": "Landing Page Components",
-      "description": "Marketing landing page with hero section, features showcase, pricing tiers, how it works section, and navigation",
+      "name": "Landing Page",
+      "description": "Marketing landing page with hero, features, pricing, and how it works sections",
       "files": [
         "src/pages/Home.tsx",
         "src/components/Hero.tsx",
         "src/components/Features.tsx",
-        "src/components/Pricing.tsx",
         "src/components/HowItWorks.tsx",
+        "src/components/Pricing.tsx",
+        "src/components/Visualization.tsx"
+      ]
+    },
+    {
+      "name": "Navigation Components",
+      "description": "Navigation bar, footer, and layout components",
+      "files": [
         "src/components/Navigation.tsx",
         "src/components/Footer.tsx",
+        "src/components/Layout.tsx",
+        "src/components/CallWaitingLogo.tsx"
+      ]
+    },
+    {
+      "name": "Chat Widget",
+      "description": "Floating chat widget for customer support",
+      "files": [
+        "src/components/FloatingChatWidget.tsx",
+        "src/components/AdvancedChatWidget.tsx",
+        "src/lib/chat.ts"
+      ]
+    },
+    {
+      "name": "Voice Widget",
+      "description": "Advanced voice widget for voice interactions",
+      "files": [
+        "src/components/AdvancedVoiceWidget.tsx"
+      ]
+    },
+    {
+      "name": "Supabase Integration",
+      "description": "Supabase client setup and database type definitions",
+      "files": [
+        "src/lib/supabase.ts"
+      ]
+    },
+    {
+      "name": "Utilities",
+      "description": "Utility functions and helpers",
+      "files": [
+        "src/lib/utils.ts",
+        "src/lib/designSystem.ts",
+        "src/hooks/use-mobile.tsx"
+      ]
+    },
+    {
+      "name": "Error Handling",
+      "description": "Error boundary component for catching React errors",
+      "files": [
+        "src/components/ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "name": "Legal Pages",
+      "description": "Privacy policy and terms of service pages",
+      "files": [
         "src/pages/Privacy.tsx",
         "src/pages/Terms.tsx"
       ]
     },
     {
-      "name": "Layout & Routing",
-      "description": "Application routing with protected routes, layout components, error boundaries, and navigation structure",
+      "name": "Routing",
+      "description": "React Router configuration with protected routes",
       "files": [
-        "src/App.tsx",
-        "src/components/Layout.tsx",
-        "src/components/ErrorBoundary.tsx",
+        "src/App.tsx"
+      ]
+    },
+    {
+      "name": "Application Entry",
+      "description": "Main application entry point",
+      "files": [
         "src/main.tsx"
-      ]
-    },
-    {
-      "name": "Design System & Utilities",
-      "description": "Design system configuration, utility functions, and shared UI components using TailwindCSS and Radix UI",
-      "files": [
-        "src/lib/designSystem.ts",
-        "src/lib/utils.ts",
-        "src/index.css",
-        "src/hooks/use-mobile.tsx"
-      ]
-    },
-    {
-      "name": "Supabase Integration",
-      "description": "Database client configuration, type definitions, and Supabase service integration for users, leads, call_logs, assistants, and payments tables",
-      "files": [
-        "src/lib/supabase.ts"
       ]
     }
   ]

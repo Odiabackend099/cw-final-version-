@@ -46,19 +46,20 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Navigate to signup page
-        frame = context.pages[-1]
-        # Click on 'Sign In' link to navigate to sign in or signup page
-        elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        # -> Find or reveal navigation or link to password reset page
+        await page.mouse.wheel(0, await page.evaluate('() => window.innerHeight'))
+        
+
+        # -> Try to navigate to password reset page by URL as no navigation elements found
+        await page.goto('http://localhost:5173/password-reset', timeout=10000)
+        await asyncio.sleep(3)
         
 
         # --> Assertions to verify final state
-        frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Account Activation Successful').first).to_be_visible(timeout=1000)
+            await expect(page.locator('text=Password Reset Successful! Your password has been updated.')).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test case failed: User sign up process did not complete successfully. Verification email was not received or email confirmation did not activate the account as expected.')
+            raise AssertionError('Test case failed: Password reset process did not complete successfully as per the test plan. The expected success message after password reset was not found on the page.')
         await asyncio.sleep(5)
     
     finally:

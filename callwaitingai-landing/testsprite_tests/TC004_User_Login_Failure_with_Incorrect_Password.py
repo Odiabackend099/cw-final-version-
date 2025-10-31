@@ -46,9 +46,9 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Navigate to signup page
+        # -> Click on the 'Sign In' link to navigate to the login page
         frame = context.pages[-1]
-        # Click on 'Sign In' link to navigate to sign in or signup page
+        # Click on the 'Sign In' link to go to login page
         elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
@@ -56,9 +56,9 @@ async def run_test():
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Account Activation Successful').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Login Successful')).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test case failed: User sign up process did not complete successfully. Verification email was not received or email confirmation did not activate the account as expected.')
+            raise AssertionError('Test case failed: Login did not succeed as expected because the password was incorrect, but the success message was not found.')
         await asyncio.sleep(5)
     
     finally:

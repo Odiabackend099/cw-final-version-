@@ -46,9 +46,18 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Navigate to signup page
+        # -> Look for any navigation or login elements by scrolling or waiting for page content to load.
+        await page.mouse.wheel(0, 300)
+        
+
+        # -> Try to reload the page or open a new tab to find login or navigation elements.
+        await page.goto('http://localhost:5173', timeout=10000)
+        await asyncio.sleep(3)
+        
+
+        # -> Click on the 'Sign In' link to log in as a user with professional or pro subscription tier.
         frame = context.pages[-1]
-        # Click on 'Sign In' link to navigate to sign in or signup page
+        # Click on the 'Sign In' link to proceed to login
         elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
@@ -56,9 +65,9 @@ async def run_test():
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Account Activation Successful').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Minimax TTS voice call established successfully').first).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test case failed: User sign up process did not complete successfully. Verification email was not received or email confirmation did not activate the account as expected.')
+            raise AssertionError('Test case failed: The voice call test did not confirm establishment with Minimax TTS generated voice output as required by the test plan.')
         await asyncio.sleep(5)
     
     finally:

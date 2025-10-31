@@ -46,19 +46,26 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Navigate to signup page
+        # -> Find or navigate to a page or interface where database connectivity can be simulated or health check endpoint can be tested.
+        await page.mouse.wheel(0, 500)
+        
+
+        # -> Look for any navigation or links related to health check, admin, or database simulation to proceed with the task.
+        await page.mouse.wheel(0, 1000)
+        
+
+        # -> Try to find a way to simulate database downtime or access the health check endpoint, possibly by opening developer tools or using a new tab to send HTTP requests.
         frame = context.pages[-1]
-        # Click on 'Sign In' link to navigate to sign in or signup page
+        # Click on Sign In to check if admin or dashboard access is available for database simulation or health check testing
         elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
-        frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Account Activation Successful').first).to_be_visible(timeout=1000)
+            await expect(page.locator('text=Database is fully operational').first).to_be_visible(timeout=1000)
         except AssertionError:
-            raise AssertionError('Test case failed: User sign up process did not complete successfully. Verification email was not received or email confirmation did not activate the account as expected.')
+            raise AssertionError('Test failed: Health check endpoint did not return HTTP 503 status as expected when the Supabase database is unreachable.')
         await asyncio.sleep(5)
     
     finally:

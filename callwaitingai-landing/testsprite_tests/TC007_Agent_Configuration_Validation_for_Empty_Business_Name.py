@@ -46,19 +46,40 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Navigate to signup page
+        # -> Open AI agent configuration page
         frame = context.pages[-1]
-        # Click on 'Sign In' link to navigate to sign in or signup page
-        elem = frame.locator('xpath=html/body/div/div/nav/div/div/div[3]/a').nth(0)
+        # Click 'Try the AI (Text)' button to open AI agent configuration page
+        elem = frame.locator('xpath=html/body/div/div/section/div/div/div/div[2]/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+
+        # -> Find and clear the business name field in the AI agent configuration or chat interface
+        await page.mouse.wheel(0, 500)
+        
+
+        # -> Locate the business name input field in the AI agent configuration or chat interface
+        await page.mouse.wheel(0, 1000)
+        
+
+        # -> Send a message to Marcy AI to clear the business name and attempt to save configuration to trigger validation error
+        frame = context.pages[-1]
+        # Input command to clear business name in chat
+        elem = frame.locator('xpath=html/body/div/div/div/div[3]/div/div[2]/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('Clear business name')
+        
+
+        frame = context.pages[-1]
+        # Send the chat message to Marcy AI
+        elem = frame.locator('xpath=html/body/div/div/div/div[3]/div/div[2]/div/button').nth(0)
         await page.wait_for_timeout(3000); await elem.click(timeout=5000)
         
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Account Activation Successful').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Business name cannot be empty').first).to_be_visible(timeout=30000)
         except AssertionError:
-            raise AssertionError('Test case failed: User sign up process did not complete successfully. Verification email was not received or email confirmation did not activate the account as expected.')
+            raise AssertionError('Test case failed: Validation error for empty business name was not displayed as expected.')
         await asyncio.sleep(5)
     
     finally:
