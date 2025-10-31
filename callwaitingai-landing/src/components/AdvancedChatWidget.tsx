@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, PhoneCall, PhoneOff, Send, Loader2, Volume2, VolumeX, Play, Pause } from 'lucide-react';
+import { MessageSquare, X, PhoneCall, PhoneOff, Send, Loader2, Volume2, VolumeX, Play, Pause, Activity } from 'lucide-react';
 import { chatService, ChatMessage } from '../lib/chat';
 import Vapi from '@vapi-ai/web';
 import CallWaitingLogo from './CallWaitingLogo';
@@ -51,6 +51,13 @@ const AdvancedChatWidget = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [connectionError, setConnectionError] = useState<string>('');
+
+  // Enhanced voice features
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [detectedEmotion, setDetectedEmotion] = useState<'neutral' | 'happy' | 'frustrated' | 'confused'>('neutral');
+  const [conversationQuality, setConversationQuality] = useState<number>(100);
+  const [responseLatency, setResponseLatency] = useState<number>(0);
+  const lastSpeechTimeRef = useRef<number>(0);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -118,20 +125,27 @@ const AdvancedChatWidget = () => {
         console.log('🎤 User started speaking - AI WILL BE INTERRUPTED');
         setIsListening(true);
         setIsSpeaking(false);
+        setIsProcessing(false);
+        lastSpeechTimeRef.current = Date.now();
         // Vapi automatically stops AI when user speaks (built-in interruption)
       });
 
       client.on('speech-end', () => {
         console.log('🎤 User stopped speaking');
         setIsListening(false);
+        setIsProcessing(true); // Show processing indicator while AI generates response
+
+        // Calculate response latency
+        const latency = Date.now() - lastSpeechTimeRef.current;
+        setResponseLatency(latency);
       });
 
-      // Transcription events
+      // Transcription events with emotion detection
       client.on('message', (message: any) => {
         console.log('📝 Vapi message:', message);
 
         if (message.type === 'transcript' && message.transcriptType === 'partial') {
-          // User's speech (partial - real-time)
+          // User's speech (partial - real-time streaming)
           if (message.transcript && message.role === 'user') {
             setTranscripts(prev => {
               const filtered = prev.filter(t => t.isFinal || t.type !== 'user');
@@ -142,6 +156,9 @@ const AdvancedChatWidget = () => {
                 isFinal: false
               }];
             });
+
+            // Simple emotion detection from text patterns
+            detectEmotionFromText(message.transcript);
           }
         } else if (message.type === 'transcript' && message.transcriptType === 'final') {
           // User's speech (final)
@@ -155,7 +172,25 @@ const AdvancedChatWidget = () => {
                 isFinal: true
               }];
             });
+
+            // Detect emotion from final transcript
+            detectEmotionFromText(message.transcript);
           }
+        }
+
+        // Assistant response streaming
+        if (message.type === 'transcript' && message.role === 'assistant') {
+          setIsProcessing(false); // Response received, stop processing indicator
+
+          setTranscripts(prev => {
+            const filtered = prev.filter(t => t.isFinal || t.type !== 'assistant');
+            return [...filtered, {
+              type: 'assistant',
+              text: message.transcript,
+              timestamp: Date.now(),
+              isFinal: message.transcriptType === 'final'
+            }];
+          });
         }
       });
 
@@ -264,6 +299,58 @@ const AdvancedChatWidget = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, transcripts]);
+
+  // Emotion detection from text patterns
+  const detectEmotionFromText = (text: string) => {
+    const lowerText = text.toLowerCase();
+
+    // Happy patterns
+    const happyPatterns = ['thank', 'great', 'awesome', 'perfect', 'love', 'excellent', 'appreciate', 'wonderful'];
+    if (happyPatterns.some(pattern => lowerText.includes(pattern))) {
+      setDetectedEmotion('happy');
+      setConversationQuality(prev => Math.min(100, prev + 5));
+      return;
+    }
+
+    // Frustrated patterns
+    const frustratedPatterns = ['can\'t', 'won\'t', 'frustrated', 'annoying', 'problem', 'issue', 'not working', 'help'];
+    if (frustratedPatterns.some(pattern => lowerText.includes(pattern))) {
+      setDetectedEmotion('frustrated');
+      setConversationQuality(prev => Math.max(0, prev - 10));
+      return;
+    }
+
+    // Confused patterns
+    const confusedPatterns = ['what', 'how', 'confused', 'don\'t understand', 'unclear', 'explain'];
+    if (confusedPatterns.some(pattern => lowerText.includes(pattern))) {
+      setDetectedEmotion('confused');
+      setConversationQuality(prev => Math.max(0, prev - 5));
+      return;
+    }
+
+    // Default neutral
+    setDetectedEmotion('neutral');
+  };
+
+  // Get emotion emoji
+  const getEmotionEmoji = () => {
+    switch (detectedEmotion) {
+      case 'happy': return '😊';
+      case 'frustrated': return '😤';
+      case 'confused': return '🤔';
+      default: return '😐';
+    }
+  };
+
+  // Get emotion color
+  const getEmotionColor = () => {
+    switch (detectedEmotion) {
+      case 'happy': return 'text-green-600';
+      case 'frustrated': return 'text-red-600';
+      case 'confused': return 'text-yellow-600';
+      default: return 'text-gray-600';
+    }
+  };
 
   // TTS Functions
   const speakText = (text: string, messageId: string) => {
@@ -717,24 +804,73 @@ const AdvancedChatWidget = () => {
               </div>
             ) : (
               /* VOICE MODE */
-              <div className="h-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-purple-50 via-blue-50 to-green-50">
+              <div className="h-full flex flex-col p-4 bg-gradient-to-br from-purple-50 via-blue-50 to-green-50">
+                {/* Enhanced Status Bar */}
+                {isCallActive && (
+                  <div className="mb-3 grid grid-cols-3 gap-2 text-xs">
+                    {/* Emotion Indicator */}
+                    <div className="bg-white rounded-lg p-2 shadow-sm">
+                      <div className="flex items-center gap-1">
+                        <span className="text-lg">{getEmotionEmoji()}</span>
+                        <div className="flex-1">
+                          <p className="text-gray-500 text-[10px]">Mood</p>
+                          <p className={`font-semibold text-xs ${getEmotionColor()}`}>
+                            {detectedEmotion.charAt(0).toUpperCase() + detectedEmotion.slice(1)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Latency Indicator */}
+                    <div className="bg-white rounded-lg p-2 shadow-sm">
+                      <div className="flex items-center gap-1">
+                        <Activity className="w-4 h-4 text-blue-600" />
+                        <div className="flex-1">
+                          <p className="text-gray-500 text-[10px]">Latency</p>
+                          <p className={`font-semibold text-xs ${responseLatency < 1000 ? 'text-green-600' : responseLatency < 2000 ? 'text-yellow-600' : 'text-red-600'}`}>
+                            {responseLatency}ms
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quality Score */}
+                    <div className="bg-white rounded-lg p-2 shadow-sm">
+                      <div className="flex items-center gap-1">
+                        <Volume2 className="w-4 h-4 text-purple-600" />
+                        <div className="flex-1">
+                          <p className="text-gray-500 text-[10px]">Quality</p>
+                          <p className={`font-semibold text-xs ${conversationQuality > 80 ? 'text-green-600' : conversationQuality > 50 ? 'text-yellow-600' : 'text-red-600'}`}>
+                            {conversationQuality}%
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Avatar Orb */}
-                <div className="mb-6 flex items-center justify-center">
+                <div className="mb-4 flex items-center justify-center">
                   <AvatarOrb />
                 </div>
 
                 {/* Status */}
-                <div className="text-center mb-4">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                <div className="text-center mb-3">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">
                     {isConnecting ? '⏳ Connecting...' :
                      isCallActive ? (
                        isListening ? '🎤 Listening...' :
+                       isProcessing ? '⚡ Processing...' :
                        isSpeaking ? '🔊 Marcy is speaking...' :
                        '⏸️ Call Active'
                      ) : '🎙️ Start Voice Call'}
                   </h3>
-                  <p className="text-gray-600 text-base">
-                    {isCallActive ? 'Speak naturally with Marcy' : 'Experience AI voice assistant'}
+                  <p className="text-gray-600 text-sm">
+                    {isCallActive
+                      ? isProcessing
+                        ? 'AI is generating response...'
+                        : 'Speak naturally with Marcy'
+                      : 'Ultra-low latency AI conversation'}
                   </p>
                 </div>
 
@@ -747,19 +883,53 @@ const AdvancedChatWidget = () => {
                   </div>
                 )}
 
-                {/* Real-time Transcripts */}
+                {/* Enhanced Real-time Transcripts with Streaming */}
                 {transcripts.length > 0 && (
-                  <div className="w-full max-h-48 overflow-y-auto bg-white rounded-xl shadow-lg p-4 mb-4 space-y-2">
+                  <div className="w-full flex-1 overflow-y-auto bg-white rounded-xl shadow-lg p-3 mb-3 space-y-2 max-h-[200px]">
                     {transcripts.map((transcript, idx) => (
                       <div
                         key={idx}
-                        className={`text-sm ${
+                        className={`flex items-start gap-2 p-2 rounded-lg transition-all ${
                           transcript.type === 'user'
-                            ? 'text-blue-700 font-medium'
-                            : 'text-green-700 font-medium'
-                        } ${!transcript.isFinal ? 'opacity-60 italic' : ''}`}
+                            ? 'bg-blue-50 border-l-4 border-blue-500'
+                            : 'bg-green-50 border-l-4 border-green-500'
+                        } ${!transcript.isFinal ? 'animate-pulse' : ''}`}
                       >
-                        <span className="font-bold">{transcript.type === 'user' ? '🗣️ You:' : '🤖 Marcy:'}</span> {transcript.text}
+                        <div className="flex-shrink-0 mt-0.5">
+                          {transcript.type === 'user' ? (
+                            <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                              U
+                            </div>
+                          ) : (
+                            <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold">
+                              M
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className={`text-xs font-semibold ${
+                              transcript.type === 'user' ? 'text-blue-700' : 'text-green-700'
+                            }`}>
+                              {transcript.type === 'user' ? 'You' : 'Marcy'}
+                            </span>
+                            {!transcript.isFinal && (
+                              <span className="flex items-center gap-1 text-[10px] text-gray-500 italic">
+                                <div className="flex gap-0.5">
+                                  <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                  <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                  <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                </div>
+                                streaming...
+                              </span>
+                            )}
+                          </div>
+                          <p className={`text-xs leading-relaxed ${
+                            transcript.type === 'user' ? 'text-blue-900' : 'text-green-900'
+                          } ${!transcript.isFinal ? 'opacity-70' : ''}`}>
+                            {transcript.text}
+                          </p>
+                        </div>
                       </div>
                     ))}
                   </div>
