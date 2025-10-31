@@ -78,14 +78,17 @@ export type Database = {
       assistants: {
         Row: {
           id: string;
-          name: string;
-          vapi_assistant_id: string | null;
-          system_prompt: string | null;
-          voice_config: Record<string, any>;
-          model: string;
-          first_message: string;
-          is_active: boolean;
-          created_by: string | null;
+          user_id: string;
+          business_name: string;
+          business_industry: string;
+          business_hours: string;
+          timezone: string;
+          system_prompt: string;
+          vapi_voice_id: string | null;
+          vapi_voice_provider: string | null;
+          // Deprecated fields (kept for migration compatibility)
+          minimax_voice_id: string | null;
+          use_minimax_tts: boolean;
           created_at: string;
           updated_at: string;
         };
