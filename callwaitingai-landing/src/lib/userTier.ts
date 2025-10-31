@@ -16,6 +16,7 @@ export async function getUserTier(userId: string): Promise<UserTier> {
     try {
       // Check payments table for most recent successful payment
       // Production schema uses 'status' column (not payment_status), and 'amount' to determine tier
+      // Use .maybeSingle() instead of .single() to handle no rows gracefully
       const { data: payment, error } = await supabase
         .from('payments')
         .select('amount, status')
@@ -23,7 +24,7 @@ export async function getUserTier(userId: string): Promise<UserTier> {
         .eq('status', 'successful')
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       // If query succeeds (even with no payment), process result
       if (!error) {

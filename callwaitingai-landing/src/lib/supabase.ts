@@ -12,6 +12,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       'Content-Type': 'application/json',
     },
   },
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+  },
 });
 
 // Vapi Configuration

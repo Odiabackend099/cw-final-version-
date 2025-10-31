@@ -289,10 +289,15 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
       // Start call with inline assistant (with retry logic)
       let callStarted = false;
       let lastError: any = null;
-      const maxStartAttempts = 2;
+      const maxStartAttempts = 3;
 
       for (let attempt = 0; attempt < maxStartAttempts; attempt++) {
         try {
+          // Add a small delay between retries for network stability
+          if (attempt > 0) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+          }
+
           await vapiRef.current.start(assistantConfig);
           callStarted = true;
           
@@ -302,6 +307,14 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
           break;
         } catch (startError: any) {
           lastError = startError;
+          
+          // Check for connection-related errors that might be retryable
+          const isConnectionError = 
+            startError.message?.toLowerCase().includes('meeting has ended') ||
+            startError.message?.toLowerCase().includes('connection') ||
+            startError.message?.toLowerCase().includes('network') ||
+            startError.message?.toLowerCase().includes('timeout') ||
+            startError.type === 'daily-call-join-error';
           
           // If error is about custom-provider or voice config, fallback to default voice
           if (
@@ -317,6 +330,14 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
             
             // Remove custom voice config and retry with default
             delete assistantConfig.voice;
+            continue;
+          }
+          
+          // If it's a connection error and we have retries left, try again
+          if (isConnectionError && attempt < maxStartAttempts - 1) {
+            if (import.meta.env.DEV) {
+              console.warn(`⚠️ Connection error (attempt ${attempt + 1}/${maxStartAttempts}), retrying...`);
+            }
             continue;
           }
           
@@ -336,14 +357,21 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
       // Provide user-friendly error messages
       let errorMessage = 'Failed to start call. ';
       
-      if (error.message?.includes('ready')) {
+      if (error.message?.includes('ready') || error.message?.includes('not ready')) {
         errorMessage += 'Voice system is initializing. Please wait a moment and try again.';
-      } else if (error.message?.includes('Meeting has ended')) {
-        errorMessage += 'Connection issue. Please check your internet connection and try again.';
+      } else if (
+        error.message?.includes('Meeting has ended') ||
+        error.message?.includes('connection') ||
+        error.message?.includes('network') ||
+        error.type === 'daily-call-join-error'
+      ) {
+        errorMessage += 'Connection issue. Please check your internet connection, microphone permissions, and try again.';
       } else if (error.message?.includes('voice') || error.message?.includes('provider')) {
         errorMessage += 'Voice configuration issue. Using default voice for this call.';
+      } else if (error.message?.includes('permission') || error.message?.includes('microphone')) {
+        errorMessage += 'Microphone access is required. Please allow microphone permissions and try again.';
       } else {
-        errorMessage += error.message || 'Unknown error occurred.';
+        errorMessage += error.message || 'Unknown error occurred. Please try again.';
       }
       
       setCallError(errorMessage);

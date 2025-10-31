@@ -165,7 +165,22 @@ const AdvancedChatWidget = () => {
         console.error('❌ Vapi error:', error);
         setIsCallActive(false);
         setIsConnecting(false);
-        setConnectionError(error.message || 'Failed to connect. Please try again.');
+        
+        // Provide user-friendly error messages
+        let errorMessage = 'Failed to connect. ';
+        if (
+          error.errorMsg?.includes('Meeting has ended') ||
+          error.type === 'daily-call-join-error' ||
+          error.type === 'start-method-error'
+        ) {
+          errorMessage += 'Connection issue. Please check your internet connection, microphone permissions, and try again.';
+        } else if (error.message?.includes('permission') || error.message?.includes('microphone')) {
+          errorMessage += 'Microphone access is required. Please allow microphone permissions and try again.';
+        } else {
+          errorMessage += error.message || error.errorMsg || 'Please try again.';
+        }
+        
+        setConnectionError(errorMessage);
         stopAudioVisualization();
       });
 
@@ -335,10 +350,17 @@ const AdvancedChatWidget = () => {
       console.error('❌ Failed to start voice call:', error);
 
       let errorMessage = 'Failed to connect. ';
-      if (error.name === 'NotAllowedError') {
+      if (error.name === 'NotAllowedError' || error.message?.includes('permission') || error.message?.includes('microphone')) {
         errorMessage += 'Please allow microphone access and try again.';
       } else if (error.name === 'NotFoundError') {
         errorMessage += 'No microphone found. Please connect a microphone.';
+      } else if (
+        error.message?.includes('Meeting has ended') ||
+        error.message?.includes('connection') ||
+        error.message?.includes('network') ||
+        error.type === 'daily-call-join-error'
+      ) {
+        errorMessage += 'Connection issue. Please check your internet connection and try again.';
       } else if (error.message) {
         errorMessage += error.message;
       } else {
