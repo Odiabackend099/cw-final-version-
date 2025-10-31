@@ -558,9 +558,9 @@ const AgentSetup = () => {
               <>
                 {/* Voice Demo Player - Beautiful UI */}
                 <VoiceDemoPlayer
-                  voices={voices}
                   onVoiceSelect={(voiceId) => setSelectedVoiceId(voiceId)}
                   selectedVoiceId={selectedVoiceId}
+                  userTier={user?.user_metadata?.subscription_tier}
                 />
 
                 {/* Voice Selection Dropdown (Fallback) */}
