@@ -27,36 +27,42 @@ const Navigation = () => {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-md'
-          : 'bg-white/80 backdrop-blur-sm'
+          ? 'bg-white/98 backdrop-blur-lg shadow-premium border-b border-gray-100'
+          : 'bg-white/95 backdrop-blur-md'
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <div className="cursor-pointer" onClick={() => scrollToSection('hero')}>
             <CallWaitingLogo size="lg" showText={true} />
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-10">
             <button
               onClick={() => scrollToSection('features')}
-              className="text-gray-700 hover:text-primary-blue font-medium transition-colors"
+              className="text-[#1E3A5F] hover:text-[#10B981] font-semibold transition-colors text-sm uppercase tracking-wide"
             >
               Features
             </button>
             <button
               onClick={() => scrollToSection('how-it-works')}
-              className="text-gray-700 hover:text-primary-blue font-medium transition-colors"
+              className="text-[#1E3A5F] hover:text-[#10B981] font-semibold transition-colors text-sm uppercase tracking-wide"
             >
               How It Works
             </button>
             <button
               onClick={() => scrollToSection('pricing')}
-              className="text-gray-700 hover:text-primary-blue font-medium transition-colors"
+              className="text-[#1E3A5F] hover:text-[#10B981] font-semibold transition-colors text-sm uppercase tracking-wide"
             >
               Pricing
+            </button>
+            <button
+              onClick={() => scrollToSection('testimonials')}
+              className="text-[#1E3A5F] hover:text-[#10B981] font-semibold transition-colors text-sm uppercase tracking-wide"
+            >
+              Testimonials
             </button>
           </div>
 
@@ -64,13 +70,13 @@ const Navigation = () => {
           <div className="hidden md:flex items-center space-x-4">
             <Link
               to="/login"
-              className="text-gray-700 hover:text-primary-blue font-medium transition-colors"
+              className="text-[#1E3A5F] hover:text-[#10B981] font-semibold transition-colors"
             >
               Sign In
             </Link>
             <Link
               to="/signup"
-              className="bg-gradient-primary text-white font-bold px-6 py-2 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300"
+              className="bg-gradient-to-r from-[#1E3A5F] to-[#10B981] text-white font-bold px-8 py-2.5 rounded-full hover:shadow-premium-lg hover:scale-105 transition-all duration-300 text-sm"
             >
               Sign Up Free
             </Link>
@@ -88,38 +94,44 @@ const Navigation = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200 animate-slide-down">
-          <div className="px-6 py-4 space-y-4">
+        <div className="md:hidden bg-white border-t border-gray-100 shadow-premium animate-slide-down">
+          <div className="px-6 py-6 space-y-4">
             <button
               onClick={() => scrollToSection('features')}
-              className="block w-full text-left text-gray-700 hover:text-brand-purple font-medium"
+              className="block w-full text-left text-[#1E3A5F] hover:text-[#10B981] font-semibold transition-colors py-2"
             >
               Features
             </button>
             <button
               onClick={() => scrollToSection('how-it-works')}
-              className="block w-full text-left text-gray-700 hover:text-brand-purple font-medium"
+              className="block w-full text-left text-[#1E3A5F] hover:text-[#10B981] font-semibold transition-colors py-2"
             >
               How It Works
             </button>
             <button
               onClick={() => scrollToSection('pricing')}
-              className="block w-full text-left text-gray-700 hover:text-brand-purple font-medium"
+              className="block w-full text-left text-[#1E3A5F] hover:text-[#10B981] font-semibold transition-colors py-2"
             >
               Pricing
             </button>
-            <div className="pt-4 border-t border-gray-200 space-y-3">
+            <button
+              onClick={() => scrollToSection('testimonials')}
+              className="block w-full text-left text-[#1E3A5F] hover:text-[#10B981] font-semibold transition-colors py-2"
+            >
+              Testimonials
+            </button>
+            <div className="pt-4 border-t border-gray-100 space-y-3">
               <Link
                 to="/login"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block w-full text-left text-gray-700 hover:text-primary-blue font-medium"
+                className="block w-full text-left text-[#1E3A5F] hover:text-[#10B981] font-semibold transition-colors py-2"
               >
                 Sign In
               </Link>
               <Link
                 to="/signup"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block w-full text-center bg-gradient-primary text-white font-bold px-6 py-3 rounded-full hover:shadow-lg transition-all"
+                className="block w-full text-center bg-gradient-to-r from-[#1E3A5F] to-[#10B981] text-white font-bold px-6 py-3 rounded-full hover:shadow-premium-lg transition-all"
               >
                 Sign Up Free
               </Link>

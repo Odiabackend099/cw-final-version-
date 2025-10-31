@@ -75,15 +75,20 @@ const Pricing = () => {
   };
 
   return (
-    <section id="pricing" className="py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
+    <section id="pricing" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl lg:text-5xl font-black mb-4">
-            Simple, <span className="gradient-text-new">transparent pricing</span>
+        <div className="text-center mb-20 animate-fade-in">
+          <div className="inline-flex items-center space-x-2 bg-[#D4AF37]/10 border border-[#D4AF37]/20 px-4 py-1.5 rounded-full mb-6">
+            <span className="text-sm font-semibold text-[#1E3A5F]">Transparent Pricing</span>
+          </div>
+          <h2 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            <span className="text-[#1E3A5F]">Simple,</span>
+            <br />
+            <span className="gradient-text">Transparent Pricing</span>
           </h2>
-          <p className="text-xl text-neutral-darkGray max-w-3xl mx-auto">
-            Choose the plan that fits your business needs. All plans include a 14-day free trial.
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Choose the plan that fits your business needs. All plans include a 14-day free trial with no credit card required.
           </p>
         </div>
 
@@ -92,18 +97,18 @@ const Pricing = () => {
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative bg-white rounded-2xl p-8 transition-all duration-300 animate-fade-in shadow-lg ${
+              className={`relative bg-white rounded-3xl p-8 transition-all duration-500 animate-fade-in ${
                 plan.highlighted
-                  ? 'border-2 border-primary-blue shadow-2xl scale-105 hover:scale-105'
-                  : 'border border-neutral-lightGray hover:border-primary-blue hover:shadow-xl hover:-translate-y-2'
+                  ? 'shadow-premium-lg border-2 border-[#D4AF37] scale-105 hover:scale-[1.07]'
+                  : 'shadow-premium border border-gray-100 hover:border-[#1E3A5F]/30 hover:shadow-premium-lg hover:-translate-y-3'
               }`}
               style={{ animationDelay: `${index * 150}ms` }}
             >
               {/* Featured Badge */}
               {plan.highlighted && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gradient-primary px-6 py-2 rounded-full flex items-center space-x-2">
-                    <Sparkles className="w-4 h-4 text-white" />
+                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 z-10">
+                  <div className="bg-gradient-gold px-6 py-2.5 rounded-full flex items-center space-x-2 shadow-lg">
+                    <Sparkles className="w-5 h-5 text-white" />
                     <span className="text-sm font-bold text-white">Most Popular</span>
                   </div>
                 </div>
@@ -111,24 +116,24 @@ const Pricing = () => {
 
               {/* Plan Header */}
               <div className="text-center mb-8 pt-4">
-                <h3 className="text-2xl font-bold text-neutral-darker mb-2">{plan.name}</h3>
-                <p className="text-neutral-darkGray mb-6">{plan.description}</p>
-                <div className="flex items-baseline justify-center">
-                  <span className="text-5xl font-black text-neutral-darker">{plan.price}</span>
+                <h3 className="text-3xl font-bold text-[#1E3A5F] mb-3 font-['Playfair_Display']">{plan.name}</h3>
+                <p className="text-gray-600 mb-8">{plan.description}</p>
+                <div className="flex items-baseline justify-center mb-4">
+                  <span className="text-6xl font-bold text-[#1E3A5F] font-['Playfair_Display']">{plan.price}</span>
                   {plan.period && (
-                    <span className="text-xl text-neutral-gray ml-2">{plan.period}</span>
+                    <span className="text-xl text-gray-500 ml-2 font-medium">{plan.period}</span>
                   )}
                 </div>
               </div>
 
               {/* Features List */}
-              <div className="space-y-4 mb-8">
+              <div className="space-y-4 mb-10">
                 {plan.features.map((feature, featureIndex) => (
                   <div key={featureIndex} className="flex items-start">
-                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-primary rounded-full flex items-center justify-center mr-3 mt-0.5">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-[#1E3A5F] to-[#10B981] rounded-full flex items-center justify-center mr-3 mt-0.5 shadow-md">
                       <Check className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-neutral-darkGray">{feature}</span>
+                    <span className="text-gray-700 leading-relaxed">{feature}</span>
                   </div>
                 ))}
               </div>
@@ -136,10 +141,10 @@ const Pricing = () => {
               {/* CTA Button */}
               <button
                 onClick={() => handlePayment(plan.paymentLink, plan.name)}
-                className={`w-full font-bold py-4 rounded-xl transition-all duration-300 ${
+                className={`w-full font-bold py-5 rounded-xl transition-all duration-300 text-lg ${
                   plan.highlighted
-                    ? 'bg-gradient-primary text-white hover:bg-gradient-primary-hover hover:shadow-xl hover:scale-105'
-                    : 'border-2 border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white'
+                    ? 'bg-gradient-to-r from-[#1E3A5F] to-[#10B981] text-white hover:shadow-premium-lg hover:scale-[1.02] shadow-premium'
+                    : 'border-2 border-[#1E3A5F] text-[#1E3A5F] hover:bg-[#1E3A5F] hover:text-white hover:shadow-lg'
                 }`}
               >
                 {plan.cta}
@@ -149,26 +154,34 @@ const Pricing = () => {
         </div>
 
         {/* Trust Banner */}
-        <div className="mt-16 text-center animate-fade-in">
-          <p className="text-neutral-darkGray mb-6">
+        <div className="mt-20 text-center animate-fade-in">
+          <p className="text-gray-600 mb-8 text-lg font-medium">
             Trusted by businesses across the UK
           </p>
-          <div className="flex justify-center items-center space-x-8 flex-wrap gap-4">
-            <div className="flex items-center space-x-2 text-neutral-darkGray">
-              <Check className="w-5 h-5 text-status-success" />
-              <span className="font-medium">No credit card required</span>
+          <div className="flex justify-center items-center space-x-8 flex-wrap gap-6">
+            <div className="flex items-center space-x-2 text-[#1E3A5F]">
+              <div className="w-6 h-6 bg-gradient-to-r from-[#1E3A5F] to-[#10B981] rounded-full flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-semibold">No credit card required</span>
             </div>
-            <div className="flex items-center space-x-2 text-neutral-darkGray">
-              <Check className="w-5 h-5 text-status-success" />
-              <span className="font-medium">Cancel anytime</span>
+            <div className="flex items-center space-x-2 text-[#1E3A5F]">
+              <div className="w-6 h-6 bg-gradient-to-r from-[#1E3A5F] to-[#10B981] rounded-full flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-semibold">Cancel anytime</span>
             </div>
-            <div className="flex items-center space-x-2 text-neutral-darkGray">
-              <Check className="w-5 h-5 text-status-success" />
-              <span className="font-medium">GDPR compliant</span>
+            <div className="flex items-center space-x-2 text-[#1E3A5F]">
+              <div className="w-6 h-6 bg-gradient-to-r from-[#1E3A5F] to-[#10B981] rounded-full flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-semibold">GDPR compliant</span>
             </div>
-            <div className="flex items-center space-x-2 text-neutral-darkGray">
-              <Check className="w-5 h-5 text-status-success" />
-              <span className="font-medium">Secure payments via Flutterwave</span>
+            <div className="flex items-center space-x-2 text-[#1E3A5F]">
+              <div className="w-6 h-6 bg-gradient-to-r from-[#1E3A5F] to-[#10B981] rounded-full flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-semibold">Secure payments</span>
             </div>
           </div>
         </div>

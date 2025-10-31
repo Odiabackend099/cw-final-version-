@@ -37,15 +37,20 @@ const HowItWorks = () => {
   ];
 
   return (
-    <section id="how-it-works" className="py-20 bg-gradient-to-b from-white to-blue-50">
+    <section id="how-it-works" className="py-24 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl lg:text-5xl font-black mb-4">
-            <span className="gradient-text">How it works</span>
+        <div className="text-center mb-20 animate-fade-in">
+          <div className="inline-flex items-center space-x-2 bg-[#D4AF37]/10 border border-[#D4AF37]/20 px-4 py-1.5 rounded-full mb-6">
+            <span className="text-sm font-semibold text-[#1E3A5F]">Simple Process</span>
+          </div>
+          <h2 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            <span className="text-[#1E3A5F]">How It Works</span>
+            <br />
+            <span className="gradient-text">In 4 Simple Steps</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Visualizing the customer journey step by step
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            See how CallWaiting AI transforms every customer call into a qualified opportunity.
           </p>
         </div>
 
@@ -53,7 +58,7 @@ const HowItWorks = () => {
         <div className="hidden lg:block">
           <div className="relative">
             {/* Connector Line */}
-            <div className="absolute top-24 left-0 right-0 h-1 gradient-bg opacity-20"></div>
+            <div className="absolute top-32 left-0 right-0 h-1 bg-gradient-to-r from-[#1E3A5F]/10 via-[#10B981]/30 to-[#1E3A5F]/10"></div>
 
             <div className="grid grid-cols-4 gap-8 relative z-10">
               {steps.map((step, index) => (
@@ -62,33 +67,31 @@ const HowItWorks = () => {
                   className="animate-fade-in"
                   style={{ animationDelay: `${index * 150}ms` }}
                 >
-                  <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
+                  <div className="bg-white rounded-3xl p-8 shadow-premium hover:shadow-premium-lg transition-all duration-500 hover:-translate-y-3 overflow-hidden border border-gray-100 group">
                     {/* Number Badge */}
-                    <div
-                      className={`w-16 h-16 bg-gradient-to-r ${step.gradient} rounded-full flex items-center justify-center mb-6 mx-auto`}
-                    >
-                      <span className="text-2xl font-black text-white">{step.number}</span>
+                    <div className="w-20 h-20 bg-gradient-to-r from-[#1E3A5F] to-[#10B981] rounded-full flex items-center justify-center mb-6 mx-auto shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <span className="text-3xl font-bold text-white font-['Playfair_Display']">{step.number}</span>
                     </div>
 
                     {/* Section Image */}
-                    <div className="mb-6 rounded-2xl overflow-hidden shadow-md">
+                    <div className="mb-6 rounded-2xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
                       <img
                         src={step.image}
                         alt={step.title}
-                        className="w-full h-auto object-cover"
+                        className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                         style={{ maxHeight: '300px' }}
                       />
                     </div>
 
                     {/* Icon */}
                     <div className="flex justify-center mb-4">
-                      <div className={`w-20 h-20 bg-gradient-to-r ${step.gradient} opacity-10 rounded-2xl flex items-center justify-center`}>
-                        <step.icon className="w-10 h-10 text-primary-blue" />
+                      <div className="w-20 h-20 bg-gradient-to-r from-[#1E3A5F]/10 to-[#10B981]/10 rounded-2xl flex items-center justify-center group-hover:from-[#1E3A5F]/20 group-hover:to-[#10B981]/20 transition-all duration-300">
+                        <step.icon className="w-10 h-10 text-[#1E3A5F]" />
                       </div>
                     </div>
 
                     {/* Content */}
-                    <h3 className="text-xl font-bold mb-3 text-gray-900 text-center">
+                    <h3 className="text-2xl font-bold mb-3 text-[#1E3A5F] text-center leading-tight">
                       {step.title}
                     </h3>
                     <p className="text-gray-600 text-center leading-relaxed">
@@ -109,16 +112,14 @@ const HowItWorks = () => {
               className="relative animate-fade-in"
               style={{ animationDelay: `${index * 150}ms` }}
             >
-                  <div className="bg-white rounded-3xl p-8 shadow-lg overflow-hidden">
+                  <div className="bg-white rounded-3xl p-8 shadow-premium overflow-hidden border border-gray-100">
                 {/* Number Badge */}
-                <div
-                  className={`w-16 h-16 bg-gradient-to-r ${step.gradient} rounded-full flex items-center justify-center mx-auto mb-6`}
-                >
-                  <span className="text-2xl font-black text-white">{step.number}</span>
+                <div className="w-20 h-20 bg-gradient-to-r from-[#1E3A5F] to-[#10B981] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <span className="text-3xl font-bold text-white font-['Playfair_Display']">{step.number}</span>
                 </div>
 
                 {/* Section Image */}
-                <div className="mb-6 rounded-2xl overflow-hidden shadow-md">
+                <div className="mb-6 rounded-2xl overflow-hidden shadow-lg">
                   <img
                     src={step.image}
                     alt={step.title}
@@ -129,8 +130,8 @@ const HowItWorks = () => {
                 {/* Content */}
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-3">
-                    <step.icon className="w-6 h-6 text-primary-blue mr-3" />
-                    <h3 className="text-xl font-bold text-gray-900">
+                    <step.icon className="w-6 h-6 text-[#1E3A5F] mr-3" />
+                    <h3 className="text-2xl font-bold text-[#1E3A5F]">
                       {step.title}
                     </h3>
                   </div>
@@ -143,7 +144,7 @@ const HowItWorks = () => {
               {/* Connector Line for Mobile */}
               {index < steps.length - 1 && (
                 <div className="flex justify-center">
-                  <div className="w-1 h-8 gradient-bg opacity-30"></div>
+                  <div className="w-1 h-8 bg-gradient-to-b from-[#1E3A5F] to-[#10B981] opacity-30"></div>
                 </div>
               )}
             </div>

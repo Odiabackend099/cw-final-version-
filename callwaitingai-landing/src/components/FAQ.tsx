@@ -44,15 +44,20 @@ const FAQ = () => {
   };
 
   return (
-    <section id="faq" className="py-20 bg-gradient-to-b from-blue-50 to-white">
+    <section id="faq" className="py-24 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-4xl mx-auto px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl lg:text-5xl font-black mb-4">
-            <span className="gradient-text">Frequently Asked Questions</span>
+        <div className="text-center mb-20 animate-fade-in">
+          <div className="inline-flex items-center space-x-2 bg-[#D4AF37]/10 border border-[#D4AF37]/20 px-4 py-1.5 rounded-full mb-6">
+            <span className="text-sm font-semibold text-[#1E3A5F]">Get Answers</span>
+          </div>
+          <h2 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            <span className="text-[#1E3A5F]">Frequently Asked</span>
+            <br />
+            <span className="gradient-text">Questions</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Everything you need to know about CallWaitingAI
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Everything you need to know about CallWaiting AI and how it can transform your customer service.
           </p>
         </div>
 
@@ -61,25 +66,25 @@ const FAQ = () => {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 animate-fade-in"
+              className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-premium hover:shadow-premium-lg transition-all duration-300 animate-fade-in"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <button
                 onClick={() => toggleFAQ(index)}
-                className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+                className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-gray-50/50 transition-colors"
               >
-                <h3 className="text-xl font-bold text-gray-900 pr-4">
+                <h3 className="text-xl font-bold text-[#1E3A5F] pr-4 leading-tight">
                   {faq.question}
                 </h3>
                 {openIndex === index ? (
-                  <ChevronUp className="w-6 h-6 text-primary-blue flex-shrink-0" />
+                  <ChevronUp className="w-6 h-6 text-[#1E3A5F] flex-shrink-0" />
                 ) : (
-                  <ChevronDown className="w-6 h-6 text-primary-blue flex-shrink-0" />
+                  <ChevronDown className="w-6 h-6 text-[#1E3A5F] flex-shrink-0" />
                 )}
               </button>
               {openIndex === index && (
                 <div className="px-8 pb-6">
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-gray-600 leading-relaxed text-base">
                     {faq.answer}
                   </p>
                 </div>
