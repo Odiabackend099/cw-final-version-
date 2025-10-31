@@ -35,6 +35,11 @@ const Footer = () => {
                   How It Works
                 </a>
               </li>
+              <li>
+                <a href="#faq" className="hover:text-white transition-colors">
+                  FAQ
+                </a>
+              </li>
             </ul>
           </div>
 

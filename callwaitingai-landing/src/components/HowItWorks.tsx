@@ -8,6 +8,7 @@ const HowItWorks = () => {
       title: 'Incoming Call',
       description: 'Customer calls your business number',
       gradient: 'from-primary-blue to-primary-green',
+      image: '/images/1.png',
     },
     {
       icon: FileText,
@@ -15,6 +16,7 @@ const HowItWorks = () => {
       title: 'Real-Time Transcription',
       description: 'Speech is converted to text instantly',
       gradient: 'from-primary-blue/80 to-primary-green/80',
+      image: '/images/2.png',
     },
     {
       icon: Brain,
@@ -22,6 +24,7 @@ const HowItWorks = () => {
       title: 'AI Processing',
       description: 'AI generates natural, context-aware responses',
       gradient: 'from-primary-green/70 to-primary-blue/70',
+      image: '/images/3.png',
     },
     {
       icon: Volume2,
@@ -29,6 +32,7 @@ const HowItWorks = () => {
       title: 'Voice Response',
       description: 'Natural voice response completes the conversation',
       gradient: 'from-primary-green to-primary-blue',
+      image: '/images/4.png',
     },
   ];
 
@@ -58,7 +62,7 @@ const HowItWorks = () => {
                   className="animate-fade-in"
                   style={{ animationDelay: `${index * 150}ms` }}
                 >
-                  <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                  <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
                     {/* Number Badge */}
                     <div
                       className={`w-16 h-16 bg-gradient-to-r ${step.gradient} rounded-full flex items-center justify-center mb-6 mx-auto`}
@@ -66,8 +70,18 @@ const HowItWorks = () => {
                       <span className="text-2xl font-black text-white">{step.number}</span>
                     </div>
 
+                    {/* Section Image */}
+                    <div className="mb-6 rounded-2xl overflow-hidden shadow-md">
+                      <img
+                        src={step.image}
+                        alt={step.title}
+                        className="w-full h-auto object-cover"
+                        style={{ maxHeight: '300px' }}
+                      />
+                    </div>
+
                     {/* Icon */}
-                    <div className="flex justify-center mb-6">
+                    <div className="flex justify-center mb-4">
                       <div className={`w-20 h-20 bg-gradient-to-r ${step.gradient} opacity-10 rounded-2xl flex items-center justify-center`}>
                         <step.icon className="w-10 h-10 text-primary-blue" />
                       </div>
@@ -95,27 +109,34 @@ const HowItWorks = () => {
               className="relative animate-fade-in"
               style={{ animationDelay: `${index * 150}ms` }}
             >
-              <div className="bg-white rounded-3xl p-8 shadow-lg">
-                <div className="flex items-start space-x-6">
-                  {/* Number Badge */}
-                  <div
-                    className={`flex-shrink-0 w-16 h-16 bg-gradient-to-r ${step.gradient} rounded-full flex items-center justify-center`}
-                  >
-                    <span className="text-2xl font-black text-white">{step.number}</span>
-                  </div>
+              <div className="bg-white rounded-3xl p-8 shadow-lg overflow-hidden">
+                {/* Number Badge */}
+                <div
+                  className={`w-16 h-16 bg-gradient-to-r ${step.gradient} rounded-full flex items-center justify-center mx-auto mb-6`}
+                >
+                  <span className="text-2xl font-black text-white">{step.number}</span>
+                </div>
 
-                  {/* Content */}
-                  <div className="flex-1">
-                    <div className="flex items-center mb-3">
-                      <step.icon className="w-6 h-6 text-primary-blue mr-3" />
-                      <h3 className="text-xl font-bold text-gray-900">
-                        {step.title}
-                      </h3>
-                    </div>
-                    <p className="text-gray-600 leading-relaxed">
-                      {step.description}
-                    </p>
+                {/* Section Image */}
+                <div className="mb-6 rounded-2xl overflow-hidden shadow-md">
+                  <img
+                    src={step.image}
+                    alt={step.title}
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+
+                {/* Content */}
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-3">
+                    <step.icon className="w-6 h-6 text-primary-blue mr-3" />
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {step.title}
+                    </h3>
                   </div>
+                  <p className="text-gray-600 leading-relaxed">
+                    {step.description}
+                  </p>
                 </div>
               </div>
 
