@@ -267,12 +267,14 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
         backgroundSound: 'off',
       };
 
-      // Configure voice - Use Minimax voices for test calls as requested
+      // Configure voice - Use Minimax voices for test calls
+      // NOTE: Vapi requires a provider, using playht format which accepts custom IDs
       if (assistant.use_minimax_tts && assistant.minimax_voice_id) {
         assistantConfig.voice = {
+          provider: 'playht',
           voiceId: assistant.minimax_voice_id,
         };
-        console.log('🎤 Using Minimax Voice:', assistant.minimax_voice_id);
+        console.log('🎤 Using Minimax Voice (via PlayHT provider):', assistant.minimax_voice_id);
       }
 
       if (import.meta.env.DEV) {
