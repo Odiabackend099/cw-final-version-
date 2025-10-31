@@ -276,12 +276,14 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
         const selectedVoice = getVoiceById(assistant.vapi_voice_id);
 
         if (selectedVoice) {
+          // Always include provider and voiceId for proper Vapi API format
           assistantConfig.voice = {
             provider: selectedVoice.provider,
             voiceId: selectedVoice.voiceId,
           };
           console.log('🎤 Using Vapi Voice:', selectedVoice.name, `(${selectedVoice.provider})`);
           console.log('Voice ID:', selectedVoice.voiceId);
+          console.log('Full voice config:', assistantConfig.voice);
         } else {
           console.log('ℹ️ Voice not found, using Vapi default voice');
         }
@@ -319,6 +321,40 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
           break;
         } catch (startError: any) {
           lastError = startError;
+          
+          console.error('❌ Vapi start error:', {
+            type: startError.type,
+            stage: startError.stage,
+            error: startError.error,
+            message: startError.message,
+          });
+          
+          // Handle start-method-error (400 Bad Request) - usually invalid config
+          if (startError.type === 'start-method-error') {
+            // If we have a custom voice, try without it first
+            if (assistantConfig.voice && attempt === 0) {
+              console.warn('⚠️ Start method error detected, retrying without custom voice config');
+              const voiceConfig = { ...assistantConfig.voice };
+              delete assistantConfig.voice;
+              // Retry without voice
+              continue;
+            }
+            
+            // If already retried without voice and still failing, try with minimal config
+            if (attempt === 1) {
+              console.warn('⚠️ Retrying with minimal assistant config');
+              // Use minimal valid config
+              assistantConfig.voice = undefined;
+              // Ensure required fields are present
+              if (!assistantConfig.model) {
+                assistantConfig.model = {
+                  provider: 'groq',
+                  model: 'llama-3.3-70b-versatile',
+                };
+              }
+              continue;
+            }
+          }
           
           // Check for connection-related errors that might be retryable
           const isConnectionError = 

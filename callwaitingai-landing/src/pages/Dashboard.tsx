@@ -41,13 +41,37 @@ export function Dashboard() {
         .order('created_at', { ascending: false })
         .limit(10);
 
-      // Fetch payments
-      const { data: payments } = await supabase
-        .from('payments')
-        .select('*')
-        .eq('payment_status', 'successful');
+      // Fetch payments - handle both 'status' and 'payment_status' columns
+      let payments: any[] = [];
+      try {
+        // Try with 'status' column first (production schema)
+        const { data: paymentsData, error: statusError } = await supabase
+          .from('payments')
+          .select('*')
+          .eq('status', 'successful');
+        
+        if (!statusError && paymentsData) {
+          payments = paymentsData;
+        } else if (statusError?.code === 'PGRST116' || statusError?.message?.includes('column')) {
+          // Fallback to 'payment_status' column if 'status' doesn't exist
+          const { data: paymentsData2, error: paymentStatusError } = await supabase
+            .from('payments')
+            .select('*')
+            .eq('payment_status', 'successful');
+          
+          if (!paymentStatusError && paymentsData2) {
+            payments = paymentsData2;
+          } else {
+            console.warn('Could not fetch payments:', paymentStatusError);
+          }
+        } else {
+          console.warn('Could not fetch payments:', statusError);
+        }
+      } catch (error) {
+        console.error('Error fetching payments:', error);
+      }
 
-      const totalRevenue = payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+      const totalRevenue = payments?.reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
 
       // Calculate stats
       const now = new Date();
