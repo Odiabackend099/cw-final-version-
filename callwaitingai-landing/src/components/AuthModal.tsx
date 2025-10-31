@@ -75,6 +75,8 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode, onSuccess }: AuthModalP
         }
       }
     } catch (err: any) {
+      console.error('Auth error:', err);
+
       if (err.message.includes('Email not confirmed')) {
         setError('Please verify your email address before signing in.');
         setCurrentStep('verify-email');
@@ -83,6 +85,16 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode, onSuccess }: AuthModalP
       } else if (err.message.includes('User already registered')) {
         setError('An account with this email already exists. Please sign in instead.');
         setMode('signin');
+      } else if (err.status === 500 || err.message.includes('500')) {
+        setError('Server error occurred. This may be a temporary issue with the authentication service. Please try again in a few moments or contact support if the problem persists.');
+        console.error('Supabase 500 error details:', {
+          error: err,
+          message: err.message,
+          status: err.status,
+          endpoint: 'signup',
+        });
+      } else if (err.message.includes('network') || err.message.includes('fetch')) {
+        setError('Network connection error. Please check your internet connection and try again.');
       } else {
         setError(err.message || 'An error occurred. Please try again.');
       }
