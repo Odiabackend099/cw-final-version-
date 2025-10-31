@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import CallWaitingLogo from '../components/CallWaitingLogo';
 
 export function SignUp() {
   const [email, setEmail] = useState('');
@@ -40,10 +41,12 @@ export function SignUp() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <img src="/logo.jpeg" alt="CallWaitingAI" className="h-16 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent">
-              CallWaitingAI
-            </h2>
+            <div className="flex justify-center mb-4">
+              <CallWaitingLogo size="xl" showText={false} />
+            </div>
+            <div className="flex justify-center mb-2">
+              <CallWaitingLogo size="xl" showText={true} />
+            </div>
             <p className="mt-2 text-gray-600">Create your account</p>
           </div>
 

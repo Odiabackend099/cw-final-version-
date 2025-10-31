@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, PhoneCall, PhoneOff, Send, Loader2 } from 'lucide-react';
 import { chatService, ChatMessage } from '../lib/chat';
 import Vapi from '@vapi-ai/web';
+import CallWaitingLogo from './CallWaitingLogo';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -380,11 +381,9 @@ const AdvancedChatWidget = () => {
               {isListening ? '🎤' : isSpeaking ? '🔊' : '⏸️'}
             </div>
           ) : (
-            <img
-              src="/images/callwaiting ai logo.jpeg"
-              alt="CallWaitingAI"
-              className="w-full h-full object-contain"
-            />
+            <div className="w-full h-full flex items-center justify-center">
+              <CallWaitingLogo size="lg" showText={false} />
+            </div>
           )}
         </div>
       </div>

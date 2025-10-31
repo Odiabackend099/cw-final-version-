@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import CallWaitingLogo from '../components/CallWaitingLogo';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -16,12 +17,29 @@ export function Login() {
     setLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
-      if (error) throw error;
-      navigate('/dashboard');
+      const { data, error } = await signIn(email, password);
+      
+      if (error) {
+        throw error;
+      }
+
+      // Guaranteed redirect to dashboard after successful login
+      if (data?.session || data?.user) {
+        // Use replace to prevent back navigation to login
+        navigate('/dashboard', { replace: true });
+        
+        // Fallback: Force redirect if navigate doesn't work
+        setTimeout(() => {
+          if (window.location.pathname !== '/dashboard') {
+            window.location.href = '/dashboard';
+          }
+        }, 500);
+      } else {
+        throw new Error('Login succeeded but no session was created');
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in');
-    } finally {
+      console.error('Login error:', err);
+      setError(err.message || 'Failed to sign in. Please check your credentials.');
       setLoading(false);
     }
   }
@@ -32,10 +50,12 @@ export function Login() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <img src="/logo.jpeg" alt="CallWaitingAI" className="h-16 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent">
-              CallWaitingAI
-            </h2>
+            <div className="flex justify-center mb-4">
+              <CallWaitingLogo size="xl" showText={false} />
+            </div>
+            <div className="flex justify-center mb-2">
+              <CallWaitingLogo size="xl" showText={true} />
+            </div>
             <p className="mt-2 text-gray-600">Sign in to your account</p>
           </div>
 

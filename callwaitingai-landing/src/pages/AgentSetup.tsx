@@ -79,6 +79,7 @@ const AgentSetup = () => {
 
   // Voice call tester state
   const [showCallTester, setShowCallTester] = useState(false);
+  const [testingVoice, setTestingVoice] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -282,6 +283,61 @@ const AgentSetup = () => {
 
     // Open voice call tester
     setShowCallTester(true);
+  };
+
+  const testVoiceId = async (voiceId: string, voiceName: string) => {
+    if (!voiceId) {
+      setMessage({ type: 'error', text: 'Please select a voice first' });
+      return false;
+    }
+
+    try {
+      setTestingVoice(true);
+      setMessage({ type: 'info', text: `Testing ${voiceName}...` });
+
+      // Call Minimax TTS Edge Function
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL || 'https://bcufohulqrceytkrqpgd.supabase.co'}/functions/v1/minimax-tts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjdWZvaHVscXJjZXl0a3JxcGdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MTA2NTUsImV4cCI6MjA3NTA4NjY1NX0.rc9-fFpLsTyESK-222zYVKGVx-R5mwb9Xi005p_bwoI'}`,
+        },
+        body: JSON.stringify({
+          text: 'Hello, this is a test of the voice system.',
+          voice_id: voiceId,
+          model: 'speech-02-hd',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        console.log('✅ VOICE TEST: TRUE/OK');
+        console.log('═══════════════════════════');
+        console.log('Voice:', voiceName);
+        console.log('Voice ID:', voiceId);
+        console.log('Status:', 'SUCCESS');
+        console.log('Audio URL:', data.audio_file);
+        console.log('═══════════════════════════');
+        console.log('RESULT: TRUE');
+        console.log('STATUS: OK');
+        console.log('═══════════════════════════');
+
+        setMessage({ type: 'success', text: `✅ ${voiceName} test: OK - Voice working correctly!` });
+        return true;
+      } else {
+        console.log('❌ VOICE TEST: FALSE/ERROR');
+        console.log('Error:', data.error || 'Unknown error');
+        setMessage({ type: 'error', text: `❌ ${voiceName} test failed: ${data.error || 'Unknown error'}` });
+        return false;
+      }
+    } catch (error: any) {
+      console.error('❌ VOICE TEST ERROR:', error);
+      setMessage({ type: 'error', text: `Voice test failed: ${error.message}` });
+      return false;
+    } finally {
+      setTestingVoice(false);
+    }
   };
 
   const testAgentConfiguration = async () => {
@@ -495,7 +551,7 @@ const AgentSetup = () => {
               </div>
 
               {useMinimaxTts && (
-                <div>
+                <div className="space-y-3">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Select Voice
                   </label>
@@ -514,9 +570,28 @@ const AgentSetup = () => {
                   </select>
 
                   {selectedVoice && (
-                    <p className="text-sm text-gray-600 mt-2">
-                      {selectedVoice.description}
-                    </p>
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-600">
+                        {selectedVoice.description}
+                      </p>
+                      <button
+                        onClick={() => testVoiceId(selectedVoiceId, selectedVoice.voice_name)}
+                        disabled={testingVoice || !selectedVoiceId}
+                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      >
+                        {testingVoice ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Testing...
+                          </>
+                        ) : (
+                          <>
+                            <Volume2 className="w-4 h-4" />
+                            Test Voice
+                          </>
+                        )}
+                      </button>
+                    </div>
                   )}
                 </div>
               )}

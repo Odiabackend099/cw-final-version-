@@ -52,3 +52,52 @@ next-env.d.ts
 .temp
 *.log
 .env
+
+# Production cleanup - test and temporary files
+test_*.ts
+test_*.sh
+test-*.sh
+*-test.sh
+BATTLE_TESTED_VOICE_FIX.sh
+GUARANTEED_FIX_SCRIPT.sh
+run-critical-fix*.sh
+verify-agent-setup-deployment.sh
+FIX_DASHBOARD_CLEANUP.sh
+
+# Temporary TypeScript files
+add_promax_payment.ts
+check_payment.ts
+check_payments_schema.ts
+create_users*.ts
+FIX_VOICE_CALL_COMPLETE.ts
+verify_and_setup_account.ts
+
+# Temporary SQL files (migrations are in supabase/migrations/)
+*.sql
+!supabase/migrations/**/*.sql
+
+# Temporary documentation
+*_COMPLETE.md
+*_SUCCESS.md
+*_PLAN.md
+*_CHECKLIST.md
+*_SOLUTION.md
+*_FIX.md
+*_READY.md
+ACTION_REQUIRED_*.md
+EXECUTE_THIS_*.md
+RUN_THIS_*.md
+SIMPLE_INSTRUCTIONS.md
+voice_call_fix_log.txt
+
+# Environment files
+.env.*
+!.env.example
+
+# Temporary directories
+testsprite_tests/tmp/
+*.tmp/
+
+# Cleanup scripts
+cleanup-production.sh
+.production-cleanup-list.txt

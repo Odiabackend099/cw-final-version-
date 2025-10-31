@@ -29,11 +29,11 @@ export async function getUserTier(userId: string): Promise<UserTier> {
     const amount = payment.amount;
 
     if (amount >= 180) {
-      return 'promax'; // $180+ = promax tier
+      return 'promax'; // $180+ = ProMax tier (gets Minimax TTS)
     } else if (amount >= 80) {
-      return 'professional'; // $80+ = professional tier
+      return 'pro'; // $80+ = Pro tier (gets Minimax TTS)
     } else if (amount >= 49) {
-      return 'pro'; // $49+ = pro tier
+      return 'professional'; // $49+ = Professional tier (Vapi default)
     }
 
     // Default to free for smaller amounts

@@ -43,19 +43,23 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   return (
     <>
       <Routes>
         {/* Landing Page Routes */}
         <Route path="/" element={
-          <div className="min-h-screen bg-neutral-lightBg">
-            <Navigation />
-            <Home />
-            <Footer />
-            <AdvancedChatWidget />
-          </div>
+          user ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <div className="min-h-screen bg-neutral-lightBg">
+              <Navigation />
+              <Home />
+              <Footer />
+              <AdvancedChatWidget />
+            </div>
+          )
         } />
         <Route path="/privacy" element={
           <div className="min-h-screen bg-neutral-lightBg">
@@ -73,8 +77,34 @@ function AppRoutes() {
         } />
 
         {/* Auth Routes */}
-        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
-        <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignUp />} />
+        <Route 
+          path="/login" 
+          element={
+            loading ? (
+              <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+            ) : user ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Login />
+            )
+          } 
+        />
+        <Route 
+          path="/signup" 
+          element={
+            loading ? (
+              <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+            ) : user ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <SignUp />
+            )
+          } 
+        />
         <Route path="/auth/confirm" element={<EmailVerification />} />
         <Route path="/auth/reset-password" element={<PasswordReset />} />
 

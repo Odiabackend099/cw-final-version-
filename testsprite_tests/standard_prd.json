@@ -1,0 +1,175 @@
+{
+  "meta": {
+    "project": "CallWaitingAI MVP",
+    "date": "2025-10-29",
+    "prepared_by": "Software Development Manager"
+  },
+  "product_overview": "CallWaitingAI is an AI-powered virtual receptionist platform that automates inbound call handling for small and medium businesses. It features an AI agent that answers calls, captures caller info, manages leads, and integrates with voice call and text-to-speech services, delivered through an intuitive web dashboard with tier-based subscription plans.",
+  "core_goals": [
+    "Deliver a functional MVP supporting up to 100 users on the free tier with zero infrastructure costs.",
+    "Implement a robust AI receptionist agent that can be configured with custom business details and system prompts.",
+    "Ensure seamless voice call handling and integration with Vapi.ai for call processing and logging.",
+    "Enable secure user authentication and subscription tier management to control feature access.",
+    "Establish input validation, error handling, and rate limiting to maintain system stability and prevent abuse.",
+    "Deploy a monitoring and health check system to guarantee high availability and reliability.",
+    "Provide a smooth end-to-end user experience from signup, agent setup, file uploads, call flow, to dashboard interaction."
+  ],
+  "key_features": [
+    "User authentication system with login, signup, password reset, and session management via Supabase Auth.",
+    "Dashboard displaying call overview, leads, and system status for user insights.",
+    "AI receptionist agent setup including business data, customizable system prompt, and voice settings with Minimax TTS integration for paid tiers.",
+    "Voice call testing through Vapi.ai SDK with tier-based voice configurations.",
+    "Payment and subscription management allowing tier upgrades and tracking.",
+    "Call logs and lead management modules to view call history and capture lead data.",
+    "Knowledge base upload with auto-save functionality to link files to agents without prior save errors.",
+    "Webhook handler for Vapi.ai to automatically create call log entries on call completion.",
+    "Input validation mechanisms ensuring business name lengths, system prompt sizes, and file upload restrictions to reduce crashes.",
+    "Basic rate limiting to prevent API abuse, especially on free-tier users.",
+    "Health check endpoint supporting uptime monitoring via UptimeRobot.",
+    "Responsive navigation with brand customization and easy settings access."
+  ],
+  "user_flow_summary": [
+    "User registers via signup page, confirms account, and logs in to dashboard.",
+    "User accesses agent setup page to configure AI receptionist details including business name, system prompt, and voice settings.",
+    "User uploads knowledge base files; system auto-saves agent before accepting files to prevent errors.",
+    "User tests voice call functionality integrating Vapi.ai and Minimax TTS if subscribed to paid tiers.",
+    "Incoming call events trigger Vapi webhook; completed calls automatically populate call logs.",
+    "User views calls and leads on dedicated dashboard pages to track interactions and potential customers.",
+    "User manages subscription payments and can upgrade tiers to unlock premium features.",
+    "System runs rate limiting on API calls to ensure fair usage and prevent misuse.",
+    "Health endpoint monitored by uptime services to check system status regularly.",
+    "Admin and user settings managed via settings page with easy navigation and profile updates."
+  ],
+  "validation_criteria": [
+    "Database migrations for critical fixes run without error, agent configuration saves with system prompt persisted.",
+    "Knowledge base upload works immediately after page load with auto-save occurrence and file visible in storage.",
+    "Input validation triggers errors for empty or oversize business names, too long prompts, and oversized or disallowed file types; valid input saves successfully.",
+    "Vapi webhook deployed and configured; test call creates accurate call log entries visible in dashboard.",
+    "Rate limiting correctly returns 429 error after 100 requests/hour per assistant and resets after cooldown.",
+    "Health check endpoint returns 200 status when database is responsive and 503 when unhealthy, verified by uptime monitoring.",
+    "End-to-end tests confirm user signup, login, agent setup, file upload, call flow, and dashboard display complete with no console errors.",
+    "System operates within free tier limits for database, storage, bandwidth, and invocation counts.",
+    "UptimeRobot configured correctly to monitor multiple endpoints every 5 minutes with reliable alerting.",
+    "No critical bugs remain; beta users successfully complete configuration and usage workflows without issues."
+  ],
+  "code_summary": {
+    "tech_stack": [
+      "TypeScript",
+      "React 18",
+      "Vite 6",
+      "Supabase (PostgreSQL)",
+      "Vapi.ai Voice SDK",
+      "Minimax TTS",
+      "Tailwind CSS",
+      "React Router v6",
+      "Vercel (Deployment)"
+    ],
+    "features": [
+      {
+        "name": "Authentication System",
+        "description": "User authentication with Supabase Auth, login, signup, password reset, and session management",
+        "files": [
+          "callwaitingai-landing/src/contexts/AuthContext.tsx",
+          "callwaitingai-landing/src/pages/Login.tsx",
+          "callwaitingai-landing/src/pages/Signup.tsx",
+          "callwaitingai-landing/src/pages/PasswordReset.tsx",
+          "callwaitingai-landing/src/lib/supabase.ts"
+        ]
+      },
+      {
+        "name": "User Tier Management",
+        "description": "Determines user subscription tier (free, professional, pro, promax) based on payment history and grants access to features accordingly",
+        "files": [
+          "callwaitingai-landing/src/lib/userTier.ts"
+        ]
+      },
+      {
+        "name": "Dashboard",
+        "description": "Main dashboard showing overview of calls, leads, and system status",
+        "files": [
+          "callwaitingai-landing/src/pages/Dashboard.tsx"
+        ]
+      },
+      {
+        "name": "AI Agent Setup",
+        "description": "Configure AI receptionist with business details, system prompt, voice settings, and Minimax TTS options for paid tiers",
+        "files": [
+          "callwaitingai-landing/src/pages/AgentSetup.tsx",
+          "callwaitingai-landing/src/components/AssistantConfig.tsx"
+        ]
+      },
+      {
+        "name": "Voice Call Testing",
+        "description": "Test voice calls with Vapi.ai integration, supports tier-based voice configuration with Minimax TTS for paid users",
+        "files": [
+          "callwaitingai-landing/src/components/VoiceCallTester.tsx"
+        ]
+      },
+      {
+        "name": "Minimax TTS Integration",
+        "description": "Premium text-to-speech service integration for paid tier users with multiple voice options",
+        "files": [
+          "supabase/functions/minimax-tts/index.ts",
+          "supabase/migrations/old/20250129000000_create_minimax_voices_table.sql"
+        ]
+      },
+      {
+        "name": "Payment Management",
+        "description": "Payment history, subscription tracking, and tier management",
+        "files": [
+          "callwaitingai-landing/src/pages/Payments.tsx"
+        ]
+      },
+      {
+        "name": "Call Logs",
+        "description": "View and manage call history and recordings",
+        "files": [
+          "callwaitingai-landing/src/pages/Calls.tsx"
+        ]
+      },
+      {
+        "name": "Lead Management",
+        "description": "Track and manage leads captured from voice calls",
+        "files": [
+          "callwaitingai-landing/src/pages/Leads.tsx"
+        ]
+      },
+      {
+        "name": "Vapi Webhook Handler",
+        "description": "Supabase Edge Function to process Vapi.ai webhooks for call events",
+        "files": [
+          "supabase/functions/vapi-webhook/index.ts"
+        ]
+      },
+      {
+        "name": "Health Check Endpoint",
+        "description": "System health monitoring endpoint",
+        "files": [
+          "supabase/functions/health/index.ts"
+        ]
+      },
+      {
+        "name": "Settings Page",
+        "description": "User profile and application settings",
+        "files": [
+          "callwaitingai-landing/src/pages/Settings.tsx"
+        ]
+      },
+      {
+        "name": "Navigation",
+        "description": "Main navigation component with responsive design and white-labeled branding (ODIADEV)",
+        "files": [
+          "callwaitingai-landing/src/components/Navigation.tsx"
+        ]
+      },
+      {
+        "name": "Database Schema",
+        "description": "Supabase database tables for users, assistants, payments, calls, leads, and minimax voices",
+        "files": [
+          "supabase/migrations/old/1761615782_complete_schema_migration_new_backend.sql",
+          "supabase/migrations/20250130000000_fix_critical_columns.sql"
+        ]
+      }
+    ]
+  }
+}

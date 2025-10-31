@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import CallWaitingLogo from './CallWaitingLogo';
 
 const Footer = () => {
   return (
@@ -7,11 +8,9 @@ const Footer = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div>
-            <img
-              src="/images/callwaiting ai logo.jpeg"
-              alt="CallWaitingAI"
-              className="h-10 w-auto mb-4 brightness-0 invert"
-            />
+            <div className="mb-4">
+              <CallWaitingLogo size="md" showText={true} invertColors={true} />
+            </div>
             <p className="text-gray-400 leading-relaxed">
               AI-powered voice receptionist built for UK businesses that value every customer interaction.
             </p>

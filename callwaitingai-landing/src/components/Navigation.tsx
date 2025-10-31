@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import CallWaitingLogo from './CallWaitingLogo';
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -32,12 +33,8 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => scrollToSection('hero')}>
-            <img
-              src="/images/callwaiting ai logo.jpeg"
-              alt="CallWaitingAI"
-              className="h-16 w-auto"
-            />
+          <div className="cursor-pointer" onClick={() => scrollToSection('hero')}>
+            <CallWaitingLogo size="lg" showText={true} />
           </div>
 
           {/* Desktop Navigation */}

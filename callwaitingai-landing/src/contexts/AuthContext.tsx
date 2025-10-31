@@ -62,6 +62,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signIn(email: string, password: string) {
     const result = await supabase.auth.signInWithPassword({ email, password });
+    
+    // Ensure session is properly set after login
+    if (result.data?.session) {
+      // Wait a moment for auth state to update
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Force refresh user state
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+        setUserProfile(profile);
+      }
+    }
+    
     return result;
   }
 

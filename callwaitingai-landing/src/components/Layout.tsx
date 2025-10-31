@@ -13,6 +13,7 @@ import {
   Bot
 } from 'lucide-react';
 import { useState } from 'react';
+import CallWaitingLogo from './CallWaitingLogo';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { user, userProfile, signOut } = useAuth();
@@ -41,10 +42,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <img src="/logo.jpeg" alt="CallWaitingAI" className="h-10 w-auto" />
-              <span className="ml-3 text-xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent">
-                CallWaitingAI
-              </span>
+              <CallWaitingLogo size="md" showText={true} />
             </div>
             
             {/* Desktop Navigation */}
