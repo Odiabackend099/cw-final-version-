@@ -1,13 +1,23 @@
 import { Link } from 'react-router-dom';
-import { Phone, Sparkles, Clock, Target, MessageSquare, Shield } from 'lucide-react';
+import { Phone, Sparkles, Clock, Target, MessageSquare, Shield, UserPlus } from 'lucide-react';
+import { useState } from 'react';
+import AuthModal from './AuthModal';
 
 const Hero = () => {
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
+
   const handleTryTextChat = () => {
     window.dispatchEvent(new CustomEvent('openChatWidget', { detail: { mode: 'chat' } }));
   };
 
   const handleTryVoiceCall = () => {
     window.dispatchEvent(new CustomEvent('openChatWidget', { detail: { mode: 'voice' } }));
+  };
+
+  const handleSignUp = () => {
+    setAuthMode('signup');
+    setShowAuthModal(true);
   };
 
   return (
@@ -41,19 +51,19 @@ const Hero = () => {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
               <button
-                onClick={handleTryTextChat}
+                onClick={handleSignUp}
                 className="bg-gradient-primary text-white font-bold px-8 py-4 rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2"
               >
-                <MessageSquare className="w-5 h-5" />
-                <span>Try the AI (Text)</span>
+                <UserPlus className="w-5 h-5" />
+                <span>Start Free Trial</span>
               </button>
 
               <button
-                onClick={handleTryVoiceCall}
+                onClick={handleTryTextChat}
                 className="bg-white text-primary-main border-2 border-primary-main font-bold px-8 py-4 rounded-xl hover:bg-primary-light hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2"
               >
-                <Phone className="w-5 h-5" />
-                <span>Call the AI</span>
+                <MessageSquare className="w-5 h-5" />
+                <span>Try the AI (Text)</span>
               </button>
             </div>
 
@@ -123,6 +133,17 @@ const Hero = () => {
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        mode={authMode}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          window.location.href = '/dashboard';
+        }}
+      />
     </section>
   );
 };
