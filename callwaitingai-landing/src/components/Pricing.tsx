@@ -92,7 +92,7 @@ const Pricing = () => {
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative bg-white/85 backdrop-blur-sm rounded-2xl p-8 transition-all duration-300 animate-fade-in shadow-lg border border-white/30 ${
+              className={`relative bg-transparent backdrop-blur-md rounded-2xl p-8 transition-all duration-300 animate-fade-in shadow-lg border border-white/30 ${
                 plan.highlighted
                   ? 'border-2 border-primary-blue shadow-2xl scale-105 hover:scale-105'
                   : 'border border-neutral-lightGray hover:border-primary-blue hover:shadow-xl hover:-translate-y-2'

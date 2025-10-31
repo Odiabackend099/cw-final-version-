@@ -61,12 +61,12 @@ const FAQ = () => {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/40 overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 animate-fade-in"
+              className="bg-transparent backdrop-blur-md rounded-2xl border border-white/40 overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 animate-fade-in"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <button
                 onClick={() => toggleFAQ(index)}
-                className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-white/20 transition-colors"
+                className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-white/10 transition-colors"
               >
                 <h3 className="text-xl font-bold text-gray-900 pr-4">
                   {faq.question}

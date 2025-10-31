@@ -62,7 +62,7 @@ const HowItWorks = () => {
                   className="animate-fade-in"
                   style={{ animationDelay: `${index * 150}ms` }}
                 >
-                  <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden border border-white/30">
+                  <div className="bg-transparent backdrop-blur-md rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden border border-white/30">
                     {/* Number Badge */}
                     <div
                       className={`w-16 h-16 bg-gradient-to-r ${step.gradient} rounded-full flex items-center justify-center mb-6 mx-auto`}
@@ -109,7 +109,7 @@ const HowItWorks = () => {
               className="relative animate-fade-in"
               style={{ animationDelay: `${index * 150}ms` }}
             >
-                  <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg overflow-hidden border border-white/30">
+                  <div className="bg-transparent backdrop-blur-md rounded-3xl p-8 shadow-lg overflow-hidden border border-white/30">
                 {/* Number Badge */}
                 <div
                   className={`w-16 h-16 bg-gradient-to-r ${step.gradient} rounded-full flex items-center justify-center mx-auto mb-6`}

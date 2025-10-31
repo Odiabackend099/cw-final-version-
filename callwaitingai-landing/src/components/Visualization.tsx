@@ -46,7 +46,7 @@ const Visualization = () => {
           {visualizations.map((viz, index) => (
             <div
               key={index}
-              className="relative overflow-hidden bg-white/70 backdrop-blur-sm border-2 border-white/40 rounded-3xl p-10 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 animate-fade-in"
+              className="relative overflow-hidden bg-transparent backdrop-blur-md border-2 border-white/40 rounded-3xl p-10 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 animate-fade-in"
               style={{ animationDelay: `${index * 150}ms` }}
             >
               {/* Icon with Animation */}

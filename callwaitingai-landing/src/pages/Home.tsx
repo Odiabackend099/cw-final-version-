@@ -9,7 +9,7 @@ import FinalCTA from '../components/FinalCTA';
 const Home = () => {
   return (
     <div className="relative">
-      {/* Fixed Background Image - Only thing that stays fixed */}
+      {/* Fixed Background Image - Only thing that stays fixed at 20% opacity */}
       <div 
         className="fixed inset-0 z-0"
         style={{
@@ -18,10 +18,9 @@ const Home = () => {
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundAttachment: 'fixed',
+          opacity: 0.2,
         }}
       >
-        {/* Subtle overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/40"></div>
       </div>
       
       {/* All content scrolls over the fixed background */}

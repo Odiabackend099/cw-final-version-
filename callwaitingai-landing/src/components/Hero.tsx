@@ -86,40 +86,40 @@ const Hero = () => {
 
           {/* Right Content - Trust Badges */}
           <div className="grid grid-cols-2 gap-6 animate-fade-in relative z-10">
-            <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <div className="bg-transparent backdrop-blur-md p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-white/30">
               <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center mb-4">
                 <Phone className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">50</h3>
-              <p className="text-gray-600 font-medium">Free Minutes</p>
-              <p className="text-sm text-gray-500 mt-1">Start your trial</p>
+              <h3 className="text-3xl font-bold text-gray-900 mb-2 drop-shadow-sm">50</h3>
+              <p className="text-gray-700 font-medium drop-shadow-sm">Free Minutes</p>
+              <p className="text-sm text-gray-600 mt-1 drop-shadow-sm">Start your trial</p>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <div className="bg-transparent backdrop-blur-md p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-white/30">
               <div className="w-12 h-12 bg-gradient-to-r from-primary-green/80 to-primary-blue/80 rounded-xl flex items-center justify-center mb-4">
                 <Clock className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">5 min</h3>
-              <p className="text-gray-600 font-medium">Setup Time</p>
-              <p className="text-sm text-gray-500 mt-1">Get started instantly</p>
+              <h3 className="text-3xl font-bold text-gray-900 mb-2 drop-shadow-sm">5 min</h3>
+              <p className="text-gray-700 font-medium drop-shadow-sm">Setup Time</p>
+              <p className="text-sm text-gray-600 mt-1 drop-shadow-sm">Get started instantly</p>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <div className="bg-transparent backdrop-blur-md p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-white/30">
               <div className="w-12 h-12 bg-gradient-to-r from-primary-blue to-primary-green rounded-xl flex items-center justify-center mb-4">
                 <Target className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">98%</h3>
-              <p className="text-gray-600 font-medium">Accuracy Rate</p>
-              <p className="text-sm text-gray-500 mt-1">AI-powered precision</p>
+              <h3 className="text-3xl font-bold text-gray-900 mb-2 drop-shadow-sm">98%</h3>
+              <p className="text-gray-700 font-medium drop-shadow-sm">Accuracy Rate</p>
+              <p className="text-sm text-gray-600 mt-1 drop-shadow-sm">AI-powered precision</p>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <div className="bg-transparent backdrop-blur-md p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-white/30">
               <div className="w-12 h-12 bg-gradient-to-r from-primary-blue/70 to-primary-green/70 rounded-xl flex items-center justify-center mb-4">
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">24/7</h3>
-              <p className="text-gray-600 font-medium">Always Available</p>
-              <p className="text-sm text-gray-500 mt-1">Never miss a call</p>
+              <h3 className="text-3xl font-bold text-gray-900 mb-2 drop-shadow-sm">24/7</h3>
+              <p className="text-gray-700 font-medium drop-shadow-sm">Always Available</p>
+              <p className="text-sm text-gray-600 mt-1 drop-shadow-sm">Never miss a call</p>
             </div>
           </div>
         </div>
