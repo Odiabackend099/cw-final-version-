@@ -1,0 +1,175 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "React 18.3",
+    "Vite 6.0",
+    "Tailwind CSS 3.4",
+    "Supabase PostgreSQL",
+    "React Router 6",
+    "Vapi AI SDK",
+    "Groq LLM",
+    "Flutterwave",
+    "Radix UI",
+    "Lucide React",
+    "Recharts"
+  ],
+  "features": [
+    {
+      "name": "Authentication System",
+      "description": "Complete authentication with Supabase Auth including signup, login, password reset, email verification, and protected routes",
+      "files": [
+        "src/contexts/AuthContext.tsx",
+        "src/pages/Login.tsx",
+        "src/pages/SignUp.tsx",
+        "src/pages/ForgotPassword.tsx",
+        "src/pages/PasswordReset.tsx",
+        "src/pages/EmailVerification.tsx",
+        "src/components/EmailVerification.tsx",
+        "src/lib/auth.ts"
+      ]
+    },
+    {
+      "name": "Landing Page",
+      "description": "Premium marketing landing page with Hero, Features, Testimonials, How It Works, Pricing, FAQ, and Final CTA sections",
+      "files": [
+        "src/pages/Home.tsx",
+        "src/components/Hero.tsx",
+        "src/components/Features.tsx",
+        "src/components/Testimonials.tsx",
+        "src/components/Visualization.tsx",
+        "src/components/HowItWorks.tsx",
+        "src/components/Pricing.tsx",
+        "src/components/FAQ.tsx",
+        "src/components/FinalCTA.tsx",
+        "src/components/Navigation.tsx",
+        "src/components/Footer.tsx"
+      ]
+    },
+    {
+      "name": "AI Chat Widget",
+      "description": "Advanced chat widget with Groq AI integration, TTS disabled, browser STT support, emotion detection, and conversation quality tracking",
+      "files": [
+        "src/components/AdvancedChatWidget.tsx",
+        "src/lib/chat.ts"
+      ]
+    },
+    {
+      "name": "Voice AI Assistant",
+      "description": "Voice call functionality using Vapi AI SDK with voice selection, call management, real-time transcription, and error handling",
+      "files": [
+        "src/components/AdvancedVoiceWidget.tsx",
+        "src/components/VoiceCallTester.tsx",
+        "src/lib/vapi.ts",
+        "src/lib/advancedVapi.ts",
+        "src/config/vapiVoices.ts"
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "description": "Comprehensive dashboard with analytics, stats cards, charts, call logs, lead management, and payment tracking",
+      "files": [
+        "src/pages/Dashboard.tsx",
+        "src/pages/Calls.tsx",
+        "src/pages/Leads.tsx",
+        "src/pages/Payments.tsx"
+      ]
+    },
+    {
+      "name": "Agent Setup",
+      "description": "AI assistant configuration page with voice selection, model settings, custom instructions, and test call functionality",
+      "files": [
+        "src/pages/AgentSetup.tsx"
+      ]
+    },
+    {
+      "name": "Settings Page",
+      "description": "User settings page for profile management and preferences",
+      "files": [
+        "src/pages/Settings.tsx"
+      ]
+    },
+    {
+      "name": "Payment Processing",
+      "description": "Payment integration with Flutterwave for subscription plans and billing management",
+      "files": [
+        "src/pages/Payments.tsx",
+        "src/components/Pricing.tsx"
+      ]
+    },
+    {
+      "name": "Lead Management",
+      "description": "Lead capture and management system with contact extraction, qualification, and tracking",
+      "files": [
+        "src/pages/Leads.tsx"
+      ]
+    },
+    {
+      "name": "Design System",
+      "description": "Premium design system with typography (Playfair Display, Inter), color palette (Navy, Gold, Emerald), and premium shadows",
+      "files": [
+        "src/lib/designSystem.ts",
+        "src/index.css"
+      ]
+    },
+    {
+      "name": "Error Handling",
+      "description": "Error boundary component for catching and displaying JavaScript errors gracefully",
+      "files": [
+        "src/components/ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "name": "User Tier Management",
+      "description": "User tier system for managing subscription levels and feature access",
+      "files": [
+        "src/lib/userTier.ts"
+      ]
+    },
+    {
+      "name": "Utilities",
+      "description": "Shared utility functions for common operations",
+      "files": [
+        "src/lib/utils.ts",
+        "src/hooks/use-mobile.tsx"
+      ]
+    },
+    {
+      "name": "Legal Pages",
+      "description": "Privacy policy and terms of service pages",
+      "files": [
+        "src/pages/Privacy.tsx",
+        "src/pages/Terms.tsx"
+      ]
+    },
+    {
+      "name": "Logo Component",
+      "description": "Reusable logo component with size variants and color inversion support",
+      "files": [
+        "src/components/CallWaitingLogo.tsx"
+      ]
+    },
+    {
+      "name": "Layout Component",
+      "description": "Main layout wrapper with navigation and footer",
+      "files": [
+        "src/components/Layout.tsx"
+      ]
+    },
+    {
+      "name": "App Router",
+      "description": "React Router configuration with protected routes, public routes, and route guards",
+      "files": [
+        "src/App.tsx",
+        "src/main.tsx"
+      ]
+    },
+    {
+      "name": "Supabase Integration",
+      "description": "Supabase client configuration and database connection setup",
+      "files": [
+        "src/lib/supabase.ts"
+      ]
+    }
+  ]
+}
+

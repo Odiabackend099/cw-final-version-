@@ -1,0 +1,16 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5173",
+  "executionArgs": {
+    "projectName": "callwaitingai-landing",
+    "projectPath": "/Users/odiadev/Desktop/active cwi november/cw-final-version-/callwaitingai-landing",
+    "testIds": [],
+    "additionalInstruction": "Re-running tests to verify improvements and compare results with previous run",
+    "envs": {
+      "API_KEY": "sk-user-Za5SXYGCeLQBAsR4iHPyszjGivXs3YsyRh6CGwyGuYT0OgiyPdd7Yj0zZu3jCobkymq7YLN_gAvkacnT2sX1Sxejo-BgbQnJI_S586i0Uoqh933aTB9kCeYHHNXsSBTbnjY"
+    }
+  },
+  "proxy": "http://2e334ea5-93a0-493e-9dbc-6b4d616b8f55:MiK2Hts1FE5sqDsqqZbusF1JzXNwzk5q@tun.testsprite.com:8080"
+}

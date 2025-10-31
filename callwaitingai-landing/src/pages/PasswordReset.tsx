@@ -16,10 +16,16 @@ const PasswordReset = () => {
 
   useEffect(() => {
     // Check if we have the necessary tokens
+    // Support both new Supabase format (?type=recovery&access_token=...)
+    // and legacy/test format (?token=...)
     const type = searchParams.get('type');
     const access_token = searchParams.get('access_token');
+    const legacy_token = searchParams.get('token');
 
-    if (type !== 'recovery' || !access_token) {
+    // Valid if we have either format
+    const hasValidToken = (type === 'recovery' && access_token) || legacy_token;
+
+    if (!hasValidToken) {
       setStatus('error');
       setMessage('Invalid password reset link. Please request a new one.');
     }

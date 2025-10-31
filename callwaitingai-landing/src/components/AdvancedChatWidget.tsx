@@ -3,7 +3,9 @@ import { MessageSquare, X, PhoneCall, PhoneOff, Send, Loader2, Volume2, VolumeX,
 import { chatService, ChatMessage } from '../lib/chat';
 import Vapi from '@vapi-ai/web';
 import CallWaitingLogo from './CallWaitingLogo';
-import { VAPI_CONFIG } from '../lib/supabase';
+import { VAPI_CONFIG, supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import { getVoiceById, DEFAULT_VOICE_ID } from '../config/vapiVoices';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -19,7 +21,17 @@ interface TranscriptEntry {
   isFinal: boolean;
 }
 
+interface Assistant {
+  id?: string;
+  business_name?: string;
+  system_prompt?: string;
+  vapi_voice_id?: string | null;
+  vapi_voice_provider?: string | null;
+}
+
 const AdvancedChatWidget = () => {
+  const { user } = useAuth();
+  const [assistant, setAssistant] = useState<Assistant | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<'chat' | 'voice'>('chat');
 
@@ -89,6 +101,43 @@ const AdvancedChatWidget = () => {
     window.addEventListener('openChatWidget', handleOpenWidget);
     return () => window.removeEventListener('openChatWidget', handleOpenWidget);
   }, [isCallActive, isConnecting]);
+
+  // Load assistant configuration from backend
+  useEffect(() => {
+    const loadAssistant = async () => {
+      if (!user) {
+        // For non-authenticated users, use default config
+        setAssistant(null);
+        return;
+      }
+
+      try {
+        const { data: assistantData, error } = await supabase
+          .from('assistants')
+          .select('id, business_name, system_prompt, vapi_voice_id, vapi_voice_provider')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error && error.code !== 'PGRST116') {
+          console.warn('⚠️ Could not load assistant config:', error);
+          setAssistant(null);
+          return;
+        }
+
+        if (assistantData) {
+          setAssistant(assistantData);
+          console.log('✅ Loaded assistant config from backend:', assistantData.business_name);
+        } else {
+          setAssistant(null);
+        }
+      } catch (err) {
+        console.warn('⚠️ Error loading assistant:', err);
+        setAssistant(null);
+      }
+    };
+
+    loadAssistant();
+  }, [user]);
 
   // Initialize Vapi
   useEffect(() => {
@@ -593,6 +642,7 @@ const AdvancedChatWidget = () => {
 
   // Voice handlers - FIXED for better connection
   const startVoiceCall = async () => {
+
     if (!vapiClient || !isVapiReady) {
       setConnectionError('Voice system is not ready. Please wait a moment and try again.');
       console.error('❌ Vapi client not initialized or not ready');
@@ -631,19 +681,24 @@ const AdvancedChatWidget = () => {
         updateAudioLevel();
       }
 
-      // Step 3: Start Vapi call with inline assistant configuration
-      console.log('🎙️ Starting Vapi call with inline assistant...');
+      // Step 3: Start Vapi call with inline configuration
+      console.log('🎙️ Starting Vapi call with inline configuration...');
 
-      // Create inline assistant with proper Vapi voice configuration
+      // Create inline assistant configuration
+      // Use backend assistant config if available, otherwise use defaults
+      const assistantName = assistant?.business_name || 'Marcy AI';
+      const systemPrompt = assistant?.system_prompt || 
+        "You are Marcy, a professional AI receptionist for CallWaitingAI. Answer questions warmly and professionally. Keep responses concise and helpful.";
+      
       const assistantConfig: any = {
-        name: 'Marcy AI',
+        name: assistantName,
         model: {
           provider: 'groq',
           model: 'llama-3.3-70b-versatile',
           messages: [
             {
               role: 'system',
-              content: "You are Marcy, a professional AI receptionist for CallWaitingAI. Answer questions warmly and professionally. Keep responses concise and helpful.",
+              content: systemPrompt,
             },
           ],
           temperature: 0.7,
@@ -654,16 +709,53 @@ const AdvancedChatWidget = () => {
           model: 'nova-2',
           language: 'en-US',
         },
-        voice: {
-          provider: 'vapi',
-          voiceId: 'harry', // Use Vapi's Harry voice (default)
-        },
-        firstMessage: "Hi! I'm Marcy, your AI assistant. How can I help you today?",
+        firstMessage: `Hi! I'm ${assistantName.includes('AI') ? 'Marcy' : assistantName}, your AI assistant. How can I help you today?`,
         silenceTimeoutSeconds: 30,
         responseDelaySeconds: 0.4,
         interruptionsEnabled: true,
         backgroundSound: 'off',
       };
+
+      // Configure voice from backend assistant config or use default
+      if (assistant?.vapi_voice_id) {
+        const selectedVoice = getVoiceById(assistant.vapi_voice_id);
+        if (selectedVoice) {
+          // For Vapi native voices, use simplified format
+          if (selectedVoice.provider === 'vapi') {
+            assistantConfig.voice = {
+              provider: 'vapi',
+              voiceId: selectedVoice.voiceId,
+            };
+          } else {
+            // For other providers, include provider field
+            assistantConfig.voice = {
+              provider: selectedVoice.provider,
+              voiceId: selectedVoice.voiceId,
+            };
+          }
+          console.log('🎤 Using backend voice:', selectedVoice.name, `(${selectedVoice.provider})`);
+        } else {
+          console.warn('⚠️ Voice not found, using default');
+          // Fall back to default Vapi voice
+          const defaultVoice = getVoiceById(DEFAULT_VOICE_ID);
+          if (defaultVoice) {
+            assistantConfig.voice = {
+              provider: 'vapi',
+              voiceId: defaultVoice.voiceId,
+            };
+          }
+        }
+      } else {
+        // No backend voice configured, use default Vapi native voice
+        const defaultVoice = getVoiceById(DEFAULT_VOICE_ID);
+        if (defaultVoice) {
+          assistantConfig.voice = {
+            provider: 'vapi',
+            voiceId: defaultVoice.voiceId,
+          };
+        }
+        console.log('ℹ️ No backend voice configured, using default:', defaultVoice?.name || 'savannah');
+      }
 
       // Add retry logic for connection issues
       let callStarted = false;
@@ -679,14 +771,14 @@ const AdvancedChatWidget = () => {
 
           await vapiClient.start(assistantConfig);
           callStarted = true;
-          console.log('✅ Vapi call started successfully with inline assistant');
+          console.log('✅ Vapi call started successfully with inline configuration');
           break;
         } catch (startError: any) {
           lastError = startError;
           console.error(`❌ Start attempt ${attempt + 1} failed:`, startError);
 
           // If it's a connection error, retry
-          const isConnectionError = 
+          const isConnectionError =
             startError.message?.toLowerCase().includes('connection') ||
             startError.message?.toLowerCase().includes('network') ||
             startError.message?.toLowerCase().includes('timeout') ||
@@ -707,11 +799,30 @@ const AdvancedChatWidget = () => {
 
     } catch (error: any) {
       console.error('❌ Failed to start voice call after retries:', error);
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        status: error.status,
+        type: error.type,
+        errorMsg: error.errorMsg,
+        response: error.response,
+      });
 
       let errorMessage = 'Failed to connect. ';
-      
+
       // Specific error handling
-      if (error.name === 'NotAllowedError' || error.message?.includes('permission') || error.message?.includes('microphone')) {
+      if (error.status === 403) {
+        errorMessage = '⚠️ Authorization Error (403): Your Vapi account may have issues. Please check:\n\n' +
+          '1. Account is active and in good standing\n' +
+          '2. Billing is up to date\n' +
+          '3. Web calls are enabled on your plan\n' +
+          '4. Public key has proper permissions\n\n' +
+          'Visit https://dashboard.vapi.ai to verify your account status.';
+      } else if (error.status === 401) {
+        errorMessage = '⚠️ Authentication Error (401): Invalid API key. Please verify your Vapi public key is correct.';
+      } else if (error.status === 400) {
+        errorMessage = '⚠️ Configuration Error (400): Invalid assistant configuration. Please check your Vapi dashboard settings.';
+      } else if (error.name === 'NotAllowedError' || error.message?.includes('permission') || error.message?.includes('microphone')) {
         errorMessage = 'Microphone permission denied. Please allow microphone access in your browser settings and try again.';
       } else if (error.name === 'NotFoundError') {
         errorMessage = 'No microphone found. Please connect a microphone and try again.';
@@ -740,11 +851,15 @@ const AdvancedChatWidget = () => {
 
   const stopVoiceCall = () => {
     console.log('🛑 Stopping voice call...');
+
     if (vapiClient) {
       vapiClient.stop();
     }
+
     setIsCallActive(false);
     setIsConnecting(false);
+    setIsSpeaking(false);
+    setIsListening(false);
     stopAudioVisualization();
   };
 
@@ -1033,15 +1148,15 @@ const AdvancedChatWidget = () => {
                       ? isProcessing
                         ? 'AI is generating response...'
                         : 'Speak naturally with Marcy'
-                      : 'Ultra-low latency AI conversation'}
+                      : '🔌 Vapi SDK streaming'}
                   </p>
                 </div>
 
                 {/* Error Message */}
                 {connectionError && (
                   <div className="w-full bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-4">
-                    <p className="text-sm text-red-700 text-center font-medium">
-                      ⚠️ {connectionError}
+                    <p className="text-sm text-red-700 text-left font-medium whitespace-pre-line">
+                      {connectionError}
                     </p>
                   </div>
                 )}

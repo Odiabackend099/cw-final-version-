@@ -18,7 +18,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-// Vapi Configuration
+// Vapi Configuration - Working credentials
 export const VAPI_CONFIG = {
   publicKey: 'ddd720c5-6fb8-4174-b7a6-729d7b308cb9',
   assistantId: 'fdaaa6f7-a204-4c08-99fd-20451c96fc74'

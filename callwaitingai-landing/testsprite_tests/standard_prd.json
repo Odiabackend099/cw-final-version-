@@ -1,0 +1,230 @@
+{
+  "meta": {
+    "project": "CallWaitingAI",
+    "date": "2025-10-29",
+    "prepared_by": "AI Product Manager"
+  },
+  "product_overview": "CallWaitingAI is an AI-powered receptionist platform that transforms missed calls into revenue by providing 24/7 AI voice call answering, lead capture, and comprehensive data analytics through an intuitive dashboard. It integrates advanced AI chat and voice assistant technologies, payment processing, and notification systems to enable businesses to convert calls into actionable leads and optimize customer engagement seamlessly.",
+  "core_goals": [
+    "Provide reliable 24/7 AI voice assistant call answering to capture every potential customer interaction.",
+    "Enable real-time lead capture and qualification from voice and chat conversations to increase sales opportunities.",
+    "Offer a feature-rich dashboard with comprehensive analytics, call logs, lead management, and payment tracking for business insights.",
+    "Integrate secure payment processing to support subscription plans and billing management.",
+    "Ensure seamless and secure user authentication with role-based access and protected routes.",
+    "Support scalable AI-powered chat and voice interactions using cutting-edge AI models and SDKs.",
+    "Facilitate easy AI assistant configuration and voice customization by users.",
+    "Deliver a premium user experience with a responsive landing page, marketing features, and consistent design system."
+  ],
+  "key_features": [
+    "Voice AI Assistant (Marcy) with 24/7 call answering powered by Vapi AI SDK including voice selection, real-time transcription, call management, and error handling.",
+    "AI Chat Widget integrated with Groq LLM for instant, contextual AI chat responses with emotion detection and conversation quality tracking.",
+    "Lead Management system that auto-extracts contact information from calls and chats, qualifying and tracking leads for sales follow-up.",
+    "Comprehensive Dashboard featuring analytics, stats cards, charts, call logs, lead management, and payment processing history.",
+    "Authentication System managed by Supabase Auth supporting signup, login, password reset, email verification, and role-based protected routes.",
+    "Payment Processing integrated with Flutterwave for subscription management and secure billing.",
+    "Premium Marketing Landing Page with hero section, features, testimonials, pricing plans, FAQ, and call-to-action components.",
+    "Agent Setup page to configure AI assistant settings including voice models, custom instructions, and test call capabilities.",
+    "Notification system via Telegram bot for real-time lead alerts.",
+    "Robust Security with Row Level Security (RLS), JWT authentication, role-based access controls, and secure API key storage.",
+    "Error Boundary component for graceful error handling in the frontend UI.",
+    "Design System employing Playfair Display and Inter for typography, Navy, Gold, and Emerald color palettes, and premium shadows."
+  ],
+  "user_flow_summary": [
+    "Users sign up or log in via the secure authentication system, including email verification and password management.",
+    "Onboarding includes configuring the AI Voice Assistant through Agent Setup, selecting voice options and model parameters, and testing calls.",
+    "Visitors interact with the AI Chat Widget on the landing page for instant assistance or connect via the Voice AI Assistant for live call answering.",
+    "Captured calls and chats auto-extract lead information stored in the Lead Management system for tracking and qualification.",
+    "Users access the Dashboard to view analytics, call logs, lead details, and payment history.",
+    "Subscription plans are selected and managed through integrated payment processing with Flutterwave.",
+    "Real-time notifications are sent to users via Telegram when new leads are captured.",
+    "Users manage their profiles and preferences on the Settings page to customize experience and assistant behavior."
+  ],
+  "validation_criteria": [
+    "Authentication system supports signup, login, password reset, and email verification workflows successfully with protected routes enforcing user access.",
+    "Voice AI Assistant handles inbound calls with real-time transcription, error handling, voice selection, and call logging accurately.",
+    "AI Chat Widget interacts via Groq LLM providing relevant responses with emotion detection and tracking conversation quality.",
+    "Lead capture extracts and stores contact info from calls and chats reliably and updates lead qualification status.",
+    "Dashboard displays accurate analytics, call logs, lead management data, and payment transactions reflecting backend data.",
+    "Payment integration with Flutterwave processes subscription payments, generates payment links, and handles billing securely.",
+    "Agent Setup changes reflect correctly in AI assistant behavior with test calls validating configuration.",
+    "Notifications via Telegram are triggered and received for lead events without delay.",
+    "Landing page content including hero, features, testimonials, pricing, and FAQ sections render correctly and are responsive.",
+    "System implements RLS and role-based access control consistently to protect user data across all services.",
+    "Frontend gracefully handles errors with the Error Boundary component showing user-friendly messages.",
+    "Design system styles are consistently applied across all UI components ensuring brand consistency."
+  ],
+  "code_summary": {
+    "tech_stack": [
+      "TypeScript",
+      "React 18.3",
+      "Vite 6.0",
+      "Tailwind CSS 3.4",
+      "Supabase PostgreSQL",
+      "React Router 6",
+      "Vapi AI SDK",
+      "Groq LLM",
+      "Flutterwave",
+      "Radix UI",
+      "Lucide React",
+      "Recharts"
+    ],
+    "features": [
+      {
+        "name": "Authentication System",
+        "description": "Complete authentication with Supabase Auth including signup, login, password reset, email verification, and protected routes",
+        "files": [
+          "src/contexts/AuthContext.tsx",
+          "src/pages/Login.tsx",
+          "src/pages/SignUp.tsx",
+          "src/pages/ForgotPassword.tsx",
+          "src/pages/PasswordReset.tsx",
+          "src/pages/EmailVerification.tsx",
+          "src/components/EmailVerification.tsx",
+          "src/lib/auth.ts"
+        ]
+      },
+      {
+        "name": "Landing Page",
+        "description": "Premium marketing landing page with Hero, Features, Testimonials, How It Works, Pricing, FAQ, and Final CTA sections",
+        "files": [
+          "src/pages/Home.tsx",
+          "src/components/Hero.tsx",
+          "src/components/Features.tsx",
+          "src/components/Testimonials.tsx",
+          "src/components/Visualization.tsx",
+          "src/components/HowItWorks.tsx",
+          "src/components/Pricing.tsx",
+          "src/components/FAQ.tsx",
+          "src/components/FinalCTA.tsx",
+          "src/components/Navigation.tsx",
+          "src/components/Footer.tsx"
+        ]
+      },
+      {
+        "name": "AI Chat Widget",
+        "description": "Advanced chat widget with Groq AI integration, TTS disabled, browser STT support, emotion detection, and conversation quality tracking",
+        "files": [
+          "src/components/AdvancedChatWidget.tsx",
+          "src/lib/chat.ts"
+        ]
+      },
+      {
+        "name": "Voice AI Assistant",
+        "description": "Voice call functionality using Vapi AI SDK with voice selection, call management, real-time transcription, and error handling",
+        "files": [
+          "src/components/AdvancedVoiceWidget.tsx",
+          "src/components/VoiceCallTester.tsx",
+          "src/lib/vapi.ts",
+          "src/lib/advancedVapi.ts",
+          "src/config/vapiVoices.ts"
+        ]
+      },
+      {
+        "name": "Dashboard",
+        "description": "Comprehensive dashboard with analytics, stats cards, charts, call logs, lead management, and payment tracking",
+        "files": [
+          "src/pages/Dashboard.tsx",
+          "src/pages/Calls.tsx",
+          "src/pages/Leads.tsx",
+          "src/pages/Payments.tsx"
+        ]
+      },
+      {
+        "name": "Agent Setup",
+        "description": "AI assistant configuration page with voice selection, model settings, custom instructions, and test call functionality",
+        "files": [
+          "src/pages/AgentSetup.tsx"
+        ]
+      },
+      {
+        "name": "Settings Page",
+        "description": "User settings page for profile management and preferences",
+        "files": [
+          "src/pages/Settings.tsx"
+        ]
+      },
+      {
+        "name": "Payment Processing",
+        "description": "Payment integration with Flutterwave for subscription plans and billing management",
+        "files": [
+          "src/pages/Payments.tsx",
+          "src/components/Pricing.tsx"
+        ]
+      },
+      {
+        "name": "Lead Management",
+        "description": "Lead capture and management system with contact extraction, qualification, and tracking",
+        "files": [
+          "src/pages/Leads.tsx"
+        ]
+      },
+      {
+        "name": "Design System",
+        "description": "Premium design system with typography (Playfair Display, Inter), color palette (Navy, Gold, Emerald), and premium shadows",
+        "files": [
+          "src/lib/designSystem.ts",
+          "src/index.css"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "description": "Error boundary component for catching and displaying JavaScript errors gracefully",
+        "files": [
+          "src/components/ErrorBoundary.tsx"
+        ]
+      },
+      {
+        "name": "User Tier Management",
+        "description": "User tier system for managing subscription levels and feature access",
+        "files": [
+          "src/lib/userTier.ts"
+        ]
+      },
+      {
+        "name": "Utilities",
+        "description": "Shared utility functions for common operations",
+        "files": [
+          "src/lib/utils.ts",
+          "src/hooks/use-mobile.tsx"
+        ]
+      },
+      {
+        "name": "Legal Pages",
+        "description": "Privacy policy and terms of service pages",
+        "files": [
+          "src/pages/Privacy.tsx",
+          "src/pages/Terms.tsx"
+        ]
+      },
+      {
+        "name": "Logo Component",
+        "description": "Reusable logo component with size variants and color inversion support",
+        "files": [
+          "src/components/CallWaitingLogo.tsx"
+        ]
+      },
+      {
+        "name": "Layout Component",
+        "description": "Main layout wrapper with navigation and footer",
+        "files": [
+          "src/components/Layout.tsx"
+        ]
+      },
+      {
+        "name": "App Router",
+        "description": "React Router configuration with protected routes, public routes, and route guards",
+        "files": [
+          "src/App.tsx",
+          "src/main.tsx"
+        ]
+      },
+      {
+        "name": "Supabase Integration",
+        "description": "Supabase client configuration and database connection setup",
+        "files": [
+          "src/lib/supabase.ts"
+        ]
+      }
+    ]
+  }
+}

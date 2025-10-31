@@ -107,8 +107,9 @@ function AppRoutes() {
         <Route path="/auth/confirm" element={<EmailVerification />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth/reset-password" element={<PasswordReset />} />
-        {/* Legacy route alias for password reset */}
+        {/* Legacy route aliases for password reset - support both old and test formats */}
         <Route path="/password-reset" element={<Navigate to="/auth/reset-password" replace />} />
+        <Route path="/reset-password" element={<PasswordReset />} />
 
         {/* Dashboard Routes */}
         <Route

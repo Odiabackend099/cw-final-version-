@@ -21,29 +21,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadUser() {
       try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        if (userError) {
-          console.error('Error loading user:', userError);
+        // Use getSession() instead of getUser() - it doesn't throw AuthSessionMissingError
+        // when no session exists, which is the expected state for logged-out users
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        // Only log actual errors, not missing sessions (which is normal)
+        if (sessionError && sessionError.name !== 'AuthSessionMissingError') {
+          console.error('Error loading session:', sessionError);
         }
-        
-        setUser(user || null);
-        
-        if (user) {
+
+        setUser(session?.user || null);
+
+        if (session?.user) {
           const { data: profile, error: profileError } = await supabase
             .from('users')
             .select('*')
-            .eq('id', user.id)
+            .eq('id', session.user.id)
             .maybeSingle();
-          
+
           if (profileError) {
             console.error('Error loading user profile:', profileError);
           }
-          
+
           setUserProfile(profile);
+        } else {
+          setUserProfile(null);
         }
-      } catch (error) {
-        console.error('Unexpected error in loadUser:', error);
+      } catch (error: any) {
+        // Silently handle AuthSessionMissingError - this is normal for logged-out users
+        if (error?.name === 'AuthSessionMissingError') {
+          console.debug('No active session found (user is logged out)');
+        } else {
+          console.error('Unexpected error in loadUser:', error);
+        }
         setUser(null);
         setUserProfile(null);
       } finally {
@@ -75,26 +85,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signIn(email: string, password: string) {
     const result = await supabase.auth.signInWithPassword({ email, password });
-    
+
     // Ensure session is properly set after login
     if (result.data?.session) {
       // Wait a moment for auth state to update
       await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Force refresh user state
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      
-      if (user) {
+
+      // Force refresh user state using getSession
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+
+      if (session?.user) {
         const { data: profile } = await supabase
           .from('users')
           .select('*')
-          .eq('id', user.id)
+          .eq('id', session.user.id)
           .maybeSingle();
         setUserProfile(profile);
       }
     }
-    
+
     return result;
   }
 
