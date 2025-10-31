@@ -1,23 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Phone, Sparkles, Clock, Target, MessageSquare, Shield, UserPlus } from 'lucide-react';
-import { useState } from 'react';
-import AuthModal from './AuthModal';
 
 const Hero = () => {
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
-
   const handleTryTextChat = () => {
     window.dispatchEvent(new CustomEvent('openChatWidget', { detail: { mode: 'chat' } }));
   };
 
   const handleTryVoiceCall = () => {
     window.dispatchEvent(new CustomEvent('openChatWidget', { detail: { mode: 'voice' } }));
-  };
-
-  const handleSignUp = () => {
-    setAuthMode('signup');
-    setShowAuthModal(true);
   };
 
   return (
@@ -50,13 +40,13 @@ const Hero = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={handleSignUp}
+              <Link
+                to="/signup"
                 className="bg-gradient-primary text-white font-bold px-8 py-4 rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2"
               >
                 <UserPlus className="w-5 h-5" />
                 <span>Start Free Trial</span>
-              </button>
+              </Link>
 
               <button
                 onClick={handleTryTextChat}
@@ -133,17 +123,6 @@ const Hero = () => {
           </div>
         </div>
       </div>
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        mode={authMode}
-        onSuccess={() => {
-          setShowAuthModal(false);
-          window.location.href = '/dashboard';
-        }}
-      />
     </section>
   );
 };

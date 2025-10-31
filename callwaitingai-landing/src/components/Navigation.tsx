@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import CallWaitingLogo from './CallWaitingLogo';
-import AuthModal from './AuthModal';
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,24 +62,18 @@ const Navigation = () => {
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <button
-              onClick={() => {
-                setAuthMode('signin');
-                setShowAuthModal(true);
-              }}
+            <Link
+              to="/login"
               className="text-gray-700 hover:text-primary-blue font-medium transition-colors"
             >
               Sign In
-            </button>
-            <button
-              onClick={() => {
-                setAuthMode('signup');
-                setShowAuthModal(true);
-              }}
+            </Link>
+            <Link
+              to="/signup"
               className="bg-gradient-primary text-white font-bold px-6 py-2 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300"
             >
               Sign Up Free
-            </button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -117,41 +109,24 @@ const Navigation = () => {
               Pricing
             </button>
             <div className="pt-4 border-t border-gray-200 space-y-3">
-              <button
-                onClick={() => {
-                  setAuthMode('signin');
-                  setShowAuthModal(true);
-                  setIsMobileMenuOpen(false);
-                }}
+              <Link
+                to="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
                 className="block w-full text-left text-gray-700 hover:text-primary-blue font-medium"
               >
                 Sign In
-              </button>
-              <button
-                onClick={() => {
-                  setAuthMode('signup');
-                  setShowAuthModal(true);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="block w-full bg-gradient-primary text-white font-bold px-6 py-3 rounded-full hover:shadow-lg transition-all"
+              </Link>
+              <Link
+                to="/signup"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block w-full text-center bg-gradient-primary text-white font-bold px-6 py-3 rounded-full hover:shadow-lg transition-all"
               >
                 Sign Up Free
-              </button>
+              </Link>
             </div>
           </div>
         </div>
       )}
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        mode={authMode}
-        onSuccess={() => {
-          setShowAuthModal(false);
-          window.location.href = '/dashboard';
-        }}
-      />
     </nav>
   );
 };

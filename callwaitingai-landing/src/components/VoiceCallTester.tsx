@@ -303,15 +303,72 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
         console.log('📋 Assistant config:', assistantConfig);
       }
 
-      // Start call with inline assistant
-      await vapiRef.current.start(assistantConfig);
+      // CRITICAL: Verify Vapi is ready before starting call
+      if (!isVapiReady) {
+        throw new Error('Voice system is not ready. Please wait and try again.');
+      }
 
-      if (import.meta.env.DEV) {
-        console.log('✅ Call start request sent');
+      // Start call with inline assistant (with retry logic)
+      let callStarted = false;
+      let lastError: any = null;
+      const maxStartAttempts = 2;
+
+      for (let attempt = 0; attempt < maxStartAttempts; attempt++) {
+        try {
+          await vapiRef.current.start(assistantConfig);
+          callStarted = true;
+          
+          if (import.meta.env.DEV) {
+            console.log('✅ Call start request sent successfully');
+          }
+          break;
+        } catch (startError: any) {
+          lastError = startError;
+          
+          // If error is about custom-provider or voice config, fallback to default voice
+          if (
+            (startError.message?.toLowerCase().includes('voice') || 
+             startError.message?.toLowerCase().includes('provider') ||
+             startError.message?.toLowerCase().includes('custom')) &&
+            assistantConfig.voice &&
+            attempt === 0
+          ) {
+            if (import.meta.env.DEV) {
+              console.warn('⚠️ Custom voice config failed, retrying with default voice:', startError.message);
+            }
+            
+            // Remove custom voice config and retry with default
+            delete assistantConfig.voice;
+            continue;
+          }
+          
+          // For other errors or final attempt, throw
+          if (attempt === maxStartAttempts - 1) {
+            throw startError;
+          }
+        }
+      }
+
+      if (!callStarted && lastError) {
+        throw lastError;
       }
     } catch (error: any) {
       console.error('❌ Failed to start call:', error);
-      setCallError(`Failed to start call: ${error.message}`);
+      
+      // Provide user-friendly error messages
+      let errorMessage = 'Failed to start call. ';
+      
+      if (error.message?.includes('ready')) {
+        errorMessage += 'Voice system is initializing. Please wait a moment and try again.';
+      } else if (error.message?.includes('Meeting has ended')) {
+        errorMessage += 'Connection issue. Please check your internet connection and try again.';
+      } else if (error.message?.includes('voice') || error.message?.includes('provider')) {
+        errorMessage += 'Voice configuration issue. Using default voice for this call.';
+      } else {
+        errorMessage += error.message || 'Unknown error occurred.';
+      }
+      
+      setCallError(errorMessage);
       setIsConnecting(false);
     }
   };

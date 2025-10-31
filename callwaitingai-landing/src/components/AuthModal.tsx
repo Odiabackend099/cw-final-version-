@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Loader2, Mail, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { authService } from '../lib/auth';
 
@@ -21,6 +21,28 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode, onSuccess }: AuthModalP
   const [resendLoading, setResendLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Reset state when modal closes
+  const handleClose = () => {
+    setCurrentStep('auth');
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setError('');
+    setSuccess('');
+    setMode(initialMode);
+    onClose();
+  };
+
+  // Update mode when initialMode changes
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+      setCurrentStep('auth');
+      setError('');
+      setSuccess('');
+    }
+  }, [initialMode, isOpen]);
 
   if (!isOpen) return null;
 
@@ -149,13 +171,35 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode, onSuccess }: AuthModalP
     setMode(initialMode);
   };
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative animate-fade-in">
+    <div 
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="auth-modal-title"
+    >
+      <div 
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative animate-fade-in"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Close Button */}
         <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          onClick={handleClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
+          aria-label="Close modal"
         >
           <X className="w-6 h-6" />
         </button>
@@ -185,7 +229,7 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode, onSuccess }: AuthModalP
             </div>
           ) : (
             <>
-              <h2 className="text-3xl font-bold gradient-text mb-2">
+              <h2 id="auth-modal-title" className="text-3xl font-bold gradient-text mb-2">
                 {mode === 'signin' ? 'Welcome Back' : 'Get Started Free'}
               </h2>
               <p className="text-gray-600">

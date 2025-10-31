@@ -8,41 +8,75 @@ export type UserTier = 'free' | 'professional' | 'pro' | 'promax';
  * @returns 'free' (Starter), 'professional', or 'pro'
  */
 export async function getUserTier(userId: string): Promise<UserTier> {
-  try {
-    // Check payments table for most recent successful payment
-    // Note: Actual schema uses 'status' not 'payment_status', and 'amount' to determine tier
-    const { data: payment, error } = await supabase
-      .from('payments')
-      .select('amount, status')
-      .eq('user_id', userId)
-      .eq('status', 'successful')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+  // Retry logic with exponential backoff (3 attempts)
+  const maxRetries = 3;
+  let lastError: any = null;
 
-    if (error || !payment) {
-      // No successful payment found = free tier
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      // Check payments table for most recent successful payment
+      // Note: Actual schema uses 'status' not 'payment_status', and 'amount' to determine tier
+      const { data: payment, error } = await supabase
+        .from('payments')
+        .select('amount, status')
+        .eq('user_id', userId)
+        .eq('status', 'successful')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      // If query succeeds (even with no payment), process result
+      if (!error) {
+        if (!payment) {
+          // No successful payment found = free tier
+          return 'free';
+        }
+
+        // Map amount to tier (based on pricing structure)
+        const amount = payment.amount;
+
+        if (amount >= 180) {
+          return 'promax'; // $180+ = ProMax tier (gets Minimax TTS)
+        } else if (amount >= 80) {
+          return 'pro'; // $80+ = Pro tier (gets Minimax TTS)
+        } else if (amount >= 49) {
+          return 'professional'; // $49+ = Professional tier (Vapi default)
+        }
+
+        // Default to free for smaller amounts
+        return 'free';
+      }
+
+      // If error is 406 (Not Acceptable), retry with delay
+      if (error.code === 'PGRST116' || error.status === 406) {
+        lastError = error;
+        if (attempt < maxRetries - 1) {
+          // Exponential backoff: 250ms, 500ms, 1000ms
+          await new Promise(resolve => setTimeout(resolve, 250 * Math.pow(2, attempt)));
+          continue;
+        }
+      }
+
+      // For other errors or final attempt, return free tier
+      if (import.meta.env.DEV) {
+        console.warn('Payment query error (non-critical, using free tier):', error.message);
+      }
       return 'free';
+    } catch (error) {
+      lastError = error;
+      if (attempt < maxRetries - 1) {
+        // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, 250 * Math.pow(2, attempt)));
+        continue;
+      }
     }
-
-    // Map amount to tier (based on pricing structure)
-    const amount = payment.amount;
-
-    if (amount >= 180) {
-      return 'promax'; // $180+ = ProMax tier (gets Minimax TTS)
-    } else if (amount >= 80) {
-      return 'pro'; // $80+ = Pro tier (gets Minimax TTS)
-    } else if (amount >= 49) {
-      return 'professional'; // $49+ = Professional tier (Vapi default)
-    }
-
-    // Default to free for smaller amounts
-    return 'free';
-  } catch (error) {
-    console.error('Error determining user tier:', error);
-    // Default to free tier on error
-    return 'free';
   }
+
+  // After all retries failed, default to free tier
+  if (import.meta.env.DEV && lastError) {
+    console.warn('Error determining user tier after retries (using free tier):', lastError);
+  }
+  return 'free';
 }
 
 /**
