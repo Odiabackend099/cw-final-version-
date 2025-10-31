@@ -266,11 +266,23 @@ export function Dashboard() {
               Would you like to test my voice or chat with me?
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="px-6 py-3 bg-white text-blue-600 rounded-xl hover:bg-blue-50 transition-all font-medium flex items-center gap-3 shadow-md hover:shadow-lg">
+              <button 
+                onClick={() => {
+                  // Open chat widget in voice mode
+                  window.dispatchEvent(new CustomEvent('openChatWidget', { detail: { mode: 'voice' } }));
+                }}
+                className="px-6 py-3 bg-white text-blue-600 rounded-xl hover:bg-blue-50 transition-all font-medium flex items-center gap-3 shadow-md hover:shadow-lg"
+              >
                 <Mic className="h-5 w-5" />
                 Test Voice Call
               </button>
-              <button className="px-6 py-3 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-all font-medium flex items-center gap-3 border border-white/30">
+              <button 
+                onClick={() => {
+                  // Open chat widget in chat mode
+                  window.dispatchEvent(new CustomEvent('openChatWidget', { detail: { mode: 'chat' } }));
+                }}
+                className="px-6 py-3 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-all font-medium flex items-center gap-3 border border-white/30"
+              >
                 <MessageCircle className="h-5 w-5" />
                 Start Chat
               </button>
