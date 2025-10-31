@@ -5,10 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm install --prefer-offline && vite",
+    "dev:test": "TEST_MODE=true pnpm install --prefer-offline && vite",
     "build": "pnpm install --prefer-offline && rm -rf node_modules/.vite-temp && tsc -b && vite build",
     "build:prod": "pnpm install --prefer-offline && rm -rf node_modules/.vite-temp && tsc -b && BUILD_MODE=prod vite build",
-    "lint": "pnpm install --prefer-offline && eslint .",
+    "build:test": "pnpm install --prefer-offline && rm -rf node_modules/.vite-temp dist && tsc -b && vite build",
     "preview": "pnpm install --prefer-offline && vite preview",
+    "preview:test": "pnpm build:test && vite preview --host 0.0.0.0 --port 5173",
+    "test:setup": "pnpm build:test && echo '✅ Production build ready for testing. Run: pnpm preview:test'",
+    "lint": "pnpm install --prefer-offline && eslint .",
     "install-deps": "pnpm install --prefer-offline",
     "clean": "rm -rf node_modules .pnpm-store pnpm-lock.yaml && pnpm store prune"
   },

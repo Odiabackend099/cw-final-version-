@@ -19,19 +19,39 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    // Test database connection
-    const { data, error } = await supabaseClient
-      .from('users')
-      .select('count')
+    // Test database connection - use a simpler query that works with any table
+    // Try payments table first (most likely to exist), fallback to users
+    let dbConnected = false
+    let dbError = null
+    
+    // Try payments table (most reliable)
+    const paymentsTest = await supabaseClient
+      .from('payments')
+      .select('id')
       .limit(1)
-      .single()
+    
+    if (!paymentsTest.error) {
+      dbConnected = true
+    } else {
+      // Fallback to users table
+      const usersTest = await supabaseClient
+        .from('users')
+        .select('id')
+        .limit(1)
+      
+      if (!usersTest.error) {
+        dbConnected = true
+      } else {
+        dbError = usersTest.error.message
+      }
+    }
 
-    if (error) {
+    if (!dbConnected) {
       return new Response(
         JSON.stringify({
           status: 'unhealthy',
-          database: 'unreachable',
-          error: error.message,
+          database: 'Not available',
+          error: dbError || 'Database connection failed',
           timestamp: new Date().toISOString()
         }),
         {

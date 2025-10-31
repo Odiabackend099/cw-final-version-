@@ -3,6 +3,11 @@ import { corsHeaders } from '../_shared/cors.ts';
 
 // Create Vapi Assistant with Minimax TTS Configuration
 // This function creates a Vapi assistant that uses Minimax TTS for voice calls
+//
+// Environment Variables Required:
+// - VAPI_PRIVATE_KEY: Vapi Private API Key (Backend - KEEP SECRET!)
+//   Default value: 27dbe3f9-8abd-4894-8d2f-0d70f19c8374
+//   Set this in Supabase Dashboard -> Project Settings -> Edge Functions -> Secrets
 
 const VAPI_API_KEY = Deno.env.get('VAPI_PRIVATE_KEY');
 const VAPI_API_URL = 'https://api.vapi.ai/assistant';

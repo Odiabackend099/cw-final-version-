@@ -15,7 +15,7 @@ export async function getUserTier(userId: string): Promise<UserTier> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       // Check payments table for most recent successful payment
-      // Note: Actual schema uses 'status' not 'payment_status', and 'amount' to determine tier
+      // Production schema uses 'status' column (not payment_status), and 'amount' to determine tier
       const { data: payment, error } = await supabase
         .from('payments')
         .select('amount, status')

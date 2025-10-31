@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Mic, Send, X, Phone } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, VAPI_CONFIG } from '../lib/supabase';
 import Vapi from '@vapi-ai/web';
 
 export function FloatingChatWidget() {
@@ -14,8 +14,8 @@ export function FloatingChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Initialize Vapi client with live public key
-    const vapiPublicKey = 'ddd720c5-6fb8-4174-b7a6-729d7b308cb9';
+    // Initialize Vapi client - use env variable if set, otherwise fallback to VAPI_CONFIG
+    const vapiPublicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY || VAPI_CONFIG.publicKey;
     try {
       const client = new Vapi(vapiPublicKey);
       setVapiClient(client);
@@ -158,8 +158,8 @@ export function FloatingChatWidget() {
     try {
       setIsVoiceActive(true);
       
-      // Start Vapi call with the configured assistant
-      await vapiClient.start('fdaaa6f7-a204-4c08-99fd-20451c96fc74');
+      // Start Vapi call with the configured assistant from VAPI_CONFIG
+      await vapiClient.start(VAPI_CONFIG.assistantId);
 
     } catch (error) {
       console.error('Error starting voice call:', error);

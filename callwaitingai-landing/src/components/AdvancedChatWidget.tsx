@@ -3,6 +3,7 @@ import { MessageSquare, X, PhoneCall, PhoneOff, Send, Loader2 } from 'lucide-rea
 import { chatService, ChatMessage } from '../lib/chat';
 import Vapi from '@vapi-ai/web';
 import CallWaitingLogo from './CallWaitingLogo';
+import { VAPI_CONFIG } from '../lib/supabase';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -72,8 +73,8 @@ const AdvancedChatWidget = () => {
 
   // Initialize Vapi
   useEffect(() => {
-    // Use env variable instead of hardcoded key
-    const VAPI_PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY;
+    // Use env variable if set, otherwise fallback to VAPI_CONFIG
+    const VAPI_PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY || VAPI_CONFIG.publicKey;
 
     if (!VAPI_PUBLIC_KEY) {
       console.error('❌ Vapi public key not configured');
@@ -326,8 +327,8 @@ const AdvancedChatWidget = () => {
       // Step 3: Start Vapi call with assistant ID (uses pre-configured assistant)
       console.log('🎙️ Starting Vapi call with assistant ID...');
 
-      // Use the assistant ID directly - it already has all configuration on Vapi dashboard
-      await vapiClient.start('fdaaa6f7-a204-4c08-99fd-20451c96fc74');
+      // Use the assistant ID from VAPI_CONFIG - it already has all configuration on Vapi dashboard
+      await vapiClient.start(VAPI_CONFIG.assistantId);
       console.log('✅ Vapi call started successfully');
 
     } catch (error: any) {

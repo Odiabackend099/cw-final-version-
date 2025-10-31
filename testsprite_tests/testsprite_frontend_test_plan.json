@@ -1,8 +1,8 @@
 [
   {
     "id": "TC001",
-    "title": "User Signup with Valid Details",
-    "description": "Verify new user can successfully register with valid information and receives confirmation to log in.",
+    "title": "User Signup with Valid Data",
+    "description": "Verify that a user can successfully register with valid input data and receives confirmation.",
     "category": "functional",
     "priority": "High",
     "steps": [
@@ -12,7 +12,7 @@
       },
       {
         "type": "action",
-        "description": "Enter valid email, password, and required registration details"
+        "description": "Enter valid user details including email, password, and required fields"
       },
       {
         "type": "action",
@@ -20,47 +20,80 @@
       },
       {
         "type": "assertion",
-        "description": "Verify registration success message or confirmation email prompt"
+        "description": "Confirm that signup is successful and confirmation message is shown"
       },
       {
         "type": "assertion",
-        "description": "Check user can proceed to login page"
+        "description": "Verify that confirmation email is received"
       }
     ]
   },
   {
     "id": "TC002",
-    "title": "User Login with Correct Credentials",
-    "description": "Check that an existing user can login successfully using correct email and password.",
-    "category": "functional",
+    "title": "User Signup with Invalid or Empty Input",
+    "description": "Verify that signup fails with appropriate error messages when required fields are empty or invalid.",
+    "category": "error handling",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Go to login page"
+        "description": "Navigate to signup page"
       },
       {
         "type": "action",
-        "description": "Enter registered email and correct password"
+        "description": "Submit the signup form with empty required fields"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that validation errors are displayed for missing input"
       },
       {
         "type": "action",
-        "description": "Click on login button"
+        "description": "Submit signup form with invalid email format"
       },
       {
         "type": "assertion",
-        "description": "Verify user is redirected to the dashboard"
+        "description": "Verify that an invalid email format error is displayed"
+      },
+      {
+        "type": "action",
+        "description": "Submit signup form with password not meeting requirements"
       },
       {
         "type": "assertion",
-        "description": "Check session is active in Supabase Auth"
+        "description": "Verify that appropriate password validation error is shown"
       }
     ]
   },
   {
     "id": "TC003",
-    "title": "User Login Failure with Incorrect Password",
-    "description": "Verify login fails and appropriate error message shows upon entering invalid password.",
+    "title": "User Login with Correct Credentials",
+    "description": "Verify that a user can login successfully with valid credentials.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to login page"
+      },
+      {
+        "type": "action",
+        "description": "Enter valid email and corresponding password"
+      },
+      {
+        "type": "action",
+        "description": "Click the login button"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm user is successfully logged in and redirected to dashboard"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "User Login with Incorrect Credentials",
+    "description": "Verify that login is denied when invalid credentials are provided with appropriate error messages.",
     "category": "error handling",
     "priority": "High",
     "steps": [
@@ -70,7 +103,7 @@
       },
       {
         "type": "action",
-        "description": "Input valid email with incorrect password"
+        "description": "Enter valid email but wrong password"
       },
       {
         "type": "action",
@@ -78,80 +111,76 @@
       },
       {
         "type": "assertion",
-        "description": "Verify error message indicating invalid credentials is displayed"
-      },
-      {
-        "type": "assertion",
-        "description": "Ensure user is not authenticated"
-      }
-    ]
-  },
-  {
-    "id": "TC004",
-    "title": "Password Reset Flow",
-    "description": "Ensure a user can request password reset and receive reset instructions via email.",
-    "category": "functional",
-    "priority": "Medium",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Go to password reset page"
-      },
-      {
-        "type": "action",
-        "description": "Enter registered email address"
-      },
-      {
-        "type": "action",
-        "description": "Submit password reset request"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify confirmation message about password reset email"
-      },
-      {
-        "type": "assertion",
-        "description": "Check email is received with reset instructions"
+        "description": "Verify login failure error message is displayed and user remains on login page"
       }
     ]
   },
   {
     "id": "TC005",
-    "title": "Agent Setup with Valid Business Data and System Prompt",
-    "description": "Confirm user can successfully create or update AI receptionist agent with proper business name and system prompt within allowed limits.",
+    "title": "Password Reset Flow Success",
+    "description": "Verify that users can request a password reset link and successfully reset password via email.",
     "category": "functional",
-    "priority": "High",
+    "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to agent setup page"
+        "description": "Navigate to password reset page"
       },
       {
         "type": "action",
-        "description": "Input valid business name (within max length)"
-      },
-      {
-        "type": "action",
-        "description": "Enter system prompt text under maximum allowed size"
-      },
-      {
-        "type": "action",
-        "description": "Configure voice settings for paid tier if applicable"
-      },
-      {
-        "type": "action",
-        "description": "Save agent configuration"
+        "description": "Submit a valid registered email for password reset"
       },
       {
         "type": "assertion",
-        "description": "Verify agent configuration saved successfully and visible on page"
+        "description": "Confirm password reset email is sent"
+      },
+      {
+        "type": "action",
+        "description": "Use password reset link to set a new valid password"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify password is updated and user can login with new password"
       }
     ]
   },
   {
     "id": "TC006",
-    "title": "Agent Setup Validation for Oversized Business Name",
-    "description": "Verify system rejects business names exceeding maximum length and shows validation error.",
+    "title": "Agent Setup with Valid Business Data and System Prompt",
+    "description": "Verify that users can set up AI receptionist agent with valid business name, system prompt, and voice settings.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login and navigate to agent setup page"
+      },
+      {
+        "type": "action",
+        "description": "Enter valid business name within allowed length"
+      },
+      {
+        "type": "action",
+        "description": "Enter system prompt text within accepted size limits"
+      },
+      {
+        "type": "action",
+        "description": "Select appropriate voice settings based on subscription tier"
+      },
+      {
+        "type": "action",
+        "description": "Save the agent configuration"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm agent configuration is saved successfully with all data persisted"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Agent Setup with Invalid Input Validation",
+    "description": "Validate that the agent setup form triggers validation errors for empty or oversize business names and system prompts exceeding max size.",
     "category": "error handling",
     "priority": "High",
     "steps": [
@@ -161,422 +190,483 @@
       },
       {
         "type": "action",
-        "description": "Input business name exceeding allowed character limit"
-      },
-      {
-        "type": "action",
-        "description": "Attempt to save agent configuration"
+        "description": "Leave business name empty and attempt to save"
       },
       {
         "type": "assertion",
-        "description": "Validate error message appears for business name length violation"
-      },
-      {
-        "type": "assertion",
-        "description": "Ensure agent configuration is not saved"
-      }
-    ]
-  },
-  {
-    "id": "TC007",
-    "title": "Agent Setup Validation for Oversized System Prompt",
-    "description": "Validate that system prompt input beyond size limits triggers validation error preventing save.",
-    "category": "error handling",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Go to agent setup page"
+        "description": "Verify validation error is shown for empty business name"
       },
       {
         "type": "action",
-        "description": "Input system prompt text exceeding maximum size limit"
+        "description": "Enter a business name longer than the maximum allowed length"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify validation error for oversize business name is shown"
       },
       {
         "type": "action",
-        "description": "Try to save the agent"
+        "description": "Enter a system prompt exceeding allowed character count"
       },
       {
         "type": "assertion",
-        "description": "Verify error message for system prompt size is shown"
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm agent configuration not saved"
+        "description": "Verify system prompt size validation error is displayed"
       }
     ]
   },
   {
     "id": "TC008",
     "title": "Knowledge Base File Upload with Auto-Save",
-    "description": "Check that file upload in knowledge base triggers agent auto-save and file is stored correctly.",
+    "description": "Verify that files can be uploaded to knowledge base after auto-saving the assistant and that files appear in storage.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Open agent setup page with no prior save"
+        "description": "Navigate to agent setup page and load existing assistant"
       },
       {
         "type": "action",
-        "description": "Attempt to upload allowed knowledge base file"
+        "description": "Upload a supported knowledge base file"
       },
       {
         "type": "assertion",
-        "description": "Verify agent auto-save is triggered before file upload"
+        "description": "Confirm auto-save is triggered before the file upload"
       },
       {
         "type": "assertion",
-        "description": "Confirm file appears in knowledge base storage and UI"
+        "description": "Verify the uploaded file is visible in knowledge base storage/list"
       }
     ]
   },
   {
     "id": "TC009",
-    "title": "Knowledge Base Upload with Disallowed File Type",
-    "description": "Ensure that uploading files with unsupported types is blocked with clear error message.",
+    "title": "Knowledge Base File Upload with Invalid Files",
+    "description": "Verify that unsupported file types or files exceeding size limits are rejected with appropriate error messaging.",
     "category": "error handling",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to knowledge base upload section"
+        "description": "Attempt to upload an unsupported file type"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify upload is rejected and error message indicates disallowed file type"
       },
       {
         "type": "action",
-        "description": "Attempt to upload a file with disallowed extension"
+        "description": "Attempt to upload a file exceeding size limit"
       },
       {
         "type": "assertion",
-        "description": "Verify upload is rejected with file type error"
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm no file is saved or linked to agent"
+        "description": "Verify upload is rejected and error message indicates file too large"
       }
     ]
   },
   {
     "id": "TC010",
-    "title": "Voice Call Testing for Paid Tier with Minimax TTS Integration",
-    "description": "Validate that users with paid tiers can successfully initiate voice call tests with voice settings applied through Minimax TTS.",
+    "title": "Voice Call Testing - Free Tier Restrictions",
+    "description": "Verify that free tier users can test voice calls but have limited voice configuration options with no Minimax TTS integration.",
     "category": "functional",
-    "priority": "High",
+    "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Ensure user is on a paid tier with voice call privileges"
+        "description": "Login as free tier user"
       },
       {
         "type": "action",
-        "description": "Navigate to Voice Call Tester component/interface"
+        "description": "Navigate to voice call testing page"
       },
       {
         "type": "action",
-        "description": "Start a test call with selected voice settings"
+        "description": "Attempt to initiate a voice call test via Vapi.ai SDK"
       },
       {
         "type": "assertion",
-        "description": "Verify Vapi.ai call is initiated and Minimax TTS voice is used"
+        "description": "Verify call connects successfully using default voice settings with no premium voice options"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to select Minimax TTS voices"
       },
       {
         "type": "assertion",
-        "description": "Check call events and logs are properly generated"
+        "description": "Verify Minimax TTS options are disabled or hidden for free tier users"
       }
     ]
   },
   {
     "id": "TC011",
-    "title": "Webhook Handler Creates Call Log on Call Completion",
-    "description": "Test that Vapi.ai webhook POST triggers creation of call log entries accurately in database and reflects on dashboard.",
-    "category": "integration",
+    "title": "Voice Call Testing - Paid Tier Minimax TTS Integration",
+    "description": "Verify paid tier users can select and test multiple Minimax TTS voices integrated with Vapi.ai SDK during voice call tests.",
+    "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Simulate Vapi.ai call completion webhook with valid payload"
+        "description": "Login as paid tier user"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to voice call testing page"
+      },
+      {
+        "type": "action",
+        "description": "Select various Minimax TTS voices"
+      },
+      {
+        "type": "action",
+        "description": "Initiate voice call test with selected voice"
       },
       {
         "type": "assertion",
-        "description": "Confirm call log entry is created in Supabase database"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify call appears in dashboard call logs page"
+        "description": "Verify call establishes successfully and TTS voice matches the selected Minimax voice"
       }
     ]
   },
   {
     "id": "TC012",
-    "title": "Subscription Tier Upgrade Unlocks Premium Features",
-    "description": "Confirm that upgrading subscription tier enables new features such as Minimax TTS voices and voice call testing with premium configurations.",
-    "category": "functional",
+    "title": "Vapi.ai Webhook Processing and Call Log Creation",
+    "description": "Validate that incoming call events from Vapi webhook are processed and call log entries are correctly created in the database and visible on dashboard.",
+    "category": "integration",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login with free tier user"
-      },
-      {
-        "type": "action",
-        "description": "Navigate to payments or subscription upgrade page"
-      },
-      {
-        "type": "action",
-        "description": "Upgrade user tier to professional or higher"
+        "description": "Simulate a Vapi.ai call completion webhook POST request with valid call data"
       },
       {
         "type": "assertion",
-        "description": "Check that premium features (voice settings, Minimax TTS) become accessible"
+        "description": "Verify the webhook endpoint accepts the request and responds with success status"
       },
       {
         "type": "assertion",
-        "description": "Verify user interface reflects new tier and features"
+        "description": "Confirm that a new call log entry is created in the database associated with the correct assistant/user"
+      },
+      {
+        "type": "action",
+        "description": "Login to dashboard and navigate to call logs"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new call log entry is visible with accurate details matching the webhook data"
       }
     ]
   },
   {
     "id": "TC013",
-    "title": "Input Validation - Empty Business Name Rejected",
-    "description": "Ensure that agent setup validation fails when no business name is provided and shows meaningful error.",
-    "category": "error handling",
+    "title": "Call Logs and Leads Management Display",
+    "description": "Verify that users can view call histories and leads accurately on dashboard pages and that data updates accordingly upon new calls.",
+    "category": "functional",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Go to agent setup page"
-      },
-      {
-        "type": "action",
-        "description": "Leave business name field empty"
-      },
-      {
-        "type": "action",
-        "description": "Attempt to save agent configuration"
+        "description": "Login and navigate to call logs page"
       },
       {
         "type": "assertion",
-        "description": "Verify validation error about empty business name is displayed"
+        "description": "Verify that all relevant call logs are listed with correct timestamps and call details"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to leads management page"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm leads are displayed and match captured data from voice calls"
       }
     ]
   },
   {
     "id": "TC014",
-    "title": "API Rate Limiting Enforced for Free Tier User",
-    "description": "Verify that free-tier users receive HTTP 429 error after exceeding 100 API requests per hour per assistant, and that rate limit resets after cooldown.",
-    "category": "error handling",
+    "title": "Subscription Tier Upgrade and Feature Access Control",
+    "description": "Verify that users can upgrade subscription tiers via payment page and gain access to premium features accordingly.",
+    "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Authenticate as free tier user"
+        "description": "Login as free or lower tier user"
       },
       {
         "type": "action",
-        "description": "Send 100 valid API requests within one hour for an assistant"
+        "description": "Navigate to payments/subscription page"
+      },
+      {
+        "type": "action",
+        "description": "Upgrade subscription to professional or higher tier"
       },
       {
         "type": "assertion",
-        "description": "Verify first 100 requests succeed"
+        "description": "Confirm payment succeeds and subscription tier updates"
       },
       {
         "type": "action",
-        "description": "Send 1 more API request exceeding limit"
+        "description": "Navigate to features restricted by tier (e.g., Minimax TTS voice selection)"
       },
       {
         "type": "assertion",
-        "description": "Confirm HTTP 429 Too Many Requests error is returned"
-      },
-      {
-        "type": "action",
-        "description": "Wait for rate limit cooldown period to expire"
-      },
-      {
-        "type": "action",
-        "description": "Send API request again"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify API request succeeds after cooldown"
+        "description": "Verify new features are enabled and accessible after upgrade"
       }
     ]
   },
   {
     "id": "TC015",
-    "title": "Health Check Endpoint Returns 200 When Healthy",
-    "description": "Test health check API endpoint returns HTTP 200 status with healthy database connectivity.",
-    "category": "functional",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Call health check endpoint when system and database are operational"
-      },
-      {
-        "type": "assertion",
-        "description": "Endpoint returns HTTP 200 status code"
-      },
-      {
-        "type": "assertion",
-        "description": "Response indicates all system components are healthy"
-      }
-    ]
-  },
-  {
-    "id": "TC016",
-    "title": "Health Check Endpoint Returns 503 When Unhealthy",
-    "description": "Ensure health check endpoint returns HTTP 503 when database connectivity or critical dependency is down.",
+    "title": "API Rate Limiting Enforcement for Free Tier",
+    "description": "Ensure that API calls by free tier users are limited to 100 requests per hour per assistant and that excessive requests receive 429 responses until reset.",
     "category": "error handling",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Simulate database failure or disconnect"
+        "description": "Simulate 100 API requests within one hour for a free tier assistant"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all 100 requests succeed with expected responses"
       },
       {
         "type": "action",
-        "description": "Call health check endpoint"
+        "description": "Send additional API request exceeding the limit"
       },
       {
         "type": "assertion",
-        "description": "Verify HTTP 503 Service Unavailable status code is returned"
+        "description": "Verify server responds with 429 Too Many Requests error"
+      },
+      {
+        "type": "action",
+        "description": "Wait for rate limit cooldown period (1 hour) to reset"
+      },
+      {
+        "type": "action",
+        "description": "Send API request again within new hour"
       },
       {
         "type": "assertion",
-        "description": "Response indicates service is unhealthy"
+        "description": "Verify request is accepted successfully"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Health Check Endpoint Returns 200 for Healthy System",
+    "description": "Confirm that the health check endpoint returns HTTP 200 status when database and system are responsive.",
+    "category": "integration",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Call the health check endpoint"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify response status is 200 OK and health details report database connectivity"
       }
     ]
   },
   {
     "id": "TC017",
-    "title": "Dashboard Displays Calls, Leads, and System Status",
-    "description": "Verify dashboard aggregates and displays call overview, recent leads, and system health information appropriately for logged-in users.",
-    "category": "functional",
+    "title": "Health Check Endpoint Returns 503 for Unhealthy System",
+    "description": "Confirm that the health check endpoint returns HTTP 503 status when database or critical services are unresponsive.",
+    "category": "error handling",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login and navigate to main dashboard"
+        "description": "Simulate database unavailability or failure"
+      },
+      {
+        "type": "action",
+        "description": "Call the health check endpoint"
       },
       {
         "type": "assertion",
-        "description": "Check call summary statistics are displayed"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify recent leads with correct details are shown"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify system status with uptime and health checks is visible"
+        "description": "Verify response status is 503 Service Unavailable"
       }
     ]
   },
   {
     "id": "TC018",
-    "title": "Call Logs Page Shows Accurate Call History",
-    "description": "Ensure calls page lists historical call records with proper metadata and playback options if available.",
-    "category": "functional",
-    "priority": "Medium",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Navigate to calls page from dashboard"
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm list of past calls is displayed with relevant details like timestamp, duration, caller info"
-      },
-      {
-        "type": "assertion",
-        "description": "Check audio playback or recording link is accessible for calls with recordings"
-      }
-    ]
-  },
-  {
-    "id": "TC019",
-    "title": "Lead Management Tracks and Displays Captured Leads",
-    "description": "Validate leads page shows newly captured leads from AI receptionist calls with correct information and statuses.",
-    "category": "functional",
-    "priority": "Medium",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Navigate to leads page"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify leads data is accurately listed with caller details and timestamps"
-      },
-      {
-        "type": "assertion",
-        "description": "Check ability to change lead statuses or add notes"
-      }
-    ]
-  },
-  {
-    "id": "TC020",
-    "title": "Navigation Component Responds Correctly on Different Screen Sizes",
-    "description": "Test navigation menu expands, collapses, and brand customizations display properly on desktop and mobile.",
-    "category": "ui",
-    "priority": "Medium",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Load application on desktop screen"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify navigation menu shows all items with branding (ODIADEV)"
-      },
-      {
-        "type": "action",
-        "description": "Load application on mobile device or narrow viewport"
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm responsive menu supports toggling and collapses as needed"
-      }
-    ]
-  },
-  {
-    "id": "TC021",
-    "title": "End-to-End User Workflow from Signup to Dashboard Interaction",
-    "description": "Comprehensive flow test covering user registration, login, agent setup, file upload, voice call test, and dashboard usage without errors.",
+    "title": "End-to-End User Workflow from Signup to Dashboard",
+    "description": "Validate complete user journey including signup, login, agent setup, knowledge base upload, voice call testing, call reception via webhook, and dashboard interaction with no errors.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Register a new user via signup page"
+        "description": "Perform user signup with valid data"
       },
       {
         "type": "action",
-        "description": "Login with registered credentials"
+        "description": "Login with newly created user"
       },
       {
         "type": "action",
-        "description": "Complete AI agent setup with valid business data and prompts"
+        "description": "Set up AI agent with valid business details and system prompt"
       },
       {
         "type": "action",
-        "description": "Upload knowledge base files with auto-save validation"
+        "description": "Upload knowledge base files"
       },
       {
         "type": "action",
-        "description": "Perform a voice call test through Vapi.ai integration"
+        "description": "Test voice call functionality using Vapi.ai SDK"
       },
       {
         "type": "action",
-        "description": "Navigate through dashboard pages to review calls, leads, and system status"
+        "description": "Trigger simulated incoming call webhook from Vapi"
+      },
+      {
+        "type": "action",
+        "description": "Verify call logs and leads pages display updated data"
       },
       {
         "type": "assertion",
-        "description": "Verify no console errors or exceptions occur during flow"
+        "description": "Check browser console logs for absence of errors throughout the workflow"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Input Validation on Business Name Field Boundary Conditions",
+    "description": "Verify that business name input accepts minimum and maximum allowed characters and rejects beyond maximum.",
+    "category": "error handling",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to agent setup page"
+      },
+      {
+        "type": "action",
+        "description": "Enter business name with minimum valid length"
       },
       {
         "type": "assertion",
-        "description": "Confirm all user data persists correctly in database"
+        "description": "Verify value saves successfully"
+      },
+      {
+        "type": "action",
+        "description": "Enter business name with maximum allowed length"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify value saves successfully"
+      },
+      {
+        "type": "action",
+        "description": "Enter business name exceeding maximum length by one character"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify validation error is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Navigation Component Responsive and Brand Customization",
+    "description": "Verify that the main navigation renders correctly, adapts responsively across screen sizes, and displays white-labeled branding.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Load application on desktop viewport"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm navigation menu displays all expected links and brand logos"
+      },
+      {
+        "type": "action",
+        "description": "Resize viewport to mobile screen size"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify navigation collapses into responsive menu and remains functional"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm brand is displayed as 'ODIADEV' with correct styling"
+      }
+    ]
+  },
+  {
+    "id": "TC021",
+    "title": "Database Migration Executes Successfully",
+    "description": "Verify that critical database migrations run without errors and required schema updates are applied.",
+    "category": "integration",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Execute database migration scripts including critical fixes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify migration process completes with no errors"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm database schema includes expected new columns and tables"
+      }
+    ]
+  },
+  {
+    "id": "TC022",
+    "title": "UptimeRobot Monitoring Configuration Verification",
+    "description": "Ensure UptimeRobot is correctly configured to monitor health check and key endpoints every 5 minutes with alerting enabled.",
+    "category": "integration",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Check UptimeRobot monitoring dashboard and settings"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify multiple endpoints including health endpoint are monitored at 5-minute intervals"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm alerting is configured for downtime or 503 responses"
+      }
+    ]
+  },
+  {
+    "id": "TC023",
+    "title": "Settings Page Profile Update",
+    "description": "Verify that user can update profile information and application settings via settings page and changes persist across sessions.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login and navigate to settings page"
+      },
+      {
+        "type": "action",
+        "description": "Modify profile fields such as display name or email preferences"
+      },
+      {
+        "type": "action",
+        "description": "Save settings changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify success notification is shown"
+      },
+      {
+        "type": "action",
+        "description": "Logout and login again"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm updated profile settings are persisted and displayed"
       }
     ]
   }

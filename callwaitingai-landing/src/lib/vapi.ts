@@ -1,6 +1,8 @@
 // Vapi Voice AI Integration
-const VAPI_PUBLIC_KEY = 'ddd720c5-6fb8-4174-b7a6-729d7b308cb9';
-const VAPI_ASSISTANT_ID = 'fdaaa6f7-a204-4c08-99fd-20451c96fc74';
+import { VAPI_CONFIG } from './supabase';
+
+const VAPI_PUBLIC_KEY = VAPI_CONFIG.publicKey;
+const VAPI_ASSISTANT_ID = VAPI_CONFIG.assistantId;
 
 export const vapiService = {
   // Initialize Vapi voice call

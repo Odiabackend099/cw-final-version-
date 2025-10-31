@@ -23,6 +23,7 @@ import { Settings } from './pages/Settings';
 import AgentSetup from './pages/AgentSetup';
 import EmailVerification from './pages/EmailVerification';
 import PasswordReset from './pages/PasswordReset';
+import { ForgotPassword } from './pages/ForgotPassword';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -106,6 +107,7 @@ function AppRoutes() {
           } 
         />
         <Route path="/auth/confirm" element={<EmailVerification />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth/reset-password" element={<PasswordReset />} />
         {/* Legacy route alias for password reset */}
         <Route path="/password-reset" element={<Navigate to="/auth/reset-password" replace />} />
