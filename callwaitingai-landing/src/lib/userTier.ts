@@ -47,8 +47,13 @@ export async function getUserTier(userId: string): Promise<UserTier> {
         return 'free';
       }
 
-      // If error is 406 (Not Acceptable), retry with delay
-      if (error.code === 'PGRST116' || error.status === 406) {
+      // If error is 406 (Not Acceptable) or no rows found, retry with delay
+      // PostgrestError doesn't have status property, check code or message instead
+      const isRetryableError = error.code === 'PGRST116' || 
+                               error.message?.includes('406') ||
+                               error.message?.includes('Not Acceptable');
+      
+      if (isRetryableError) {
         lastError = error;
         if (attempt < maxRetries - 1) {
           // Exponential backoff: 250ms, 500ms, 1000ms
