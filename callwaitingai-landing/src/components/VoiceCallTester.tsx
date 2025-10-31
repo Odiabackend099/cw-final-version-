@@ -4,6 +4,7 @@ import Vapi from '@vapi-ai/web';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserTier } from '../lib/userTier';
 import { VAPI_CONFIG, supabase } from '../lib/supabase';
+import { getVoiceById } from '../config/vapiVoices';
 
 interface Assistant {
   id: string;
@@ -12,8 +13,11 @@ interface Assistant {
   business_hours: string;
   timezone: string;
   system_prompt: string;
-  minimax_voice_id: string | null;
-  use_minimax_tts: boolean;
+  vapi_voice_id: string | null;
+  vapi_voice_provider: string | null;
+  // Deprecated fields (kept for migration compatibility)
+  minimax_voice_id?: string | null;
+  use_minimax_tts?: boolean;
 }
 
 interface VoiceCallTesterProps {
@@ -267,14 +271,22 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
         backgroundSound: 'off',
       };
 
-      // Configure voice - For test calls, use default Vapi voice
-      // NOTE: Minimax TTS is only available in production via custom-voice provider
-      // Test calls will use Vapi's default voice for simplicity and reliability
-      if (assistant.use_minimax_tts && assistant.minimax_voice_id) {
-        // Log that Minimax is configured but will use default for test
-        console.log('ℹ️ Minimax Voice configured:', assistant.minimax_voice_id);
-        console.log('ℹ️ Test call will use default Vapi voice (Minimax only available in production)');
-        // Do not set voice config - let Vapi use default voice for test calls
+      // Configure voice from Vapi voices config
+      if (assistant.vapi_voice_id) {
+        const selectedVoice = getVoiceById(assistant.vapi_voice_id);
+
+        if (selectedVoice) {
+          assistantConfig.voice = {
+            provider: selectedVoice.provider,
+            voiceId: selectedVoice.voiceId,
+          };
+          console.log('🎤 Using Vapi Voice:', selectedVoice.name, `(${selectedVoice.provider})`);
+          console.log('Voice ID:', selectedVoice.voiceId);
+        } else {
+          console.log('ℹ️ Voice not found, using Vapi default voice');
+        }
+      } else {
+        console.log('ℹ️ No voice configured, using Vapi default voice');
       }
 
       if (import.meta.env.DEV) {
@@ -475,18 +487,21 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
           )}
         </div>
 
-        {/* Minimax Voice Info */}
-        {assistant.use_minimax_tts && assistant.minimax_voice_id && (
-          <div className="mx-6 mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2">
-            <Volume2 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-sm text-blue-800 font-medium">Minimax Voice Configured</p>
-              <p className="text-xs text-blue-700 mt-1">
-                Test calls use default Vapi voice for reliability. Your Minimax TTS voice ({assistant.minimax_voice_id}) will be used in production calls only.
-              </p>
+        {/* Voice Info */}
+        {assistant.vapi_voice_id && (() => {
+          const voice = getVoiceById(assistant.vapi_voice_id);
+          return voice ? (
+            <div className="mx-6 mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2">
+              <Volume2 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm text-blue-800 font-medium">Voice Configured</p>
+                <p className="text-xs text-blue-700 mt-1">
+                  Using <strong>{voice.name}</strong> ({voice.provider}) for this test call.
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          ) : null;
+        })()}
 
         {/* Error Alert */}
         {callError && (

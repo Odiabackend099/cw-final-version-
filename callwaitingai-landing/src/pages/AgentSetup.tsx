@@ -3,17 +3,7 @@ import { Save, Upload, Play, Loader2, AlertCircle, CheckCircle, Volume2, FileTex
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { VoiceCallTester } from '../components/VoiceCallTester';
-import VoiceDemoPlayer from '../components/VoiceDemoPlayer';
-
-interface MinimaxVoice {
-  id: string;
-  voice_id: string;
-  voice_name: string;
-  gender: string;
-  accent: string;
-  description: string;
-  is_premium: boolean;
-}
+import { ALL_VAPI_VOICES, DEFAULT_VOICE_ID, type VapiVoice } from '../config/vapiVoices';
 
 interface Assistant {
   id: string;
@@ -23,8 +13,11 @@ interface Assistant {
   business_hours: string;
   timezone: string;
   system_prompt: string;
-  minimax_voice_id: string | null;
-  use_minimax_tts: boolean;
+  vapi_voice_id: string | null;
+  vapi_voice_provider: string | null;
+  // Deprecated fields (kept for migration compatibility)
+  minimax_voice_id?: string | null;
+  use_minimax_tts?: boolean;
 }
 
 const DEFAULT_SYSTEM_PROMPT = `You are Marcy, a professional AI receptionist for {business_name}.
@@ -69,18 +62,16 @@ const AgentSetup = () => {
   const [businessHours, setBusinessHours] = useState('Monday-Friday 9AM-5PM');
   const [timezone, setTimezone] = useState('America/New_York');
   const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT);
-  const [selectedVoiceId, setSelectedVoiceId] = useState<string>('');
-  const [useMinimaxTts, setUseMinimaxTts] = useState(false);
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string>(DEFAULT_VOICE_ID);
+  const [selectedVoiceProvider, setSelectedVoiceProvider] = useState<string>('vapi');
 
   // Data state
-  const [voices, setVoices] = useState<MinimaxVoice[]>([]);
   const [assistant, setAssistant] = useState<Assistant | null>(null);
   const [knowledgeBaseFiles, setKnowledgeBaseFiles] = useState<File[]>([]);
   const [uploadingKb, setUploadingKb] = useState(false);
 
   // Voice call tester state
   const [showCallTester, setShowCallTester] = useState(false);
-  const [testingVoice, setTestingVoice] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -91,16 +82,6 @@ const AgentSetup = () => {
 
     try {
       setLoading(true);
-
-      // Load Minimax voices
-      const { data: voicesData, error: voicesError } = await supabase
-        .from('minimax_voices')
-        .select('*')
-        .eq('is_active', true)
-        .order('voice_name');
-
-      if (voicesError) throw voicesError;
-      setVoices(voicesData || []);
 
       // Load assistant configuration
       const { data: assistantData, error: assistantError } = await supabase
@@ -121,8 +102,8 @@ const AgentSetup = () => {
         setBusinessHours(assistantData.business_hours || 'Monday-Friday 9AM-5PM');
         setTimezone(assistantData.timezone || 'America/New_York');
         setSystemPrompt(assistantData.system_prompt || DEFAULT_SYSTEM_PROMPT);
-        setSelectedVoiceId(assistantData.minimax_voice_id || '');
-        setUseMinimaxTts(assistantData.use_minimax_tts || false);
+        setSelectedVoiceId(assistantData.vapi_voice_id || DEFAULT_VOICE_ID);
+        setSelectedVoiceProvider(assistantData.vapi_voice_provider || 'vapi');
       }
     } catch (error: any) {
       console.error('Error loading data:', error);
@@ -153,8 +134,8 @@ const AgentSetup = () => {
         business_hours: businessHours,
         timezone: timezone,
         system_prompt: processedPrompt,
-        minimax_voice_id: selectedVoiceId || null,
-        use_minimax_tts: useMinimaxTts,
+        vapi_voice_id: selectedVoiceId || DEFAULT_VOICE_ID,
+        vapi_voice_provider: selectedVoiceProvider || 'vapi',
         updated_at: new Date().toISOString(),
       };
 
@@ -231,8 +212,8 @@ const AgentSetup = () => {
           business_hours: businessHours,
           timezone: timezone,
           system_prompt: processedPrompt,
-          minimax_voice_id: selectedVoiceId || null,
-          use_minimax_tts: useMinimaxTts,
+          vapi_voice_id: selectedVoiceId || DEFAULT_VOICE_ID,
+          vapi_voice_provider: selectedVoiceProvider || 'vapi',
           updated_at: new Date().toISOString(),
         };
 
@@ -287,9 +268,9 @@ const AgentSetup = () => {
 
   const handleTestCall = async () => {
     // If assistant doesn't exist or voice was changed, save first
-    if (!assistant || (selectedVoiceId && assistant.minimax_voice_id !== selectedVoiceId)) {
+    if (!assistant || (selectedVoiceId && assistant.vapi_voice_id !== selectedVoiceId)) {
       setMessage({ type: 'info', text: 'Saving configuration before test call...' });
-      
+
       try {
         await handleSave();
         // Wait a moment for state to update
@@ -322,65 +303,6 @@ const AgentSetup = () => {
     setShowCallTester(true);
   };
 
-  const testVoiceId = async (voiceId: string, voiceName: string) => {
-    if (!voiceId) {
-      setMessage({ type: 'error', text: 'Please select a voice first' });
-      return false;
-    }
-
-    try {
-      setTestingVoice(true);
-      setMessage({ type: 'info', text: `Testing ${voiceName}...` });
-
-      // Call Minimax TTS Edge Function - Use correct endpoint and voiceId format
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://bcufohulqrceytkrqpgd.supabase.co';
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjdWZvaHVscXJjZXl0a3JxcGdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MTA2NTUsImV4cCI6MjA3NTA4NjY1NX0.rc9-fFpLsTyESK-222zYVKGVx-R5mwb9Xi005p_bwoI';
-      
-      const response = await fetch(`${supabaseUrl}/functions/v1/minimax-tts`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseAnonKey}`,
-        },
-        body: JSON.stringify({
-          text: 'Hello, this is a test of the voice system.',
-          voiceId: voiceId, // Use camelCase voiceId for Minimax endpoint
-          speed: 1.0,
-          volume: 5,
-          pitch: 0,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        console.log('✅ VOICE TEST: TRUE/OK');
-        console.log('═══════════════════════════');
-        console.log('Voice:', voiceName);
-        console.log('Voice ID:', voiceId);
-        console.log('Status:', 'SUCCESS');
-        console.log('Audio URL:', data.audio_file);
-        console.log('═══════════════════════════');
-        console.log('RESULT: TRUE');
-        console.log('STATUS: OK');
-        console.log('═══════════════════════════');
-
-        setMessage({ type: 'success', text: `✅ ${voiceName} test: OK - Voice working correctly!` });
-        return true;
-      } else {
-        console.log('❌ VOICE TEST: FALSE/ERROR');
-        console.log('Error:', data.error || 'Unknown error');
-        setMessage({ type: 'error', text: `❌ ${voiceName} test failed: ${data.error || 'Unknown error'}` });
-        return false;
-      }
-    } catch (error: any) {
-      console.error('❌ VOICE TEST ERROR:', error);
-      setMessage({ type: 'error', text: `Voice test failed: ${error.message}` });
-      return false;
-    } finally {
-      setTestingVoice(false);
-    }
-  };
 
   const testAgentConfiguration = async () => {
     if (!assistant) {
@@ -409,8 +331,8 @@ const AgentSetup = () => {
         console.log('Timezone:', assistant.timezone);
         console.log('System Prompt Length:', assistant.system_prompt.length, 'chars');
         console.log('Voice Config:', {
-          use_minimax_tts: assistant.use_minimax_tts,
-          minimax_voice_id: assistant.minimax_voice_id,
+          vapi_voice_id: assistant.vapi_voice_id,
+          vapi_voice_provider: assistant.vapi_voice_provider,
         });
         console.log('═══════════════════════════');
         console.log('RESULT: TRUE');
@@ -431,8 +353,6 @@ const AgentSetup = () => {
       return false;
     }
   };
-
-  const selectedVoice = voices.find(v => v.voice_id === selectedVoiceId);
 
   if (loading) {
     return (
@@ -575,108 +495,103 @@ const AgentSetup = () => {
           </div>
 
           {/* Voice Selection */}
-          <div className="space-y-6">
-            {/* Voice Demo Player */}
-            <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <input
-                type="checkbox"
-                id="use-minimax-tts"
-                checked={useMinimaxTts}
-                onChange={(e) => setUseMinimaxTts(e.target.checked)}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-              />
-              <label htmlFor="use-minimax-tts" className="text-sm font-medium text-gray-700">
-                Use custom ODIADEV TTS voices (Pro/ProMax plans only)
-              </label>
-            </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Volume2 className="w-5 h-5" />
+              Voice Configuration
+            </h2>
 
-            {useMinimaxTts && (
-              <>
-                {/* Important Notice */}
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-semibold text-amber-900 mb-1">
-                        Voice Usage Notice
-                      </p>
-                      <p className="text-xs text-amber-800">
-                        Custom Minimax voices are used for production calls via webhooks and recorded messages.
-                        Test calls in the dashboard will use Vapi's default voice for real-time streaming compatibility.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Voice Demo Player - Beautiful UI */}
-                <VoiceDemoPlayer
-                  onVoiceSelect={(voiceId) => setSelectedVoiceId(voiceId)}
-                  selectedVoiceId={selectedVoiceId}
-                  userTier={user?.user_metadata?.subscription_tier}
-                />
-
-                {/* Voice Selection Dropdown (Fallback) */}
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-md font-semibold text-gray-900 mb-4">
-                    Or Select from List
-                  </h3>
-                  <label htmlFor="voice-select-dropdown" className="sr-only">
-                    Select voice from dropdown
-                  </label>
-                  <select
-                    id="voice-select-dropdown"
-                    value={selectedVoiceId}
-                    onChange={(e) => setSelectedVoiceId(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    aria-label="Select voice from dropdown"
-                  >
-                    <option value="">-- Select a voice --</option>
-                    {voices.map((voice) => (
-                      <option key={voice.id} value={voice.voice_id}>
-                        {voice.voice_name} ({voice.gender}, {voice.accent})
-                        {voice.is_premium && ' - Premium'}
-                      </option>
-                    ))}
-                  </select>
-
-                  {selectedVoice && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm font-medium text-gray-900 mb-1">
-                        Selected: {selectedVoice.voice_name}
-                      </p>
-                      <p className="text-sm text-gray-600 mb-3">
-                        {selectedVoice.description}
-                      </p>
-                      <button
-                        onClick={() => testVoiceId(selectedVoiceId, selectedVoice.voice_name)}
-                        disabled={testingVoice || !selectedVoiceId}
-                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                      >
-                        {testingVoice ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Testing Voice...
-                          </>
-                        ) : (
-                          <>
-                            <Volume2 className="w-4 h-4" />
-                            Test Voice Quality
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-
-            {!useMinimaxTts && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <p className="text-sm text-gray-600">
-                  Using default Vapi voices. Enable custom ODIADEV TTS above for Pro/ProMax voice options.
+            <div className="space-y-4">
+              {/* Voice Provider Selection */}
+              <div>
+                <label htmlFor="voice-provider" className="block text-sm font-medium text-gray-700 mb-2">
+                  Voice Provider
+                </label>
+                <select
+                  id="voice-provider"
+                  value={selectedVoiceProvider}
+                  onChange={(e) => {
+                    const provider = e.target.value;
+                    setSelectedVoiceProvider(provider);
+                    // Auto-select first voice of new provider
+                    const firstVoice = ALL_VAPI_VOICES.find(v => v.provider === provider);
+                    if (firstVoice) setSelectedVoiceId(firstVoice.id);
+                  }}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="vapi">Vapi Native Voices (Free)</option>
+                  <option value="elevenlabs">ElevenLabs (Premium - Requires API Key)</option>
+                  <option value="playht">PlayHT (Premium - Requires API Key)</option>
+                  <option value="azure">Azure (Premium - Requires API Key)</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  {selectedVoiceProvider === 'vapi'
+                    ? 'Free, high-quality voices included with all plans'
+                    : 'Premium providers require API key configuration in Vapi dashboard'}
                 </p>
               </div>
-            )}
+
+              {/* Voice Selection */}
+              <div>
+                <label htmlFor="voice-select" className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Voice
+                </label>
+                <select
+                  id="voice-select"
+                  value={selectedVoiceId}
+                  onChange={(e) => setSelectedVoiceId(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {ALL_VAPI_VOICES
+                    .filter(v => v.provider === selectedVoiceProvider)
+                    .map(voice => (
+                      <option key={voice.id} value={voice.id}>
+                        {voice.name} - {voice.gender}, {voice.accent} ({voice.age}yo)
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              {/* Voice Preview */}
+              {(() => {
+                const selectedVoice = ALL_VAPI_VOICES.find(v => v.id === selectedVoiceId);
+                return selectedVoice ? (
+                  <div className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        <Volume2 className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 mb-1">{selectedVoice.name}</h4>
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <p><span className="font-medium">Style:</span> {selectedVoice.description}</p>
+                          <p><span className="font-medium">Accent:</span> {selectedVoice.accent}</p>
+                          <p><span className="font-medium">Age:</span> {selectedVoice.age} years old</p>
+                          <p><span className="font-medium">Provider:</span> {selectedVoice.provider.toUpperCase()}</p>
+                        </div>
+                        {selectedVoice.isPremium && (
+                          <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded">
+                            <CheckCircle className="w-3 h-3" />
+                            Premium Voice
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : null;
+              })()}
+
+              {/* Info Notice */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-blue-800">
+                    <strong>Note:</strong> Your selected voice will be used for both test calls and production calls.
+                    {selectedVoiceProvider !== 'vapi' && ' Premium providers require API key setup in your Vapi dashboard.'}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Knowledge Base Upload */}
