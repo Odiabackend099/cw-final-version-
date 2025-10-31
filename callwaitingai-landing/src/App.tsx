@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
-import { FloatingChatWidget } from './components/FloatingChatWidget';
 
 // Landing pages
 import Navigation from './components/Navigation';
@@ -58,7 +57,6 @@ function AppRoutes() {
               <Navigation />
               <Home />
               <Footer />
-              <AdvancedChatWidget />
             </div>
           )
         } />
@@ -175,7 +173,8 @@ function AppRoutes() {
         />
       </Routes>
 
-      {user && <FloatingChatWidget />}
+      {/* Advanced Chat Widget for all pages */}
+      <AdvancedChatWidget />
     </>
   );
 }
