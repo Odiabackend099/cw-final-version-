@@ -1,38 +1,52 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 
-// Landing pages
+// Landing pages - eagerly loaded for initial page view
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
-import AdvancedChatWidget from './components/AdvancedChatWidget';
-import Home from './pages/Home';
-import Privacy from './pages/Privacy';
-import Terms from './pages/Terms';
 
-// Dashboard pages
-import { Login } from './pages/Login';
-import { SignUp } from './pages/SignUp';
-import { Dashboard } from './pages/Dashboard';
-import { Calls } from './pages/Calls';
-import { Leads } from './pages/Leads';
-import { Payments } from './pages/Payments';
-import { Settings } from './pages/Settings';
-import AgentSetup from './pages/AgentSetup';
-import EmailVerification from './pages/EmailVerification';
-import PasswordReset from './pages/PasswordReset';
-import { ForgotPassword } from './pages/ForgotPassword';
+// Lazy load chat widget to reduce initial bundle size
+const AdvancedChatWidget = lazy(() => import('./components/AdvancedChatWidget'));
+
+// Lazy loaded pages
+const Home = lazy(() => import('./pages/Home'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Terms = lazy(() => import('./pages/Terms'));
+
+// Auth pages - lazy loaded
+const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
+const SignUp = lazy(() => import('./pages/SignUp').then(module => ({ default: module.SignUp })));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then(module => ({ default: module.ForgotPassword })));
+const EmailVerification = lazy(() => import('./pages/EmailVerification'));
+const PasswordReset = lazy(() => import('./pages/PasswordReset'));
+
+// Dashboard pages - lazy loaded
+const Dashboard = lazy(() => import('./pages/Dashboard').then(module => ({ default: module.Dashboard })));
+const Calls = lazy(() => import('./pages/Calls').then(module => ({ default: module.Calls })));
+const Leads = lazy(() => import('./pages/Leads').then(module => ({ default: module.Leads })));
+const Payments = lazy(() => import('./pages/Payments').then(module => ({ default: module.Payments })));
+const Settings = lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })));
+const AgentSetup = lazy(() => import('./pages/AgentSetup'));
+
+// Loading component for Suspense fallback
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-neutral-lightBg">
+      <div className="flex flex-col items-center gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-green"></div>
+        <p className="text-neutral-darkGray">Loading...</p>
+      </div>
+    </div>
+  );
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <LoadingFallback />;
   }
 
   if (!user) {
@@ -47,7 +61,8 @@ function AppRoutes() {
 
   return (
     <>
-      <Routes>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
         {/* Landing Page Routes */}
         <Route path="/" element={
           user ? (
@@ -173,6 +188,7 @@ function AppRoutes() {
           }
         />
       </Routes>
+      </Suspense>
 
       {/* Advanced Chat Widget for all pages */}
       <AdvancedChatWidget />

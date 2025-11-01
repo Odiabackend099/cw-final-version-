@@ -51,7 +51,7 @@ export const chatService = {
       const data = await response.json();
       return data.data.message;
     } catch (error: any) {
-      console.error('Chat error:', error);
+      if (import.meta.env.DEV) console.error('Chat error:', error);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout. Please try again.');
       }

@@ -28,7 +28,7 @@ export const vapiService = {
 
       return { success: true, message: 'Call initiated with Marcy' };
     } catch (error) {
-      console.error('Vapi call error:', error);
+      if (import.meta.env.DEV) console.error('Vapi call error:', error);
       throw new Error('Failed to initiate voice call');
     }
   },

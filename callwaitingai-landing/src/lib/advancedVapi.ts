@@ -26,17 +26,17 @@ export class AdvancedVapiService {
   // Initialize Vapi SDK - Now instant since it's bundled!
   async initialize(): Promise<void> {
     if (this.isInitialized && this.vapi) {
-      console.log('✅ Vapi already initialized');
+      if (import.meta.env.DEV) console.log('✅ Vapi already initialized');
       return;
     }
 
-    console.log('🚀 Initializing Vapi SDK from NPM package...');
+    if (import.meta.env.DEV) console.log('🚀 Initializing Vapi SDK from NPM package...');
 
     try {
       // Create Vapi instance directly - no CDN loading needed!
       this.vapi = new Vapi(VAPI_PUBLIC_KEY);
       this.isInitialized = true;
-      console.log('✅ Vapi initialized successfully (NPM package)!');
+      if (import.meta.env.DEV) console.log('✅ Vapi initialized successfully (NPM package)!');
     } catch (error) {
       console.error('❌ Failed to initialize Vapi:', error);
       throw new Error(`Vapi initialization failed: ${error}`);
@@ -45,14 +45,14 @@ export class AdvancedVapiService {
 
   // Start voice call with comprehensive error handling
   async startCall(options: VoiceCallOptions = {}): Promise<void> {
-    console.log('🎙️ Starting voice call...');
+    if (import.meta.env.DEV) console.log('🎙️ Starting voice call...');
 
     try {
       // Ensure initialized
       await this.initialize();
 
       if (this.isCallActive) {
-        console.warn('⚠️ Call already in progress');
+        if (import.meta.env.DEV) console.warn('⚠️ Call already in progress');
         throw new Error('Call already in progress');
       }
 
@@ -64,7 +64,7 @@ export class AdvancedVapiService {
       this.setupEventListeners(options);
 
       // Request microphone permission
-      console.log('🎤 Requesting microphone permission...');
+      if (import.meta.env.DEV) console.log('🎤 Requesting microphone permission...');
       try {
         this.mediaStream = await navigator.mediaDevices.getUserMedia({
           audio: {
@@ -73,18 +73,18 @@ export class AdvancedVapiService {
             autoGainControl: true,
           }
         });
-        console.log('✅ Microphone permission granted');
+        if (import.meta.env.DEV) console.log('✅ Microphone permission granted');
       } catch (micError) {
         console.error('❌ Microphone permission denied:', micError);
         throw new Error('Microphone access denied. Please allow microphone access and try again.');
       }
 
       // Start the call with assistant ID
-      console.log('📞 Starting Vapi call with assistant ID:', VAPI_ASSISTANT_ID);
+      if (import.meta.env.DEV) console.log('📞 Starting Vapi call with assistant ID:', VAPI_ASSISTANT_ID);
       await this.vapi.start(VAPI_ASSISTANT_ID);
 
       this.isCallActive = true;
-      console.log('✅ Call started successfully!');
+      if (import.meta.env.DEV) console.log('✅ Call started successfully!');
 
       if (options.onStart) {
         options.onStart();
@@ -104,17 +104,17 @@ export class AdvancedVapiService {
   // End the voice call
   async endCall(): Promise<void> {
     if (!this.isCallActive) {
-      console.log('ℹ️ No active call to end');
+      if (import.meta.env.DEV) console.log('ℹ️ No active call to end');
       return;
     }
 
-    console.log('🛑 Ending call...');
+    if (import.meta.env.DEV) console.log('🛑 Ending call...');
 
     try {
       if (this.vapi) {
         await this.vapi.stop();
       }
-      console.log('✅ Call ended successfully');
+      if (import.meta.env.DEV) console.log('✅ Call ended successfully');
     } catch (error) {
       console.error('⚠️ Error ending call:', error);
     } finally {
@@ -126,33 +126,33 @@ export class AdvancedVapiService {
   private setupEventListeners(options: VoiceCallOptions): void {
     if (!this.vapi) return;
 
-    console.log('🎧 Setting up event listeners...');
+    if (import.meta.env.DEV) console.log('🎧 Setting up event listeners...');
 
     this.vapi.on('call-start', () => {
-      console.log('📞 Event: call-start');
+      if (import.meta.env.DEV) console.log('📞 Event: call-start');
       this.isCallActive = true;
       if (options.onStart) options.onStart();
     });
 
     this.vapi.on('call-end', () => {
-      console.log('📞 Event: call-end');
+      if (import.meta.env.DEV) console.log('📞 Event: call-end');
       this.isCallActive = false;
       this.cleanup();
       if (options.onEnd) options.onEnd();
     });
 
     this.vapi.on('speech-start', () => {
-      console.log('🗣️ Event: speech-start (user speaking)');
+      if (import.meta.env.DEV) console.log('🗣️ Event: speech-start (user speaking)');
       if (options.onSpeechStart) options.onSpeechStart();
     });
 
     this.vapi.on('speech-end', () => {
-      console.log('🤐 Event: speech-end (user stopped)');
+      if (import.meta.env.DEV) console.log('🤐 Event: speech-end (user stopped)');
       if (options.onSpeechEnd) options.onSpeechEnd();
     });
 
     this.vapi.on('message', (message: any) => {
-      console.log('💬 Event: message received:', message);
+      if (import.meta.env.DEV) console.log('💬 Event: message received:', message);
       if (options.onMessage) options.onMessage(message);
 
       // Handle transcript messages
@@ -166,7 +166,7 @@ export class AdvancedVapiService {
       if (options.onError) options.onError(error);
     });
 
-    console.log('✅ Event listeners configured');
+    if (import.meta.env.DEV) console.log('✅ Event listeners configured');
   }
 
   // Send message during call
@@ -183,7 +183,7 @@ export class AdvancedVapiService {
           content: message,
         },
       });
-      console.log('📤 Message sent:', message);
+      if (import.meta.env.DEV) console.log('📤 Message sent:', message);
     } catch (error) {
       console.error('❌ Failed to send message:', error);
       throw error;
@@ -196,7 +196,7 @@ export class AdvancedVapiService {
 
     try {
       this.vapi.setMuted(muted);
-      console.log(`🎤 Microphone ${muted ? 'muted' : 'unmuted'}`);
+      if (import.meta.env.DEV) console.log(`🎤 Microphone ${muted ? 'muted' : 'unmuted'}`);
     } catch (error) {
       console.error('❌ Failed to set mute:', error);
     }
@@ -217,7 +217,7 @@ export class AdvancedVapiService {
 
   // Cleanup resources
   private cleanup(): void {
-    console.log('🧹 Cleaning up resources...');
+    if (import.meta.env.DEV) console.log('🧹 Cleaning up resources...');
 
     this.isCallActive = false;
 
@@ -225,12 +225,12 @@ export class AdvancedVapiService {
     if (this.mediaStream) {
       this.mediaStream.getTracks().forEach((track) => {
         track.stop();
-        console.log('🎤 Stopped media track');
+        if (import.meta.env.DEV) console.log('🎤 Stopped media track');
       });
       this.mediaStream = null;
     }
 
-    console.log('✅ Cleanup complete');
+    if (import.meta.env.DEV) console.log('✅ Cleanup complete');
   }
 }
 
@@ -242,8 +242,8 @@ export const vapiService = {
   async initiateCall() {
     try {
       await advancedVapiService.startCall({
-        onStart: () => console.log('✅ Call started via legacy API'),
-        onEnd: () => console.log('📞 Call ended via legacy API'),
+        onStart: () => { if (import.meta.env.DEV) console.log('✅ Call started via legacy API'); },
+        onEnd: () => { if (import.meta.env.DEV) console.log('📞 Call ended via legacy API'); },
         onError: (error) => console.error('❌ Call error via legacy API:', error),
       });
       return { success: true, message: 'Call initiated with Marcy' };
@@ -254,7 +254,7 @@ export const vapiService = {
   },
 
   dialDirect() {
-    console.log('📞 Fallback: Direct dial to +12765825329');
+    if (import.meta.env.DEV) console.log('📞 Fallback: Direct dial to +12765825329');
     window.location.href = 'tel:+12765825329';
   },
 };

@@ -106,7 +106,7 @@ const AgentSetup = () => {
         setSelectedVoiceProvider(assistantData.vapi_voice_provider || 'vapi');
       }
     } catch (error: any) {
-      console.error('Error loading data:', error);
+      if (import.meta.env.DEV) console.error('Error loading data:', error);
       setMessage({ type: 'error', text: error.message });
     } finally {
       setLoading(false);
@@ -170,7 +170,7 @@ const AgentSetup = () => {
 
       setMessage({ type: 'success', text: 'Agent configuration saved successfully!' });
     } catch (error: any) {
-      console.error('Error saving:', error);
+      if (import.meta.env.DEV) console.error('Error saving:', error);
       setMessage({ type: 'error', text: error.message });
     } finally {
       setSaving(false);
@@ -259,7 +259,7 @@ const AgentSetup = () => {
       setMessage({ type: 'success', text: `${knowledgeBaseFiles.length} file(s) uploaded successfully!` });
       setKnowledgeBaseFiles([]);
     } catch (error: any) {
-      console.error('Error uploading knowledge base:', error);
+      if (import.meta.env.DEV) console.error('Error uploading knowledge base:', error);
       setMessage({ type: 'error', text: error.message });
     } finally {
       setUploadingKb(false);
@@ -322,33 +322,37 @@ const AgentSetup = () => {
       );
 
       if (isValid) {
-        console.log('✅ AGENT TEST: TRUE/OK');
-        console.log('═══════════════════════════');
-        console.log('Agent ID:', assistant.id);
-        console.log('Business:', assistant.business_name);
-        console.log('Industry:', assistant.business_industry);
-        console.log('Hours:', assistant.business_hours);
-        console.log('Timezone:', assistant.timezone);
-        console.log('System Prompt Length:', assistant.system_prompt.length, 'chars');
-        console.log('Voice Config:', {
-          vapi_voice_id: assistant.vapi_voice_id,
-          vapi_voice_provider: assistant.vapi_voice_provider,
-        });
-        console.log('═══════════════════════════');
-        console.log('RESULT: TRUE');
-        console.log('STATUS: OK');
-        console.log('═══════════════════════════');
+        if (import.meta.env.DEV) {
+          console.log('✅ AGENT TEST: TRUE/OK');
+          console.log('═══════════════════════════');
+          console.log('Agent ID:', assistant.id);
+          console.log('Business:', assistant.business_name);
+          console.log('Industry:', assistant.business_industry);
+          console.log('Hours:', assistant.business_hours);
+          console.log('Timezone:', assistant.timezone);
+          console.log('System Prompt Length:', assistant.system_prompt.length, 'chars');
+          console.log('Voice Config:', {
+            vapi_voice_id: assistant.vapi_voice_id,
+            vapi_voice_provider: assistant.vapi_voice_provider,
+          });
+          console.log('═══════════════════════════');
+          console.log('RESULT: TRUE');
+          console.log('STATUS: OK');
+          console.log('═══════════════════════════');
+        }
 
         setMessage({ type: 'success', text: '✅ Agent configuration validated successfully! Check console for details.' });
         return true;
       } else {
-        console.log('❌ AGENT TEST: FALSE/ERROR');
-        console.log('Missing required fields');
+        if (import.meta.env.DEV) {
+          console.log('❌ AGENT TEST: FALSE/ERROR');
+          console.log('Missing required fields');
+        }
         setMessage({ type: 'error', text: 'Agent configuration incomplete. Missing required fields.' });
         return false;
       }
     } catch (error: any) {
-      console.error('❌ AGENT TEST ERROR:', error);
+      if (import.meta.env.DEV) console.error('❌ AGENT TEST ERROR:', error);
       setMessage({ type: 'error', text: `Test failed: ${error.message}` });
       return false;
     }

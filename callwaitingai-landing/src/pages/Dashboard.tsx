@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Phone, Users, DollarSign, TrendingUp, Mic, MessageCircle } from 'lucide-react';
+import { Phone, Users, DollarSign, TrendingUp, Mic, MessageCircle, Check, X, Clock } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface Stats {
@@ -58,17 +58,17 @@ export function Dashboard() {
             .from('payments')
             .select('*')
             .eq('payment_status', 'successful');
-          
+
           if (!paymentStatusError && paymentsData2) {
             payments = paymentsData2;
           } else {
-            console.warn('Could not fetch payments:', paymentStatusError);
+            if (import.meta.env.DEV) console.warn('Could not fetch payments:', paymentStatusError);
           }
         } else {
-          console.warn('Could not fetch payments:', statusError);
+          if (import.meta.env.DEV) console.warn('Could not fetch payments:', statusError);
         }
       } catch (error) {
-        console.error('Error fetching payments:', error);
+        if (import.meta.env.DEV) console.error('Error fetching payments:', error);
       }
 
       const totalRevenue = payments?.reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
@@ -93,7 +93,7 @@ export function Dashboard() {
       setRecentCalls(calls || []);
       setRecentLeads(leads || []);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      if (import.meta.env.DEV) console.error('Error loading dashboard data:', error);
     } finally {
       setLoading(false);
     }
@@ -109,7 +109,7 @@ export function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1E3A5F]"></div>
       </div>
     );
   }
@@ -129,7 +129,7 @@ export function Dashboard() {
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border border-gray-100">
+            <div key={stat.label} className="bg-white rounded-2xl shadow-premium p-6 hover:shadow-premium-lg hover:-translate-y-2 transition-all duration-500 border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">{stat.label}</p>
@@ -153,11 +153,11 @@ export function Dashboard() {
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Calls */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-premium hover:shadow-premium-lg hover:-translate-y-2 transition-all duration-500 border border-gray-100">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">Recent Calls</h2>
-              <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+              <button className="text-sm text-[#1E3A5F] hover:text-[#2C5F8D] font-medium transition-colors duration-300">
                 View All
               </button>
             </div>
@@ -180,11 +180,14 @@ export function Dashboard() {
                         </p>
                       </div>
                     </div>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full flex items-center gap-1 ${
                       call.call_status === 'completed' ? 'bg-green-100 text-green-800' :
                       call.call_status === 'failed' ? 'bg-red-100 text-red-800' :
                       'bg-yellow-100 text-yellow-800'
                     }`}>
+                      {call.call_status === 'completed' && <Check className="h-3 w-3" />}
+                      {call.call_status === 'failed' && <X className="h-3 w-3" />}
+                      {call.call_status !== 'completed' && call.call_status !== 'failed' && <Clock className="h-3 w-3" />}
                       {call.call_status}
                     </span>
                   </div>
@@ -203,11 +206,11 @@ export function Dashboard() {
         </div>
 
         {/* Recent Leads */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-premium hover:shadow-premium-lg hover:-translate-y-2 transition-all duration-500 border border-gray-100">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">Recent Leads</h2>
-              <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+              <button className="text-sm text-[#1E3A5F] hover:text-[#2C5F8D] font-medium transition-colors duration-300">
                 View All
               </button>
             </div>
@@ -230,11 +233,13 @@ export function Dashboard() {
                         </p>
                       </div>
                     </div>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full flex items-center gap-1 ${
                       lead.status === 'converted' ? 'bg-green-100 text-green-800' :
                       lead.status === 'qualified' ? 'bg-blue-100 text-blue-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
+                      {lead.status === 'converted' && <Check className="h-3 w-3" />}
+                      {lead.status !== 'converted' && <Clock className="h-3 w-3" />}
                       {lead.status}
                     </span>
                   </div>
@@ -271,7 +276,7 @@ export function Dashboard() {
                   // Open chat widget in voice mode
                   window.dispatchEvent(new CustomEvent('openChatWidget', { detail: { mode: 'voice' } }));
                 }}
-                className="px-6 py-3 bg-white text-blue-600 rounded-xl hover:bg-blue-50 transition-all font-medium flex items-center gap-3 shadow-md hover:shadow-lg"
+                className="px-6 py-3 bg-white text-[#1E3A5F] rounded-xl hover:bg-blue-50 transition-all duration-500 font-medium flex items-center gap-3 shadow-premium hover:shadow-premium-lg"
               >
                 <Mic className="h-5 w-5" />
                 Test Voice Call

@@ -93,7 +93,7 @@ const AdvancedVoiceWidget = () => {
           }
         },
         onMessage: (message: any) => {
-          console.log('Vapi message:', message);
+          if (import.meta.env.DEV) console.log('Vapi message:', message);
           if (message.type === 'transcript' && message.role === 'assistant') {
             setTranscript(prev => [...prev, {
               text: message.transcript,
@@ -119,7 +119,7 @@ const AdvancedVoiceWidget = () => {
     try {
       await advancedVapiService.endCall();
     } catch (err) {
-      console.error('Error ending call:', err);
+      if (import.meta.env.DEV) console.error('Error ending call:', err);
     }
     
     setIsCallActive(false);

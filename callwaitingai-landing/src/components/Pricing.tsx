@@ -68,8 +68,8 @@ const Pricing = () => {
 
   const handlePayment = (paymentLink: string, planName: string) => {
     // Track payment intent
-    console.log(`Redirecting to payment for ${planName}`);
-    
+    if (import.meta.env.DEV) console.log(`Redirecting to payment for ${planName}`);
+
     // Redirect to Flutterwave payment link
     window.open(paymentLink, '_blank');
   };

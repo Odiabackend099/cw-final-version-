@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Phone, Clock, User, Calendar } from 'lucide-react';
+import { Phone, Clock, User, Calendar, Check, X } from 'lucide-react';
 
 export function Calls() {
   const [calls, setCalls] = useState<any[]>([]);
@@ -57,7 +57,7 @@ export function Calls() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1E3A5F]"></div>
       </div>
     );
   }
@@ -73,15 +73,15 @@ export function Calls() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-white rounded-2xl shadow-premium p-4 hover:shadow-premium-lg hover:-translate-y-2 transition-all duration-500">
         <div className="flex gap-2 flex-wrap">
           {['all', 'completed', 'in_progress', 'failed'].map((status) => (
             <button
               key={status}
               onClick={() => setFilter(status)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                 filter === status
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-[#1E3A5F] text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -92,7 +92,7 @@ export function Calls() {
       </div>
 
       {/* Calls Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-premium overflow-hidden hover:shadow-premium-lg hover:-translate-y-2 transition-all duration-500">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -138,12 +138,15 @@ export function Calls() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full flex items-center gap-1 w-fit ${
                         call.call_status === 'completed' ? 'bg-green-100 text-green-800' :
                         call.call_status === 'failed' ? 'bg-red-100 text-red-800' :
                         call.call_status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
                         'bg-yellow-100 text-yellow-800'
                       }`}>
+                        {call.call_status === 'completed' && <Check className="h-3 w-3" />}
+                        {call.call_status === 'failed' && <X className="h-3 w-3" />}
+                        {call.call_status !== 'completed' && call.call_status !== 'failed' && <Clock className="h-3 w-3" />}
                         {call.call_status}
                       </span>
                     </td>

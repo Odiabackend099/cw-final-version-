@@ -119,19 +119,19 @@ const AdvancedChatWidget = () => {
           .maybeSingle();
 
         if (error && error.code !== 'PGRST116') {
-          console.warn('⚠️ Could not load assistant config:', error);
+          if (import.meta.env.DEV) console.warn('⚠️ Could not load assistant config:', error);
           setAssistant(null);
           return;
         }
 
         if (assistantData) {
           setAssistant(assistantData);
-          console.log('✅ Loaded assistant config from backend:', assistantData.business_name);
+          if (import.meta.env.DEV) console.log('✅ Loaded assistant config from backend:', assistantData.business_name);
         } else {
           setAssistant(null);
         }
       } catch (err) {
-        console.warn('⚠️ Error loading assistant:', err);
+        if (import.meta.env.DEV) console.warn('⚠️ Error loading assistant:', err);
         setAssistant(null);
       }
     };
@@ -151,19 +151,19 @@ const AdvancedChatWidget = () => {
     }
 
     try {
-      console.log('🚀 Initializing Vapi client...');
+      if (import.meta.env.DEV) console.log('🚀 Initializing Vapi client...');
       const client = new Vapi(VAPI_PUBLIC_KEY);
-      
+
       // Wait a moment for Vapi to fully initialize
       setTimeout(() => {
         setVapiClient(client);
         setIsVapiReady(true);
-        console.log('✅ Vapi client initialized and ready');
+        if (import.meta.env.DEV) console.log('✅ Vapi client initialized and ready');
       }, 500);
 
       // Voice call events
       client.on('call-start', () => {
-        console.log('✅ Voice call started');
+        if (import.meta.env.DEV) console.log('✅ Voice call started');
         setIsCallActive(true);
         setIsConnecting(false);
         setIsListening(true);
@@ -171,7 +171,7 @@ const AdvancedChatWidget = () => {
       });
 
       client.on('call-end', () => {
-        console.log('📞 Voice call ended');
+        if (import.meta.env.DEV) console.log('📞 Voice call ended');
         setIsCallActive(false);
         setIsConnecting(false);
         setIsListening(false);
@@ -181,7 +181,7 @@ const AdvancedChatWidget = () => {
 
       // Speech recognition events (user speaking)
       client.on('speech-start', () => {
-        console.log('🎤 User started speaking - AI WILL BE INTERRUPTED');
+        if (import.meta.env.DEV) console.log('🎤 User started speaking - AI WILL BE INTERRUPTED');
         setIsListening(true);
         setIsSpeaking(false);
         setIsProcessing(false);
@@ -190,7 +190,7 @@ const AdvancedChatWidget = () => {
       });
 
       client.on('speech-end', () => {
-        console.log('🎤 User stopped speaking');
+        if (import.meta.env.DEV) console.log('🎤 User stopped speaking');
         setIsListening(false);
         setIsProcessing(true); // Show processing indicator while AI generates response
 
@@ -201,7 +201,7 @@ const AdvancedChatWidget = () => {
 
       // Transcription events with emotion detection
       client.on('message', (message: any) => {
-        console.log('📝 Vapi message:', message);
+        if (import.meta.env.DEV) console.log('📝 Vapi message:', message);
 
         if (message.type === 'transcript' && message.transcriptType === 'partial') {
           // User's speech (partial - real-time streaming)
@@ -263,7 +263,7 @@ const AdvancedChatWidget = () => {
       });
 
       client.on('error', (error: any) => {
-        console.error('❌ Vapi error:', error);
+        if (import.meta.env.DEV) console.error('❌ Vapi error:', error);
         setIsCallActive(false);
         setIsConnecting(false);
         
@@ -288,7 +288,7 @@ const AdvancedChatWidget = () => {
       // Mark as ready after successful initialization
       
     } catch (error: any) {
-      console.error('❌ Failed to initialize Vapi client:', error);
+      if (import.meta.env.DEV) console.error('❌ Failed to initialize Vapi client:', error);
       setConnectionError('Failed to initialize voice system. Please refresh the page and try again.');
       setIsVapiReady(false);
     }
@@ -304,7 +304,7 @@ const AdvancedChatWidget = () => {
   // Audio visualization
   const startAudioVisualization = async () => {
     try {
-      console.log('🎵 Starting audio visualization...');
+      if (import.meta.env.DEV) console.log('🎵 Starting audio visualization...');
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -312,7 +312,7 @@ const AdvancedChatWidget = () => {
           autoGainControl: true
         }
       });
-      console.log('✅ Microphone access granted');
+      if (import.meta.env.DEV) console.log('✅ Microphone access granted');
 
       audioContextRef.current = new AudioContext();
       const source = audioContextRef.current.createMediaStreamSource(stream);
@@ -322,7 +322,7 @@ const AdvancedChatWidget = () => {
 
       updateAudioLevel();
     } catch (error: any) {
-      console.error('Failed to get audio stream:', error);
+      if (import.meta.env.DEV) console.error('Failed to get audio stream:', error);
       setConnectionError('Microphone access denied. Please allow microphone access and try again.');
       throw error;
     }
@@ -417,7 +417,7 @@ const AdvancedChatWidget = () => {
 
     // Check if browser supports speech synthesis
     if (!window.speechSynthesis) {
-      console.warn('⚠️ Speech synthesis not supported in this browser');
+      if (import.meta.env.DEV) console.warn('⚠️ Speech synthesis not supported in this browser');
       return;
     }
 
@@ -443,17 +443,17 @@ const AdvancedChatWidget = () => {
 
       utterance.onstart = () => {
         setCurrentlyPlayingId(messageId);
-        console.log('🔊 TTS started for message:', messageId);
+        if (import.meta.env.DEV) console.log('🔊 TTS started for message:', messageId);
       };
 
       utterance.onend = () => {
         setCurrentlyPlayingId(null);
         speechSynthesisRef.current = null;
-        console.log('✅ TTS finished for message:', messageId);
+        if (import.meta.env.DEV) console.log('✅ TTS finished for message:', messageId);
       };
 
       utterance.onerror = (event) => {
-        console.error('❌ TTS error:', event);
+        if (import.meta.env.DEV) console.error('❌ TTS error:', event);
         setCurrentlyPlayingId(null);
         speechSynthesisRef.current = null;
       };
@@ -461,7 +461,7 @@ const AdvancedChatWidget = () => {
       speechSynthesisRef.current = utterance;
       window.speechSynthesis.speak(utterance);
     } catch (error) {
-      console.error('❌ Failed to start TTS:', error);
+      if (import.meta.env.DEV) console.error('❌ Failed to start TTS:', error);
       setCurrentlyPlayingId(null);
     }
   };
@@ -521,24 +521,24 @@ const AdvancedChatWidget = () => {
       };
       
       recognition.onerror = (event: any) => {
-        console.error('STT error:', event.error);
+        if (import.meta.env.DEV) console.error('STT error:', event.error);
         setIsSttActive(false);
         setSttTranscript('');
-        
+
         if (event.error === 'not-allowed') {
           setConnectionError('Microphone permission denied. Please allow microphone access.');
         } else if (event.error === 'no-speech') {
           setIsSttActive(false);
         }
       };
-      
+
       recognition.onend = () => {
         setIsSttActive(false);
       };
-      
+
       recognitionRef.current = recognition;
     } else {
-      console.warn('⚠️ Browser Speech Recognition not supported');
+      if (import.meta.env.DEV) console.warn('⚠️ Browser Speech Recognition not supported');
     }
     
     return () => {
@@ -559,12 +559,12 @@ const AdvancedChatWidget = () => {
       recognitionRef.current.start();
       setIsSttActive(true);
       setSttTranscript('');
-      console.log('🎤 Browser STT started');
+      if (import.meta.env.DEV) console.log('🎤 Browser STT started');
     } catch (error: any) {
       if (error.name === 'InvalidStateError') {
         // Already started, ignore
       } else {
-        console.error('Failed to start STT:', error);
+        if (import.meta.env.DEV) console.error('Failed to start STT:', error);
         setConnectionError('Failed to start speech recognition');
       }
     }
@@ -575,7 +575,7 @@ const AdvancedChatWidget = () => {
       recognitionRef.current.stop();
       setIsSttActive(false);
       setSttTranscript('');
-      console.log('🛑 Browser STT stopped');
+      if (import.meta.env.DEV) console.log('🛑 Browser STT stopped');
     }
   };
 
@@ -645,23 +645,23 @@ const AdvancedChatWidget = () => {
 
     if (!vapiClient || !isVapiReady) {
       setConnectionError('Voice system is not ready. Please wait a moment and try again.');
-      console.error('❌ Vapi client not initialized or not ready');
+      if (import.meta.env.DEV) console.error('❌ Vapi client not initialized or not ready');
       return;
     }
 
     if (isConnecting || isCallActive) {
-      console.log('⚠️ Call already in progress');
+      if (import.meta.env.DEV) console.log('⚠️ Call already in progress');
       return;
     }
 
-    console.log('📞 Starting voice call...');
+    if (import.meta.env.DEV) console.log('📞 Starting voice call...');
     setIsConnecting(true);
     setTranscripts([]);
     setConnectionError('');
 
     try {
       // Step 1: Request microphone permission
-      console.log('🎤 Requesting microphone permission...');
+      if (import.meta.env.DEV) console.log('🎤 Requesting microphone permission...');
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -669,7 +669,7 @@ const AdvancedChatWidget = () => {
           autoGainControl: true
         }
       });
-      console.log('✅ Microphone permission granted');
+      if (import.meta.env.DEV) console.log('✅ Microphone permission granted');
 
       // Step 2: Setup audio visualization
       if (!audioContextRef.current) {
@@ -682,7 +682,7 @@ const AdvancedChatWidget = () => {
       }
 
       // Step 3: Start Vapi call with inline configuration
-      console.log('🎙️ Starting Vapi call with inline configuration...');
+      if (import.meta.env.DEV) console.log('🎙️ Starting Vapi call with inline configuration...');
 
       // Create inline assistant configuration
       // Use backend assistant config if available, otherwise use defaults
@@ -733,9 +733,9 @@ const AdvancedChatWidget = () => {
               voiceId: selectedVoice.voiceId,
             };
           }
-          console.log('🎤 Using backend voice:', selectedVoice.name, `(${selectedVoice.provider})`);
+          if (import.meta.env.DEV) console.log('🎤 Using backend voice:', selectedVoice.name, `(${selectedVoice.provider})`);
         } else {
-          console.warn('⚠️ Voice not found, using default');
+          if (import.meta.env.DEV) console.warn('⚠️ Voice not found, using default');
           // Fall back to default Vapi voice
           const defaultVoice = getVoiceById(DEFAULT_VOICE_ID);
           if (defaultVoice) {
@@ -754,7 +754,7 @@ const AdvancedChatWidget = () => {
             voiceId: defaultVoice.voiceId,
           };
         }
-        console.log('ℹ️ No backend voice configured, using default:', defaultVoice?.name || 'savannah');
+        if (import.meta.env.DEV) console.log('ℹ️ No backend voice configured, using default:', defaultVoice?.name || 'savannah');
       }
 
       // Add retry logic for connection issues
@@ -765,17 +765,17 @@ const AdvancedChatWidget = () => {
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
           if (attempt > 0) {
-            console.log(`🔄 Retry attempt ${attempt + 1}/${maxRetries}...`);
+            if (import.meta.env.DEV) console.log(`🔄 Retry attempt ${attempt + 1}/${maxRetries}...`);
             await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
           }
 
           await vapiClient.start(assistantConfig);
           callStarted = true;
-          console.log('✅ Vapi call started successfully with inline configuration');
+          if (import.meta.env.DEV) console.log('✅ Vapi call started successfully with inline configuration');
           break;
         } catch (startError: any) {
           lastError = startError;
-          console.error(`❌ Start attempt ${attempt + 1} failed:`, startError);
+          if (import.meta.env.DEV) console.error(`❌ Start attempt ${attempt + 1} failed:`, startError);
 
           // If it's a connection error, retry
           const isConnectionError =
@@ -798,8 +798,8 @@ const AdvancedChatWidget = () => {
       }
 
     } catch (error: any) {
-      console.error('❌ Failed to start voice call after retries:', error);
-      console.error('Error details:', {
+      if (import.meta.env.DEV) console.error('❌ Failed to start voice call after retries:', error);
+      if (import.meta.env.DEV) console.error('Error details:', {
         name: error.name,
         message: error.message,
         status: error.status,
@@ -850,7 +850,7 @@ const AdvancedChatWidget = () => {
   };
 
   const stopVoiceCall = () => {
-    console.log('🛑 Stopping voice call...');
+    if (import.meta.env.DEV) console.log('🛑 Stopping voice call...');
 
     if (vapiClient) {
       vapiClient.stop();

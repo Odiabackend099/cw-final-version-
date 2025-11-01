@@ -281,14 +281,14 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
             provider: selectedVoice.provider,
             voiceId: selectedVoice.voiceId,
           };
-          console.log('🎤 Using Vapi Voice:', selectedVoice.name, `(${selectedVoice.provider})`);
-          console.log('Voice ID:', selectedVoice.voiceId);
-          console.log('Full voice config:', assistantConfig.voice);
+          if (import.meta.env.DEV) console.log('🎤 Using Vapi Voice:', selectedVoice.name, `(${selectedVoice.provider})`);
+          if (import.meta.env.DEV) console.log('Voice ID:', selectedVoice.voiceId);
+          if (import.meta.env.DEV) console.log('Full voice config:', assistantConfig.voice);
         } else {
-          console.log('ℹ️ Voice not found, using Vapi default voice');
+          if (import.meta.env.DEV) console.log('ℹ️ Voice not found, using Vapi default voice');
         }
       } else {
-        console.log('ℹ️ No voice configured, using Vapi default voice');
+        if (import.meta.env.DEV) console.log('ℹ️ No voice configured, using Vapi default voice');
       }
 
       if (import.meta.env.DEV) {
@@ -314,35 +314,35 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
 
           await vapiRef.current.start(assistantConfig);
           callStarted = true;
-          
+
           if (import.meta.env.DEV) {
             console.log('✅ Call start request sent successfully');
           }
           break;
         } catch (startError: any) {
           lastError = startError;
-          
-          console.error('❌ Vapi start error:', {
+
+          if (import.meta.env.DEV) console.error('❌ Vapi start error:', {
             type: startError.type,
             stage: startError.stage,
             error: startError.error,
             message: startError.message,
           });
-          
+
           // Handle start-method-error (400 Bad Request) - usually invalid config
           if (startError.type === 'start-method-error') {
             // If we have a custom voice, try without it first
             if (assistantConfig.voice && attempt === 0) {
-              console.warn('⚠️ Start method error detected, retrying without custom voice config');
+              if (import.meta.env.DEV) console.warn('⚠️ Start method error detected, retrying without custom voice config');
               const voiceConfig = { ...assistantConfig.voice };
               delete assistantConfig.voice;
               // Retry without voice
               continue;
             }
-            
+
             // If already retried without voice and still failing, try with minimal config
             if (attempt === 1) {
-              console.warn('⚠️ Retrying with minimal assistant config');
+              if (import.meta.env.DEV) console.warn('⚠️ Retrying with minimal assistant config');
               // Use minimal valid config
               assistantConfig.voice = undefined;
               // Ensure required fields are present
@@ -355,18 +355,18 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
               continue;
             }
           }
-          
+
           // Check for connection-related errors that might be retryable
-          const isConnectionError = 
+          const isConnectionError =
             startError.message?.toLowerCase().includes('meeting has ended') ||
             startError.message?.toLowerCase().includes('connection') ||
             startError.message?.toLowerCase().includes('network') ||
             startError.message?.toLowerCase().includes('timeout') ||
             startError.type === 'daily-call-join-error';
-          
+
           // If error is about custom-provider or voice config, fallback to default voice
           if (
-            (startError.message?.toLowerCase().includes('voice') || 
+            (startError.message?.toLowerCase().includes('voice') ||
              startError.message?.toLowerCase().includes('provider') ||
              startError.message?.toLowerCase().includes('custom')) &&
             assistantConfig.voice &&
@@ -375,12 +375,12 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
             if (import.meta.env.DEV) {
               console.warn('⚠️ Custom voice config failed, retrying with default voice:', startError.message);
             }
-            
+
             // Remove custom voice config and retry with default
             delete assistantConfig.voice;
             continue;
           }
-          
+
           // If it's a connection error and we have retries left, try again
           if (isConnectionError && attempt < maxStartAttempts - 1) {
             if (import.meta.env.DEV) {
@@ -388,7 +388,7 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
             }
             continue;
           }
-          
+
           // For other errors or final attempt, throw
           if (attempt === maxStartAttempts - 1) {
             throw startError;
@@ -400,8 +400,8 @@ export function VoiceCallTester({ assistant, onClose }: VoiceCallTesterProps) {
         throw lastError;
       }
     } catch (error: any) {
-      console.error('❌ Failed to start call:', error);
-      
+      if (import.meta.env.DEV) console.error('❌ Failed to start call:', error);
+
       // Provide user-friendly error messages
       let errorMessage = 'Failed to start call. ';
       

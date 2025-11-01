@@ -64,7 +64,7 @@ export const VoiceDemoPlayer: React.FC<VoiceDemoPlayerProps> = ({
       });
 
       audio.addEventListener('error', (e) => {
-        console.error('Audio playback error:', e);
+        if (import.meta.env.DEV) console.error('Audio playback error:', e);
         setPlayingId(null);
         alert('Failed to load audio sample. Please try again.');
       });
@@ -76,7 +76,7 @@ export const VoiceDemoPlayer: React.FC<VoiceDemoPlayerProps> = ({
         setPlayingId(audioId);
       })
       .catch((error) => {
-        console.error('Error playing audio:', error);
+        if (import.meta.env.DEV) console.error('Error playing audio:', error);
         setPlayingId(null);
         alert('Failed to play audio. Please check your browser settings.');
       });

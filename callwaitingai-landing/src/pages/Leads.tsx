@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Users, Mail, Phone as PhoneIcon, Building, Plus, X } from 'lucide-react';
+import { Users, Mail, Phone as PhoneIcon, Building, Plus, X, Check, Clock } from 'lucide-react';
 
 export function Leads() {
   const [leads, setLeads] = useState<any[]>([]);
@@ -43,7 +43,7 @@ export function Leads() {
       
       setLeads(data || []);
     } catch (error) {
-      console.error('Error loading leads:', error);
+      if (import.meta.env.DEV) console.error('Error loading leads:', error);
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,7 @@ export function Leads() {
 
   async function handleAddLead(e: React.FormEvent) {
     e.preventDefault();
-    
+
     try {
       const { error } = await supabase
         .from('leads')
@@ -71,10 +71,10 @@ export function Leads() {
         company_name: '',
         message: '',
       });
-      
+
       loadLeads();
     } catch (error) {
-      console.error('Error adding lead:', error);
+      if (import.meta.env.DEV) console.error('Error adding lead:', error);
     }
   }
 
@@ -88,14 +88,14 @@ export function Leads() {
       if (error) throw error;
       loadLeads();
     } catch (error) {
-      console.error('Error updating lead:', error);
+      if (import.meta.env.DEV) console.error('Error updating lead:', error);
     }
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1E3A5F]"></div>
       </div>
     );
   }
@@ -110,7 +110,7 @@ export function Leads() {
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#1E3A5F] text-white rounded-lg hover:bg-[#2C5F8D] transition-all duration-300 shadow-premium hover:shadow-premium-lg"
         >
           <Plus className="h-4 w-4" />
           Add Lead
@@ -121,7 +121,7 @@ export function Leads() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {leads.length > 0 ? (
           leads.map((lead) => (
-            <div key={lead.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+            <div key={lead.id} className="bg-white rounded-2xl shadow-premium p-6 hover:shadow-premium-lg hover:-translate-y-2 transition-all duration-500">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-blue-100 rounded-full">
@@ -135,7 +135,7 @@ export function Leads() {
                 <select
                   value={lead.status}
                   onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
-                  className={`text-xs font-medium rounded-full px-2 py-1 border-0 cursor-pointer ${
+                  className={`text-xs font-medium rounded-full px-2 py-1 border-0 cursor-pointer transition-all duration-300 ${
                     lead.status === 'converted' ? 'bg-green-100 text-green-800' :
                     lead.status === 'qualified' ? 'bg-blue-100 text-blue-800' :
                     lead.status === 'contacted' ? 'bg-yellow-100 text-yellow-800' :
@@ -193,7 +193,7 @@ export function Leads() {
       {/* Add Lead Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="bg-white rounded-2xl shadow-premium-lg max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-900">Add New Lead</h2>
               <button
@@ -268,7 +268,7 @@ export function Leads() {
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                className="w-full bg-[#1E3A5F] text-white py-2 px-4 rounded-lg hover:bg-[#2C5F8D] transition-all duration-300 shadow-premium hover:shadow-premium-lg"
               >
                 Add Lead
               </button>

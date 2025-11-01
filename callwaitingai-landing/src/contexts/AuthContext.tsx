@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Only log actual errors, not missing sessions (which is normal)
         if (sessionError && sessionError.name !== 'AuthSessionMissingError') {
-          console.error('Error loading session:', sessionError);
+          if (import.meta.env.DEV) console.error('Error loading session:', sessionError);
         }
 
         setUser(session?.user || null);
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .maybeSingle();
 
           if (profileError) {
-            console.error('Error loading user profile:', profileError);
+            if (import.meta.env.DEV) console.error('Error loading user profile:', profileError);
           }
 
           setUserProfile(profile);
@@ -50,9 +50,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (error: any) {
         // Silently handle AuthSessionMissingError - this is normal for logged-out users
         if (error?.name === 'AuthSessionMissingError') {
-          console.debug('No active session found (user is logged out)');
+          if (import.meta.env.DEV) console.debug('No active session found (user is logged out)');
         } else {
-          console.error('Unexpected error in loadUser:', error);
+          if (import.meta.env.DEV) console.error('Unexpected error in loadUser:', error);
         }
         setUser(null);
         setUserProfile(null);

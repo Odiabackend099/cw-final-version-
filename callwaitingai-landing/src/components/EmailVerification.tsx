@@ -30,7 +30,7 @@ const EmailVerification = () => {
             try {
               await authService.createUserProfile(result.user);
             } catch (profileError) {
-              console.error('Failed to create user profile:', profileError);
+              if (import.meta.env.DEV) console.error('Failed to create user profile:', profileError);
               // Don't fail the verification if profile creation fails
             }
           }

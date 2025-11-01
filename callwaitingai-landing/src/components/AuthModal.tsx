@@ -44,6 +44,19 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode, onSuccess }: AuthModalP
     }
   }, [initialMode, isOpen]);
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  // Early return after all hooks
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -170,18 +183,6 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode, onSuccess }: AuthModalP
     setSuccess('');
     setMode(initialMode);
   };
-
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
 
   return (
     <div 
